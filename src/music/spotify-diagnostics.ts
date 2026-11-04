@@ -51,6 +51,10 @@ export async function testSpotify(log: (line: string) => void) {
     const again = await call('/me/player/devices')
     devices.splice(0, devices.length, ...((again.body?.devices as Device[]) ?? []).filter((d) => d.id))
   }
+  // Side B's own player may not be listed until it has played something: use it directly.
+  if (picked && !devices.some((d) => d.id === picked) && (!chosenDeviceId() || chosenDeviceId() === LOCAL)) {
+    devices.unshift({ id: picked, name: 'Side B (this device)', type: 'Browser', is_active: false })
+  }
   if (!devices.length) return log('✗ No devices. Open Spotify on the phone/computer/speaker and play any song for a second, then test again.')
   const target = devices.find((d) => d.id === picked) ?? devices.find((d) => d.is_active) ?? devices[0]
   log(`Target: ${target.name}${target.id === picked ? ' (picked in Side B)' : target.is_active ? ' (Spotify’s active device)' : ' (first available)'}`)
