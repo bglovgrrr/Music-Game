@@ -12,7 +12,9 @@ type ItunesResult = {
 }
 
 const PREVIEW_MS = 30_000
-let itunesReachable: boolean | null = null
+/** After a failed iTunes request, use the built-in list briefly, then try iTunes again. */
+export const RETRY_AFTER_MS = 20_000
+let itunesFailedAt = 0
 
 export type SearchResult = { tracks: Track[]; offline: boolean }
 
@@ -24,19 +26,19 @@ export async function searchTracks(query: string, signal?: AbortSignal): Promise
   const q = query.trim()
   if (!q) return { tracks: [], offline: false }
 
-  if (itunesReachable !== false) {
+  if (Date.now() - itunesFailedAt >= RETRY_AFTER_MS) {
     try {
       const url = `https://itunes.apple.com/search?media=music&entity=song&limit=20&term=${encodeURIComponent(q)}`
       const timeout = AbortSignal.timeout(6000)
       const res = await fetch(url, { signal: signal ? AbortSignal.any([signal, timeout]) : timeout })
       if (!res.ok) throw new Error(`HTTP ${res.status}`)
       const data = (await res.json()) as { results: ItunesResult[] }
-      itunesReachable = true
+      itunesFailedAt = 0
       return { tracks: data.results.filter((r) => r.trackName).map(fromItunes), offline: false }
     } catch (err) {
       if (signal?.aborted) throw err
-      // Only give up on iTunes for good if it has never worked.
-      if (itunesReachable === null) itunesReachable = false
+      // A blip (rate limit, flaky network) shouldn't switch search off for the whole game.
+      itunesFailedAt = Date.now()
     }
   }
   return { tracks: searchDemoCatalog(q), offline: true }
