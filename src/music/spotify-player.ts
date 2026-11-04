@@ -1,11 +1,14 @@
 /** Remote control for the host's Spotify (phone app, desktop app, or Spotify Connect speaker). */
 import { SpotifyError, spotifyApi } from './spotify-auth'
 import { safeStorage } from '@/lib/utils'
+import { ensureLocalPlayer, localDeviceId } from './spotify-sdk'
 
 export type SpotifyDevice = { id: string; name: string; type: string; is_active: boolean }
 export type SpotifyPlayback = { isPlaying: boolean; progressMs: number; uri?: string; durationMs?: number; device?: string }
 
 const DEVICE_KEY = 'sideb:spotify-device'
+/** Stored choice meaning "Side B's own in-page player" (its device id changes every visit). */
+export const LOCAL = 'local'
 export const chosenDeviceId = () => safeStorage.get(DEVICE_KEY) || null
 export const chooseDevice = (id: string | null) => safeStorage.set(DEVICE_KEY, id ?? '')
 
@@ -16,11 +19,17 @@ export async function listDevices(): Promise<SpotifyDevice[]> {
 
 /** The device to play on: the one picked in Side B, else Spotify's active one, else the first available. */
 async function targetDevice(): Promise<SpotifyDevice> {
+  const picked = chosenDeviceId()
+  // Default: Side B's own in-page player (no Spotify app needed).
+  if (!picked || picked === LOCAL) {
+    const id = localDeviceId() ?? (await ensureLocalPlayer())
+    if (id) return { id, name: 'this device', type: 'Computer', is_active: true }
+    if (picked === LOCAL) throw new SpotifyError('Side B’s built-in Spotify player isn’t ready. Pick another device under “Play on”.', 'no_device')
+  }
   const devices = await listDevices()
   if (!devices.length) {
     throw new SpotifyError('Open the Spotify app on the speaker phone (play any song for a second), then tap play again.', 'no_device')
   }
-  const picked = chosenDeviceId()
   return devices.find((d) => d.id === picked) ?? devices.find((d) => d.is_active) ?? devices[0]
 }
 

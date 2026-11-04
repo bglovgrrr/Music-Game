@@ -6,7 +6,8 @@ import { useSpotifyConnected } from '@/hooks/use-spotify'
 import { connectSpotify, disconnectSpotify, SpotifyError, spotifyConfigured } from '@/music/spotify-auth'
 import { testSpotify } from '@/music/spotify-diagnostics'
 import { onSpotifyLog, spotifyLogLines } from '@/music/spotify-log'
-import { chooseDevice, chosenDeviceId, listDevices, type SpotifyDevice } from '@/music/spotify-player'
+import { chooseDevice, chosenDeviceId, listDevices, LOCAL, type SpotifyDevice } from '@/music/spotify-player'
+import { ensureLocalPlayer, LOCAL_PLAYER_NAME, localDeviceId, localPlayerProblem, onLocalPlayer, stopLocalPlayer } from '@/music/spotify-sdk'
 import { cn } from '@/lib/utils'
 
 function SpotifyLogo({ className }: { className?: string }) {
@@ -26,7 +27,9 @@ export function SpotifyCard({ compact, className }: { compact?: boolean; classNa
   const connected = useSpotifyConnected()
   const [busy, setBusy] = useState(false)
   const [devices, setDevices] = useState<SpotifyDevice[] | null>(null)
-  const [device, setDevice] = useState<string | null>(chosenDeviceId)
+  const [device, setDevice] = useState<string>(() => chosenDeviceId() ?? LOCAL)
+  const localId = useSyncExternalStore(onLocalPlayer, localDeviceId)
+  const localProblem = useSyncExternalStore(onLocalPlayer, localPlayerProblem)
   const [loadingDevices, setLoadingDevices] = useState(false)
   const [report, setReport] = useState<string[] | null>(null)
   const [testing, setTesting] = useState(false)
@@ -60,7 +63,8 @@ export function SpotifyCard({ compact, className }: { compact?: boolean; classNa
   const refresh = useCallback(async () => {
     setLoadingDevices(true)
     try {
-      setDevices(await listDevices())
+      // Side B's own player is listed separately (first), so leave it out here.
+      setDevices((await listDevices()).filter((d) => d.name !== LOCAL_PLAYER_NAME))
     } catch (err) {
       setDevices([])
       if (err instanceof SpotifyError) toast.error(err.message)
@@ -70,7 +74,9 @@ export function SpotifyCard({ compact, className }: { compact?: boolean; classNa
   }, [])
 
   useEffect(() => {
-    if (connected) void refresh()
+    if (!connected) return
+    void refresh()
+    void ensureLocalPlayer()
   }, [connected, refresh])
 
   if (!spotifyConfigured) return null
@@ -107,8 +113,9 @@ export function SpotifyCard({ compact, className }: { compact?: boolean; classNa
     )
   }
 
-  const active = devices?.find((d) => d.id === device) ?? devices?.find((d) => d.is_active) ?? devices?.[0]
-  if (compact) return <CompactStatus active={active?.name} className={className} />
+  const usingLocal = device === LOCAL
+  const active = usingLocal ? undefined : (devices?.find((d) => d.id === device) ?? devices?.find((d) => d.is_active) ?? devices?.[0])
+  if (compact) return <CompactStatus active={usingLocal ? 'this device' : active?.name} className={className} />
 
   return (
     <div className={cn('grid gap-3', className)}>
@@ -120,7 +127,14 @@ export function SpotifyCard({ compact, className }: { compact?: boolean; classNa
           </span>
           <span className="text-xs text-muted-foreground">Songs play in full on the device below.</span>
         </div>
-        <Button variant="ghost" size="sm" onClick={() => disconnectSpotify()}>
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => {
+            stopLocalPlayer()
+            disconnectSpotify()
+          }}
+        >
           Disconnect
         </Button>
       </div>
@@ -133,28 +147,39 @@ export function SpotifyCard({ compact, className }: { compact?: boolean; classNa
             <RefreshCw className={cn(loadingDevices && 'animate-spin')} />
           </Button>
         </div>
-        {devices && devices.length === 0 ? (
-          <p className="rounded-xl bg-muted p-3 text-xs text-muted-foreground">
-            No Spotify devices found. Open the Spotify app on the phone or speaker you want to use (play any song for a second), then tap refresh.
-          </p>
-        ) : (
-          <div className="flex flex-wrap gap-2">
-            {(devices ?? []).map((d) => (
-              <button
-                key={d.id}
-                onClick={() => pick(d.id)}
-                aria-pressed={active?.id === d.id}
-                className={cn(
-                  'cursor-pointer rounded-full border px-3 py-1.5 text-sm font-medium transition',
-                  active?.id === d.id ? 'border-transparent bg-[#1ED760] text-black' : 'bg-card hover:bg-muted',
-                )}
-              >
-                {d.name}
-              </button>
-            ))}
-            {!devices && <Loader2 className="size-4 animate-spin text-muted-foreground" />}
-          </div>
-        )}
+        <div className="flex flex-wrap gap-2">
+          <button
+            onClick={() => pick(LOCAL)}
+            aria-pressed={usingLocal}
+            className={cn(
+              'cursor-pointer rounded-full border px-3 py-1.5 text-sm font-medium transition',
+              usingLocal ? 'border-transparent bg-[#1ED760] text-black' : 'bg-card hover:bg-muted',
+            )}
+          >
+            This device {localId ? '' : localProblem ? '⚠' : '…'}
+          </button>
+          {(devices ?? []).map((d) => (
+            <button
+              key={d.id}
+              onClick={() => pick(d.id)}
+              aria-pressed={!usingLocal && active?.id === d.id}
+              className={cn(
+                'cursor-pointer rounded-full border px-3 py-1.5 text-sm font-medium transition',
+                !usingLocal && active?.id === d.id ? 'border-transparent bg-[#1ED760] text-black' : 'bg-card hover:bg-muted',
+              )}
+            >
+              {d.name}
+            </button>
+          ))}
+          {!devices && <Loader2 className="size-4 animate-spin self-center text-muted-foreground" />}
+        </div>
+        <p className="text-xs text-muted-foreground">
+          {usingLocal
+            ? localProblem
+              ? `${localProblem}. Pick another device, or open Spotify on one and tap refresh.`
+              : 'Music plays right here in Side B. No Spotify app needed. Keep this screen open.'
+            : 'Music plays in the Spotify app on that device. Keep Spotify open there.'}
+        </p>
       </div>
       <div className="grid gap-2">
         <Button variant="outline" size="sm" onClick={runTest} disabled={testing} className="justify-self-start">

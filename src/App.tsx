@@ -11,6 +11,8 @@ import { OnlineGameClient } from '@/game/online-client'
 import { useCues } from '@/hooks/use-cues'
 import { GameContext, useGame } from '@/hooks/use-game'
 import { unlockChime } from '@/lib/chime'
+import { useWakeLock } from '@/hooks/use-wake-lock'
+import { activateLocalPlayer } from '@/music/spotify-sdk'
 import { setDemoActive } from '@/lib/pwa'
 import { onlineAvailable } from '@/lib/supabase'
 import { AskingScreen } from '@/screens/asking'
@@ -25,6 +27,7 @@ import { RecapScreen } from '@/screens/recap'
 function Game({ onExit }: { onExit: () => void }) {
   const { state, client, meId } = useGame()
   useCues(state, meId)
+  useWakeLock(client.isSpeaker && state.phase !== 'lobby' && state.phase !== 'recap')
   const screens = {
     lobby: <LobbyScreen />,
     asking: <AskingScreen />,
@@ -71,6 +74,7 @@ export default function App() {
     const unlock = () => {
       unlockAudio()
       unlockChime()
+      activateLocalPlayer()
     }
     window.addEventListener('pointerdown', unlock)
     return () => window.removeEventListener('pointerdown', unlock)

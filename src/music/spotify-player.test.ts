@@ -8,6 +8,12 @@ const store = new Map<string, string>()
 ;(globalThis as { window?: unknown }).window = { addEventListener() {}, removeEventListener() {}, location: { origin: 'https://x' } }
 vi.stubEnv('VITE_SPOTIFY_CLIENT_ID', 'client123')
 
+const sdk = vi.hoisted(() => ({ id: null as string | null }))
+vi.mock('./spotify-sdk', () => ({
+  ensureLocalPlayer: async () => sdk.id,
+  localDeviceId: () => sdk.id,
+}))
+
 const { getAccessToken, isSpotifyConnected, SCOPES } = await import('./spotify-auth')
 const { chooseDevice, pausePlayback, playTrack, seekTo } = await import('./spotify-player')
 
@@ -34,6 +40,7 @@ const signedIn = (overrides: Record<string, unknown> = {}) =>
 beforeEach(() => {
   store.clear()
   signedIn()
+  sdk.id = null
 })
 afterEach(() => vi.unstubAllGlobals())
 
@@ -66,6 +73,20 @@ describe('Spotify playback control', () => {
     const calls = fakeSpotify((c) => (c.url.endsWith('/me/player/devices') ? json(200, devices) : c.url.includes('/tracks/') ? json(404, {}) : json(204)))
     await playTrack('spotify:track:9', 0)
     expect(calls.find((c) => c.url.includes('/me/player/play'))!.body).toEqual({ uris: ['spotify:track:9'], position_ms: 0 })
+  })
+
+  it('plays inside Side B by default when its built-in player is ready (no Spotify app needed)', async () => {
+    sdk.id = 'sideb-local'
+    const calls = fakeSpotify(() => json(204))
+    await playTrack('spotify:track:1', 0, 'spotify:album:A')
+    expect(calls.some((c) => c.url.endsWith('/me/player/devices'))).toBe(false)
+    expect(calls.find((c) => c.url.includes('/me/player/play'))!.url).toContain('device_id=sideb-local')
+  })
+
+  it('falls back to Spotify devices when the built-in player can’t run here', async () => {
+    const calls = fakeSpotify((c) => (c.url.endsWith('/me/player/devices') ? json(200, devices) : json(204)))
+    await playTrack('spotify:track:1', 0, 'spotify:album:A')
+    expect(calls.find((c) => c.url.includes('/me/player/play'))!.url).toContain('device_id=sonos')
   })
 
   it('uses the device picked in Side B', async () => {

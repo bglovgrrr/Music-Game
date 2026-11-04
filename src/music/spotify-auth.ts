@@ -10,7 +10,16 @@
 import { safeStorage } from '@/lib/utils'
 
 const CLIENT_ID = import.meta.env.VITE_SPOTIFY_CLIENT_ID as string | undefined
-export const SCOPES = ['user-read-playback-state', 'user-modify-playback-state', 'playlist-modify-private', 'playlist-modify-public']
+export const SCOPES = [
+  'user-read-playback-state',
+  'user-modify-playback-state',
+  'playlist-modify-private',
+  'playlist-modify-public',
+  // In-page player (Web Playback SDK)
+  'streaming',
+  'user-read-email',
+  'user-read-private',
+]
 const TOKEN_KEY = 'sideb:spotify-token'
 const PENDING_KEY = 'sideb:spotify-pending'
 

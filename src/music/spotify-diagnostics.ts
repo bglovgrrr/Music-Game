@@ -1,5 +1,6 @@
 import { getAccessToken } from './spotify-auth'
-import { chosenDeviceId } from './spotify-player'
+import { chosenDeviceId, LOCAL } from './spotify-player'
+import { ensureLocalPlayer, localPlayerProblem } from './spotify-sdk'
 
 type Device = { id: string; name: string; type: string; is_active: boolean; is_restricted?: boolean; volume_percent?: number | null }
 
@@ -39,9 +40,18 @@ export async function testSpotify(log: (line: string) => void) {
   log(`Devices (${devices.length}):`)
   for (const d of devices)
     log(`  • ${d.name} · ${d.type}${d.is_active ? ' · ACTIVE' : ''}${d.is_restricted ? ' · RESTRICTED (can’t be controlled)' : ''} · volume ${d.volume_percent ?? '?'}%`)
-  if (!devices.length) return log('✗ No devices. Open Spotify on the phone/computer/speaker and play any song for a second, then test again.')
 
-  const picked = chosenDeviceId()
+  let picked = chosenDeviceId()
+  if (!picked || picked === LOCAL) {
+    const id = await ensureLocalPlayer()
+    log(id ? '✓ Side B’s built-in player is ready' : `✗ Side B’s built-in player: ${localPlayerProblem() ?? 'not ready'}`)
+    picked = id
+  }
+  if (picked && !devices.some((d) => d.id === picked)) {
+    const again = await call('/me/player/devices')
+    devices.splice(0, devices.length, ...((again.body?.devices as Device[]) ?? []).filter((d) => d.id))
+  }
+  if (!devices.length) return log('✗ No devices. Open Spotify on the phone/computer/speaker and play any song for a second, then test again.')
   const target = devices.find((d) => d.id === picked) ?? devices.find((d) => d.is_active) ?? devices[0]
   log(`Target: ${target.name}${target.id === picked ? ' (picked in Side B)' : target.is_active ? ' (Spotify’s active device)' : ' (first available)'}`)
   if (target.volume_percent === 0) log('⚠ That device’s Spotify volume is 0%.')
