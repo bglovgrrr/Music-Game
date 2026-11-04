@@ -29,14 +29,37 @@ export type SearchResult = {
 
 /** For tests. */
 export function resetSearchState() {
+  spotifySearch = 'unknown'
   itunesFailedAt = 0
   lastReason = ''
   cache.clear()
 }
 
+/** Spotify search via our Vercel function. Off for the session once we learn it isn't set up. */
+let spotifySearch: 'unknown' | 'on' | 'off' = import.meta.env.MODE === 'preview' ? 'off' : 'unknown'
+
+async function searchSpotify(q: string, signal?: AbortSignal): Promise<Track[] | null> {
+  if (spotifySearch === 'off') return null
+  try {
+    const res = await fetchWithTimeout(`/api/spotify-search?q=${encodeURIComponent(q)}`, 8000, signal)
+    const type = res.headers.get('content-type') ?? ''
+    if (res.status === 503 || !type.includes('application/json')) {
+      spotifySearch = 'off' // not configured, or a local dev server without the function
+      return null
+    }
+    if (!res.ok) return null
+    const data = (await res.json()) as { tracks: Track[] }
+    spotifySearch = 'on'
+    return data.tracks
+  } catch (err) {
+    if (signal?.aborted) throw err
+    return null
+  }
+}
+
 /**
- * Song search. Uses the free iTunes Search API (no key needed, 30s previews).
- * Falls back to a small built-in catalog when the network blocks it.
+ * Song search: Spotify's full catalogue first (via /api/spotify-search), then the free
+ * iTunes Search API (30s previews), then a small built-in list if both are unreachable.
  */
 export async function searchTracks(query: string, signal?: AbortSignal): Promise<SearchResult> {
   const q = query.trim()
@@ -44,6 +67,12 @@ export async function searchTracks(query: string, signal?: AbortSignal): Promise
   const key = q.toLowerCase()
   const cached = cache.get(key)
   if (cached) return { tracks: cached, offline: false }
+
+  const fromSpotify = await searchSpotify(q, signal)
+  if (fromSpotify) {
+    cache.set(key, fromSpotify)
+    return { tracks: fromSpotify, offline: false }
+  }
 
   if (Date.now() - itunesFailedAt >= RETRY_AFTER_MS) {
     try {
@@ -105,6 +134,22 @@ function fromItunes(r: ItunesResult): Track {
     durationMs: PREVIEW_MS,
     externalUrl: r.trackViewUrl,
     source: 'itunes',
+  }
+}
+
+/** Find a 30-second preview for a song (e.g. a Spotify pick when the host isn't connected). */
+export async function findPreview(t: Track): Promise<string | null> {
+  if (t.previewUrl) return t.previewUrl
+  try {
+    const res = await fetchWithTimeout(
+      `https://itunes.apple.com/search?media=music&entity=song&limit=1&term=${encodeURIComponent(`${t.title} ${t.artist.split(',')[0]}`)}`,
+      6000,
+    )
+    if (!res.ok) return null
+    const data = (await res.json()) as { results: ItunesResult[] }
+    return data.results[0]?.previewUrl ?? null
+  } catch {
+    return null
   }
 }
 

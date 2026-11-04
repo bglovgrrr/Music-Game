@@ -24,12 +24,12 @@ Side B is a relaxed music game for 2–8 friends in the same room. Someone asks 
 - **Song of the round.** Vote for your favourite after each round; the winner gets a crown.
 - **Group selfies.** Snap a selfie after any round; it's saved privately with the game, shown as polaroids in the recap, and added to the recap card.
 - **Recap card.** A shareable image of the night's mixtape.
-- **Save to Spotify.** Turn the whole game into a playlist (needs a Spotify app; see below).
+- **Save to Spotify.** Turn the whole game into a playlist.
 - **Gentle chimes.** A soft sound when it's your turn to ask, when picking starts, and when 10 seconds are left.
 - **Live sync.** Every phone stays in step: questions, picks, play/pause, and the progress bar.
 - **Rejoin anytime.** Refresh or lock your phone and you land back in the same game.
 - **Question themes.** Throwback, Family, Love & heartbreak, Hype, Deep cuts, Places, and Wildcard, plus your own questions and "Surprise me".
-- **Song search with previews.** Uses iTunes search with 30-second clips. No API key needed.
+- **Search any song (Spotify) and play it in full** on the host's Spotify. Falls back to 30-second iTunes previews.
 - **Demo mode.** Play a full game on one device with three bot friends.
 - **Made for phones and desktops.** Light, dark, or match-device theme. You can add it to your home screen like an app.
 
@@ -66,14 +66,20 @@ The app is hosted on Vercel (project `music-game`, team `personal`):
 - **Previews:** every other branch gets its own test link. Those links require a Vercel login (Deployment Protection → Standard Protection); the production address is public.
 - No environment variables are needed: the Supabase address and publishable key are in `.env`. Add `VITE_SPOTIFY_CLIENT_ID` under **Settings → Environment Variables** if you set up Save to Spotify.
 
-## Save to Spotify (optional)
+## Spotify (full songs)
 
-1. Create an app at [developer.spotify.com/dashboard](https://developer.spotify.com/dashboard). Choose **Web API**.
-2. Add your site's address as a **Redirect URI**, with the trailing slash (for example `https://your-app.vercel.app/`). For local testing add `http://127.0.0.1:5173/` and open the app at that address (Spotify doesn't accept `localhost`).
-3. Put the app's **Client ID** in `.env` as `VITE_SPOTIFY_CLIENT_ID` (it is not a secret). On Vercel, add it under **Settings → Environment Variables** too.
-4. Under **User Management**, add the Spotify account of everyone who will save playlists.
+Side B uses a Spotify developer app (in Development Mode) for three things:
 
-Spotify restricts apps in Development Mode: the app owner needs Spotify Premium, and only listed users can sign in. Since Spotify's February 2026 changes, some developers report that playlist creation is refused for Development Mode apps. If that happens, the app explains the error and **Copy song list** still works.
+- **Search for everyone:** `api/spotify-search.ts` runs on Vercel and searches Spotify's catalogue with the app's credentials. Guests don't need a Spotify account. Results are cached on Vercel's CDN.
+- **Full songs:** the host taps **Connect** (lobby). Songs then play in full on the host's Spotify app or Spotify Connect speaker; anyone's play / pause / skip / seek controls it. Without Spotify, songs play as 30-second previews.
+- **Save to Spotify** at the end of a game.
+
+Setup (done for the live site):
+1. App at [developer.spotify.com/dashboard](https://developer.spotify.com/dashboard) with **Web API**, Redirect URI `https://music-game-virid.vercel.app/`.
+2. `VITE_SPOTIFY_CLIENT_ID` in `.env` (public). In Vercel: `SPOTIFY_CLIENT_ID` and `SPOTIFY_CLIENT_SECRET` (secret: never commit it).
+3. **User Management:** add every person who will host (max 5 in Development Mode). The app owner needs Spotify Premium; hosts need Premium to play full songs.
+
+If search can't reach Spotify, it falls back to iTunes (30s previews), then a small built-in list.
 
 ## Backend (Supabase)
 
@@ -123,7 +129,7 @@ To change how the game plays, start in `src/game/engine.ts`. Demo and online mod
 | UI | Tailwind CSS v4, shadcn/ui, Motion, Lucide icons |
 | Brand | Pastel palette with Fraunces and Figtree fonts (bundled). Colours are tokens in `src/index.css` |
 | Backend | Supabase (Postgres, anonymous auth, Realtime) |
-| Music | iTunes Search API. Spotify is planned |
+| Music | Spotify Web API (search + playback control), iTunes previews as fallback |
 | Install | PWA via `vite-plugin-pwa` |
 
 Add more shadcn components with `npx shadcn@latest add <component>`.
@@ -147,4 +153,4 @@ Add more shadcn components with `npx shadcn@latest add <component>`.
 - [x] Hosted on Vercel
 - [ ] Play a first real game with friends
 - [ ] Game history: browse past games and their mixtapes
-- [ ] Spotify: full-length playback on the host's device
+- [x] Spotify: search any song and play it in full on the host's Spotify

@@ -10,6 +10,8 @@ export type Track = {
   durationMs: number
   externalUrl?: string
   source: 'itunes' | 'demo' | 'spotify'
+  /** spotify:track:… — lets the host's Spotify play the full song. */
+  spotifyUri?: string
   /** Used to draw a gradient cover when there is no artwork. */
   hue?: number
 }

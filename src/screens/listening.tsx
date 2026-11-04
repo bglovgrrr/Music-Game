@@ -2,6 +2,7 @@ import { Check, Eye, ExternalLink, MessageCircle, Pause, Play, SkipBack, SkipFor
 import { AnimatePresence, motion } from 'motion/react'
 import { AlbumArt, Equalizer, PlayerAvatar, PromptCard } from '@/components/game-ui'
 import { ReactionBar } from '@/components/reactions'
+import { SpotifyCard } from '@/components/spotify-card'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { currentPick, currentRound, guessersFor, isRevealed, playbackPosition, playerById } from '@/game/engine'
@@ -194,6 +195,8 @@ export function ListeningScreen() {
         </div>
 
         <ReactionBar />
+
+        {client.isSpeaker && pick.track.spotifyUri && <SpotifyCard compact className="-mt-1" />}
 
         {!client.isSpeaker && host && (
           <p className="-mt-1 flex items-center justify-center gap-1.5 text-xs text-muted-foreground">

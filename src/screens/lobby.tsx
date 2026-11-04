@@ -4,6 +4,8 @@ import { toast } from 'sonner'
 import { GameSettings } from '@/components/game-settings'
 import { PlayerAvatar } from '@/components/game-ui'
 import { QrCode } from '@/components/qr-code'
+import { SpotifyCard } from '@/components/spotify-card'
+import { spotifyConfigured } from '@/music/spotify-auth'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { MIN_PLAYERS } from '@/game/engine'
@@ -94,6 +96,12 @@ export function LobbyScreen() {
         <Card className="p-4">
           <GameSettings />
         </Card>
+
+        {client.isSpeaker && spotifyConfigured && (
+          <Card className="p-4">
+            <SpotifyCard />
+          </Card>
+        )}
 
         {client.mode === 'online' && host && (
           <p className="flex items-center justify-center gap-2 text-center text-sm text-muted-foreground">
