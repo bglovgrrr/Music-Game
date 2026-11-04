@@ -15,7 +15,7 @@ vi.mock('./spotify-sdk', () => ({
 }))
 
 const { getAccessToken, isSpotifyConnected, SCOPES } = await import('./spotify-auth')
-const { chooseDevice, pausePlayback, playTrack, seekTo } = await import('./spotify-player')
+const { chooseDevice, pausePlayback, playTrack, seekTo, setKeepAliveDevice, SILENCE, localPlayerUsable } = await import('./spotify-player')
 
 type Call = { url: string; method: string; body?: unknown }
 const json = (status: number, body?: unknown) =>
@@ -41,6 +41,7 @@ beforeEach(() => {
   store.clear()
   signedIn()
   sdk.id = null
+  setKeepAliveDevice(null)
 })
 afterEach(() => vi.unstubAllGlobals())
 
@@ -150,5 +151,55 @@ describe('Spotify sign-in', () => {
     fakeSpotify((c) => (c.url.endsWith('/devices') ? json(401, {}) : json(204)))
     await expect(playTrack('spotify:track:1', 0)).rejects.toThrow(/Connect again/)
     expect(isSpotifyConnected()).toBe(false)
+  })
+})
+
+describe('keeping a phone’s Spotify awake', () => {
+  const phoneDevices = { devices: [{ id: 'iphone', name: 'iPhone', type: 'Smartphone', is_active: true }] }
+
+  it('pausing on a kept-awake phone plays silence instead (a paused Spotify app gets put to sleep by iOS)', async () => {
+    setKeepAliveDevice('iphone')
+    const calls = fakeSpotify(() => json(204))
+    await pausePlayback()
+    expect(calls).toHaveLength(1)
+    expect(calls[0].url).toContain('/me/player/play?device_id=iphone')
+    expect(calls[0].body).toEqual({ context_uri: SILENCE.album, offset: { uri: SILENCE.uri }, position_ms: 0 })
+  })
+
+  it('pausing anywhere else really pauses', async () => {
+    const calls = fakeSpotify(() => json(204))
+    await pausePlayback()
+    expect(calls.map((c) => c.url.replace('https://api.spotify.com/v1', ''))).toEqual(['/me/player/pause'])
+  })
+
+  it('when the built-in player is unreachable, switches to the Spotify app automatically and remembers', async () => {
+    sdk.id = 'sideb-local'
+    vi.useFakeTimers()
+    const calls = fakeSpotify((c) => {
+      if (c.url.endsWith('/me/player/devices')) return json(200, phoneDevices)
+      if (c.url.includes('/me/player/play') && c.url.includes('sideb-local')) return json(404, { error: { message: 'Device not found' } })
+      return json(204)
+    })
+    const p = playTrack('spotify:track:1', 0, 'spotify:album:A')
+    await vi.runAllTimersAsync()
+    const device = await p
+    vi.useRealTimers()
+    expect(device.id).toBe('iphone')
+    expect(calls.filter((c) => c.url.includes('/me/player/play')).at(-1)!.url).toContain('device_id=iphone')
+    expect(localPlayerUsable()).toBe(false)
+  })
+
+  it('on iPhone, skips the built-in player and uses the phone’s Spotify app', async () => {
+    const nav = globalThis.navigator
+    Object.defineProperty(globalThis, 'navigator', { value: { userAgent: 'Mozilla/5.0 (iPhone; CPU iPhone OS 26_0 like Mac OS X)', platform: 'iPhone', maxTouchPoints: 5 }, configurable: true })
+    try {
+      sdk.id = 'sideb-local'
+      expect(localPlayerUsable()).toBe(false)
+      const calls = fakeSpotify((c) => (c.url.endsWith('/me/player/devices') ? json(200, phoneDevices) : json(204)))
+      await playTrack('spotify:track:1', 0, 'spotify:album:A')
+      expect(calls.find((c) => c.url.includes('/me/player/play'))!.url).toContain('device_id=iphone')
+    } finally {
+      Object.defineProperty(globalThis, 'navigator', { value: nav, configurable: true })
+    }
   })
 })

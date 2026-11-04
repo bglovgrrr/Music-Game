@@ -6,7 +6,7 @@ import { useSpotifyConnected } from '@/hooks/use-spotify'
 import { connectSpotify, disconnectSpotify, SpotifyError, spotifyConfigured } from '@/music/spotify-auth'
 import { testSpotify } from '@/music/spotify-diagnostics'
 import { onSpotifyLog, spotifyLogLines } from '@/music/spotify-log'
-import { chooseDevice, chosenDeviceId, listDevices, LOCAL, type SpotifyDevice } from '@/music/spotify-player'
+import { chooseDevice, chosenDeviceId, isIOS, listDevices, LOCAL, localPlayerUsable, needsKeepAlive, playSilence, setKeepAliveDevice, type SpotifyDevice } from '@/music/spotify-player'
 import { ensureLocalPlayer, LOCAL_PLAYER_NAME, localDeviceId, localPlayerProblem, onLocalPlayer, stopLocalPlayer } from '@/music/spotify-sdk'
 import { cn } from '@/lib/utils'
 
@@ -27,7 +27,8 @@ export function SpotifyCard({ compact, className }: { compact?: boolean; classNa
   const connected = useSpotifyConnected()
   const [busy, setBusy] = useState(false)
   const [devices, setDevices] = useState<SpotifyDevice[] | null>(null)
-  const [device, setDevice] = useState<string>(() => chosenDeviceId() ?? LOCAL)
+  const [device, setDevice] = useState<string>(() => chosenDeviceId() ?? (localPlayerUsable() ? LOCAL : ''))
+  const canUseLocal = localPlayerUsable()
   const localId = useSyncExternalStore(onLocalPlayer, localDeviceId)
   const localProblem = useSyncExternalStore(onLocalPlayer, localPlayerProblem)
   const [loadingDevices, setLoadingDevices] = useState(false)
@@ -76,8 +77,30 @@ export function SpotifyCard({ compact, className }: { compact?: boolean; classNa
   useEffect(() => {
     if (!connected) return
     void refresh()
-    void ensureLocalPlayer()
-  }, [connected, refresh])
+    if (canUseLocal) void ensureLocalPlayer()
+  }, [connected, refresh, canUseLocal])
+
+  // Back from the Spotify app ("Wake up Spotify"): find the phone, use it, and keep it awake.
+  useEffect(() => {
+    if (!connected) return
+    const onVisible = async () => {
+      if (document.visibilityState !== 'visible') return
+      const list = (await listDevices().catch(() => [])).filter((d) => d.name !== LOCAL_PLAYER_NAME)
+      setDevices(list)
+      const current = chosenDeviceId()
+      const phone = list.find(needsKeepAlive)
+      if (phone && (!current || (current === LOCAL && !canUseLocal) || !list.some((d) => d.id === current))) {
+        chooseDevice(phone.id)
+        setDevice(phone.id)
+      }
+      if (phone && (chosenDeviceId() === phone.id)) {
+        setKeepAliveDevice(phone.id)
+        await playSilence().catch(() => {})
+      }
+    }
+    document.addEventListener('visibilitychange', onVisible)
+    return () => document.removeEventListener('visibilitychange', onVisible)
+  }, [connected, canUseLocal])
 
   if (!spotifyConfigured) return null
 
@@ -113,7 +136,7 @@ export function SpotifyCard({ compact, className }: { compact?: boolean; classNa
     )
   }
 
-  const usingLocal = device === LOCAL
+  const usingLocal = device === LOCAL && canUseLocal
   const active = usingLocal ? undefined : (devices?.find((d) => d.id === device) ?? devices?.find((d) => d.is_active) ?? devices?.[0])
   if (compact) return <CompactStatus active={usingLocal ? 'this device' : active?.name} className={className} />
 
@@ -148,16 +171,18 @@ export function SpotifyCard({ compact, className }: { compact?: boolean; classNa
           </Button>
         </div>
         <div className="flex flex-wrap gap-2">
-          <button
-            onClick={() => pick(LOCAL)}
-            aria-pressed={usingLocal}
-            className={cn(
-              'cursor-pointer rounded-full border px-3 py-1.5 text-sm font-medium transition',
-              usingLocal ? 'border-transparent bg-[#1ED760] text-black' : 'bg-card hover:bg-muted',
-            )}
-          >
-            This device {localId ? '' : localProblem ? '⚠' : '…'}
-          </button>
+          {canUseLocal && (
+            <button
+              onClick={() => pick(LOCAL)}
+              aria-pressed={usingLocal}
+              className={cn(
+                'cursor-pointer rounded-full border px-3 py-1.5 text-sm font-medium transition',
+                usingLocal ? 'border-transparent bg-[#1ED760] text-black' : 'bg-card hover:bg-muted',
+              )}
+            >
+              This device {localId ? '' : localProblem ? '⚠' : '…'}
+            </button>
+          )}
           {(devices ?? []).map((d) => (
             <button
               key={d.id}
@@ -178,8 +203,23 @@ export function SpotifyCard({ compact, className }: { compact?: boolean; classNa
             ? localProblem
               ? `${localProblem}. Pick another device, or open Spotify on one and tap refresh.`
               : 'Music plays right here in Side B. No Spotify app needed. Keep this screen open.'
-            : 'Music plays in the Spotify app on that device. Keep Spotify open there.'}
+            : active && needsKeepAlive(active)
+              ? 'Music plays through the Spotify app on this phone. Side B keeps it awake between songs (with silence), so you don’t need to switch apps.'
+              : active
+                ? 'Music plays in Spotify on that device.'
+                : 'No Spotify found yet.'}
         </p>
+        {!canUseLocal && !(active && needsKeepAlive(active)) && (
+          <div className="grid gap-2 rounded-xl bg-muted p-3">
+            <p className="text-xs text-muted-foreground">
+              {isIOS() ? 'On iPhone, the music plays through the Spotify app. ' : ''}Tap below, then come straight back here. Side B keeps Spotify awake for the
+              rest of the game.
+            </p>
+            <Button asChild size="sm" className="justify-self-start bg-[#1ED760] text-black hover:bg-[#1ED760]/90">
+              <a href="spotify:">Wake up Spotify</a>
+            </Button>
+          </div>
+        )}
       </div>
       <div className="grid gap-2">
         <Button variant="outline" size="sm" onClick={runTest} disabled={testing} className="justify-self-start">

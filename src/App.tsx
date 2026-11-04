@@ -4,6 +4,8 @@ import { useEffect, useState } from 'react'
 import { toast } from 'sonner'
 import { AudioEngine, unlockAudio } from '@/components/audio-engine'
 import { ReactionLayer } from '@/components/reactions'
+import { SpotifyKeepAlive } from '@/components/spotify-keepalive'
+import { spotifyConfigured } from '@/music/spotify-auth'
 import { Toaster } from '@/components/ui/sonner'
 import type { GameClient } from '@/game/client'
 import { LocalGameClient } from '@/game/local-client'
@@ -40,6 +42,7 @@ function Game({ onExit }: { onExit: () => void }) {
     <GameShell onExit={onExit}>
       {client.isSpeaker && state.phase === 'listening' && <AudioEngine />}
       <ReactionLayer />
+      {client.isSpeaker && spotifyConfigured && <SpotifyKeepAlive />}
       <AnimatePresence mode="wait">
         <motion.div
           key={`${state.phase}-${state.rounds.length}`}

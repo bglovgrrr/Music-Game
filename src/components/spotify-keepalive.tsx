@@ -1,0 +1,72 @@
+import { useEffect, useRef } from 'react'
+import { useGame } from '@/hooks/use-game'
+import { useSpotifyConnected } from '@/hooks/use-spotify'
+import { logSpotify } from '@/music/spotify-log'
+import {
+  chooseDevice,
+  chosenDeviceId,
+  getPlayback,
+  isSilence,
+  listDevices,
+  LOCAL,
+  localPlayerUsable,
+  needsKeepAlive,
+  playSilence,
+  setKeepAliveDevice,
+} from '@/music/spotify-player'
+
+/**
+ * Host only. When the music plays on a phone's Spotify app, iOS puts that app to sleep
+ * once it's paused. So whenever no song is playing, keep Spotify busy with silence.
+ * Checks every 45s and whenever the host comes back to Side B.
+ */
+export function SpotifyKeepAlive() {
+  const { state, client } = useGame()
+  const connected = useSpotifyConnected()
+  const songPlaying = useRef(false)
+  songPlaying.current = state.phase === 'listening' && state.playback.isPlaying
+
+  useEffect(() => {
+    if (!connected || !client.isSpeaker) {
+      setKeepAliveDevice(null)
+      return
+    }
+    let busy = false
+    const tick = async () => {
+      if (busy || document.visibilityState !== 'visible') return
+      busy = true
+      try {
+        const devices = await listDevices().catch(() => [])
+        const picked = chosenDeviceId()
+        let target = devices.find((d) => d.id === picked)
+        // No usable built-in player here (e.g. iPhone): default to this phone's Spotify app.
+        if (!target && (!picked || picked === LOCAL) && !localPlayerUsable()) {
+          target = devices.find(needsKeepAlive)
+          if (target) chooseDevice(target.id)
+        }
+        const phone = target && needsKeepAlive(target) ? target : null
+        setKeepAliveDevice(phone?.id ?? null)
+        if (!phone || songPlaying.current) return
+        const pb = await getPlayback().catch(() => null)
+        if (pb?.isPlaying && pb.deviceId === phone.id) return // already awake (silence or music)
+        await playSilence()
+        logSpotify(`keep-alive: playing silence on ${phone.name}${pb && !isSilence(pb) ? '' : ''}`)
+      } catch (err) {
+        logSpotify(`keep-alive: ${(err as Error).message}`)
+      } finally {
+        busy = false
+      }
+    }
+    void tick()
+    const timer = setInterval(tick, 45_000)
+    const onVisible = () => document.visibilityState === 'visible' && void tick()
+    document.addEventListener('visibilitychange', onVisible)
+    return () => {
+      clearInterval(timer)
+      document.removeEventListener('visibilitychange', onVisible)
+      setKeepAliveDevice(null)
+    }
+  }, [connected, client.isSpeaker])
+
+  return null
+}

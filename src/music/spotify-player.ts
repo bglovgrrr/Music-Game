@@ -4,13 +4,45 @@ import { safeStorage } from '@/lib/utils'
 import { ensureLocalPlayer, localDeviceId } from './spotify-sdk'
 
 export type SpotifyDevice = { id: string; name: string; type: string; is_active: boolean }
-export type SpotifyPlayback = { isPlaying: boolean; progressMs: number; uri?: string; durationMs?: number; device?: string }
+export type SpotifyPlayback = {
+  isPlaying: boolean
+  progressMs: number
+  uri?: string
+  durationMs?: number
+  device?: string
+  deviceId?: string
+  contextUri?: string
+}
 
 const DEVICE_KEY = 'sideb:spotify-device'
 /** Stored choice meaning "Side B's own in-page player" (its device id changes every visit). */
 export const LOCAL = 'local'
 export const chosenDeviceId = () => safeStorage.get(DEVICE_KEY) || null
 export const chooseDevice = (id: string | null) => safeStorage.set(DEVICE_KEY, id ?? '')
+
+/** iPhone/iPad: Spotify's in-page player starts there but Spotify never reaches it (tested Nov 2026). */
+export const isIOS = () =>
+  typeof navigator !== 'undefined' &&
+  (/iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1))
+
+const LOCAL_BROKEN_KEY = 'sideb:local-player-broken'
+/** Side B's built-in player can be used on this browser (not iOS, and it hasn't failed here before). */
+export const localPlayerUsable = () => !isIOS() && safeStorage.get(LOCAL_BROKEN_KEY) !== '1'
+const markLocalBroken = () => safeStorage.set(LOCAL_BROKEN_KEY, '1')
+
+/** Phones put a paused Spotify app to sleep; we keep those busy with silence between songs. */
+export const needsKeepAlive = (d: Pick<SpotifyDevice, 'type'>) => /smartphone|tablet/i.test(d.type)
+
+/** Silence used to keep a phone's Spotify awake ("30 Minutes of Silence" by Silenzio). */
+export const SILENCE = { uri: 'spotify:track:0XycH5D4znCfJIBeYt3upG', album: 'spotify:album:2d71KC0acijowAr9j9xInR' }
+export const isSilence = (pb: SpotifyPlayback | null) => !!pb && (pb.uri === SILENCE.uri || pb.contextUri === SILENCE.album)
+
+let keepAliveId: string | null = null
+/** The phone being kept awake, or null. Set by the host's game screen. */
+export const setKeepAliveDevice = (id: string | null) => {
+  keepAliveId = id
+}
+export const keepAliveDevice = () => keepAliveId
 
 export async function listDevices(): Promise<SpotifyDevice[]> {
   const d = await spotifyApi<{ devices: SpotifyDevice[] }>('/me/player/devices')
@@ -20,17 +52,21 @@ export async function listDevices(): Promise<SpotifyDevice[]> {
 /** The device to play on: the one picked in Side B, else Spotify's active one, else the first available. */
 async function targetDevice(): Promise<SpotifyDevice> {
   const picked = chosenDeviceId()
-  // Default: Side B's own in-page player (no Spotify app needed).
-  if (!picked || picked === LOCAL) {
+  // Default: Side B's own in-page player (no Spotify app needed), where it works.
+  if ((!picked || picked === LOCAL) && localPlayerUsable()) {
     const id = localDeviceId() ?? (await ensureLocalPlayer())
     if (id) return { id, name: 'this device', type: 'Computer', is_active: true }
-    if (picked === LOCAL) throw new SpotifyError('Side B’s built-in Spotify player isn’t ready. Pick another device under “Play on”.', 'no_device')
   }
   const devices = await listDevices()
   if (!devices.length) {
-    throw new SpotifyError('Open the Spotify app on the speaker phone (play any song for a second), then tap play again.', 'no_device')
+    throw new SpotifyError('Open the Spotify app (tap “Wake up Spotify” on the Spotify card), then tap play again.', 'no_device')
   }
-  return devices.find((d) => d.id === picked) ?? devices.find((d) => d.is_active) ?? devices[0]
+  return (
+    devices.find((d) => d.id === picked) ??
+    devices.find((d) => d.is_active) ??
+    (isIOS() ? devices.find(needsKeepAlive) : undefined) ??
+    devices[0]
+  )
 }
 
 const q = (deviceId?: string) => (deviceId ? `?device_id=${encodeURIComponent(deviceId)}` : '')
@@ -74,10 +110,9 @@ export async function playTrack(uri: string, positionMs: number, albumUri?: stri
       // Switch playback to it explicitly, wait, and try again.
       if (!(isLocal && err instanceof SpotifyError && err.code === 'no_device') || attempt >= 3) {
         if (isLocal && err instanceof SpotifyError && err.code === 'no_device') {
-          throw new SpotifyError(
-            'Spotify can’t reach Side B’s built-in player on this browser yet. Try again in a moment, or pick another device under “Play on”.',
-            'no_device',
-          )
+          // The built-in player doesn't work on this browser: remember that and use a Spotify app/speaker instead.
+          markLocalBroken()
+          return playTrack(uri, positionMs, albumUri)
         }
         throw err
       }
@@ -87,8 +122,22 @@ export async function playTrack(uri: string, positionMs: number, albumUri?: stri
   }
 }
 
+/** Play silence on the kept-awake phone (instead of pausing, which lets iOS put Spotify to sleep). */
+export async function playSilence() {
+  if (!keepAliveId) return
+  await spotifyApi(`/me/player/play?device_id=${encodeURIComponent(keepAliveId)}`, {
+    method: 'PUT',
+    body: JSON.stringify({ context_uri: SILENCE.album, offset: { uri: SILENCE.uri }, position_ms: 0 }),
+  })
+}
+
+/** Stop the song. On a kept-awake phone this switches to silence so Spotify stays awake. */
 export async function pausePlayback() {
   try {
+    if (keepAliveId) {
+      await playSilence()
+      return
+    }
     await spotifyApi('/me/player/pause', { method: 'PUT' })
   } catch (err) {
     // Already paused / nothing playing is fine.
@@ -102,9 +151,21 @@ export async function seekTo(positionMs: number) {
 }
 
 export async function getPlayback(): Promise<SpotifyPlayback | null> {
-  const d = await spotifyApi<{ is_playing: boolean; progress_ms: number | null; item?: { uri: string; duration_ms: number }; device?: { name: string } }>(
-    '/me/player',
-  )
+  const d = await spotifyApi<{
+    is_playing: boolean
+    progress_ms: number | null
+    item?: { uri: string; duration_ms: number }
+    device?: { id: string; name: string }
+    context?: { uri?: string } | null
+  }>('/me/player')
   if (!d) return null
-  return { isPlaying: d.is_playing, progressMs: d.progress_ms ?? 0, uri: d.item?.uri, durationMs: d.item?.duration_ms, device: d.device?.name }
+  return {
+    isPlaying: d.is_playing,
+    progressMs: d.progress_ms ?? 0,
+    uri: d.item?.uri,
+    durationMs: d.item?.duration_ms,
+    device: d.device?.name,
+    deviceId: d.device?.id,
+    contextUri: d.context?.uri ?? undefined,
+  }
 }
