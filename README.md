@@ -64,7 +64,7 @@ The app is hosted on Vercel (project `music-game`, team `personal`):
 
 - **Production:** every push to `main` deploys to [music-game-virid.vercel.app](https://music-game-virid.vercel.app).
 - **Previews:** every other branch gets its own test link. Those links require a Vercel login (Deployment Protection → Standard Protection); the production address is public.
-- No environment variables are needed: the Supabase address and publishable key are in `.env`. Add `VITE_SPOTIFY_CLIENT_ID` under **Settings → Environment Variables** if you set up Save to Spotify.
+- Environment variables on Vercel: `SPOTIFY_CLIENT_ID` and `SPOTIFY_CLIENT_SECRET` (for Spotify search; see below). The Supabase address, publishable key and `VITE_SPOTIFY_CLIENT_ID` are public and live in `.env`. After changing a variable, redeploy for it to take effect.
 
 ## Spotify (full songs)
 
