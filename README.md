@@ -4,7 +4,9 @@
 
 Side B is a relaxed music game for 2–8 friends in the same room. Someone asks a question, everyone secretly answers with a song, and then you listen to each one together and talk about why it was picked.
 
-> **Status:** in development. Demo mode and online rooms work. The database is live on Supabase; the app isn't hosted yet.
+**▶ Play: [music-game-virid.vercel.app](https://music-game-virid.vercel.app)**
+
+> **Status:** live on Vercel, backed by Supabase. Not yet played in a real game with friends.
 
 ## How a game works
 
@@ -56,15 +58,13 @@ GitHub runs lint, type check, tests, and a build on every push (`.github/workflo
 
 Online play reads the Supabase project from `.env`. The publishable key in that file is meant to be public; the database's row-level security rules control access.
 
-## Putting it online
+## Hosting (Vercel)
 
-Friends need a web address to join. Any static host works. The easiest free option is **Vercel**:
+The app is hosted on Vercel (project `music-game`, team `personal`):
 
-1. Sign in at [vercel.com](https://vercel.com) with GitHub.
-2. Choose **Add New → Project** and import this repository.
-3. Keep the detected settings (Vite, `npm run build`, output `dist`) and deploy.
-
-Vercel deploys the repository's default branch, so merge your work there first, or pick a different production branch in the project settings.
+- **Production:** every push to `main` deploys to [music-game-virid.vercel.app](https://music-game-virid.vercel.app).
+- **Previews:** every other branch gets its own test link. Those links require a Vercel login (Deployment Protection → Standard Protection); the production address is public.
+- No environment variables are needed: the Supabase address and publishable key are in `.env`. Add `VITE_SPOTIFY_CLIENT_ID` under **Settings → Environment Variables** if you set up Save to Spotify.
 
 ## Save to Spotify (optional)
 
@@ -144,6 +144,7 @@ Add more shadcn components with `npx shadcn@latest add <component>`.
 - [x] Guess who picked it, pick timer, reactions, song of the round, QR join, chimes
 - [x] Recap card and Save to Spotify
 - [x] Group selfies saved with each game
-- [ ] Host the app (Vercel) and play a first real game
+- [x] Hosted on Vercel
+- [ ] Play a first real game with friends
 - [ ] Game history: browse past games and their mixtapes
 - [ ] Spotify: full-length playback on the host's device
