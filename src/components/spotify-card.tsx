@@ -1,9 +1,10 @@
-import { Check, Loader2, RefreshCw, Speaker } from 'lucide-react'
+import { Check, Copy, Loader2, RefreshCw, Speaker, Stethoscope } from 'lucide-react'
 import { useCallback, useEffect, useState } from 'react'
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import { useSpotifyConnected } from '@/hooks/use-spotify'
 import { connectSpotify, disconnectSpotify, SpotifyError, spotifyConfigured } from '@/music/spotify-auth'
+import { testSpotify } from '@/music/spotify-diagnostics'
 import { chooseDevice, chosenDeviceId, listDevices, type SpotifyDevice } from '@/music/spotify-player'
 import { cn } from '@/lib/utils'
 
@@ -26,6 +27,34 @@ export function SpotifyCard({ compact, className }: { compact?: boolean; classNa
   const [devices, setDevices] = useState<SpotifyDevice[] | null>(null)
   const [device, setDevice] = useState<string | null>(chosenDeviceId)
   const [loadingDevices, setLoadingDevices] = useState(false)
+  const [report, setReport] = useState<string[] | null>(null)
+  const [testing, setTesting] = useState(false)
+
+  const runTest = async () => {
+    setTesting(true)
+    const lines: string[] = []
+    setReport(lines)
+    try {
+      await testSpotify((line) => {
+        lines.push(line)
+        setReport([...lines])
+      })
+    } catch (err) {
+      lines.push(`✗ ${(err as Error).message}`)
+      setReport([...lines])
+    } finally {
+      setTesting(false)
+    }
+  }
+
+  const copyReport = async () => {
+    try {
+      await navigator.clipboard.writeText((report ?? []).join('\n'))
+      toast.success('Copied')
+    } catch {
+      toast.error('Couldn’t copy. Take a screenshot instead.')
+    }
+  }
 
   const refresh = useCallback(async () => {
     setLoadingDevices(true)
@@ -129,6 +158,21 @@ export function SpotifyCard({ compact, className }: { compact?: boolean; classNa
               </button>
             ))}
             {!devices && <Loader2 className="size-4 animate-spin text-muted-foreground" />}
+          </div>
+        )}
+      </div>
+      <div className="grid gap-2">
+        <Button variant="outline" size="sm" onClick={runTest} disabled={testing} className="justify-self-start">
+          {testing ? <Loader2 className="animate-spin" /> : <Stethoscope />} Test Spotify
+        </Button>
+        {report && (
+          <div className="grid gap-2 rounded-xl bg-muted p-3">
+            <pre className="overflow-x-auto font-mono text-[11px] leading-relaxed whitespace-pre-wrap">{report.join('\n')}</pre>
+            {!testing && (
+              <Button variant="ghost" size="sm" onClick={copyReport} className="justify-self-start">
+                <Copy /> Copy result
+              </Button>
+            )}
           </div>
         )}
       </div>

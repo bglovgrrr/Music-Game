@@ -1,37 +1,45 @@
 import { describe, expect, it } from 'vitest'
-import { START_TIMEOUT_MS, watchSpotify } from './spotify-watch'
+import { START_TIMEOUT_MS, type StartState, watchSpotify } from './spotify-watch'
 
 const URI = 'spotify:track:ours'
 const T = 1_000_000
-const fresh = { at: T, confirmed: false, retried: false }
-const playing = (uri = URI, progressMs = 10_000, isPlaying = true) => ({ isPlaying, progressMs, uri, durationMs: 200_000 })
+const D = 200_000
+const fresh = (): StartState => ({ at: T, confirmed: false, retried: false })
+const pb = (uri: string | undefined = URI, progressMs = 10_000, isPlaying = true) => ({ isPlaying, progressMs, uri, durationMs: D })
 
 describe('watching the host’s Spotify', () => {
-  it('a song that never started is NOT treated as finished (the skip bug)', () => {
-    // Spotify reports some other song, or nothing, right after we asked it to play
-    expect(watchSpotify(playing('spotify:track:other', 50_000, false), URI, fresh, T + 3000, 200_000)).toBe('wait')
-    expect(watchSpotify(null, URI, fresh, T + 3000, 200_000)).toBe('wait')
+  it('a song that never started is not finished', () => {
+    expect(watchSpotify(pb('spotify:track:other', 50_000, false), URI, fresh(), T + 3000, D, 3000)).toBe('wait')
+    expect(watchSpotify(null, URI, fresh(), T + 3000, D, 3000)).toBe('wait')
+  })
+
+  it('only confirms once Spotify’s progress is actually moving', () => {
+    const s = fresh()
+    expect(watchSpotify(pb(URI, 1000), URI, s, T + 2000, D, 2000)).toBe('wait') // first sighting
+    expect(watchSpotify(pb(URI, 1000), URI, s, T + 4000, D, 4000)).toBe('wait') // stuck: not playing for real
+    expect(watchSpotify(pb(URI, 3000), URI, s, T + 6000, D, 6000)).toBe('confirmed')
   })
 
   it('retries once, then gives up with an explanation', () => {
-    expect(watchSpotify(null, URI, fresh, T + START_TIMEOUT_MS, 200_000)).toBe('retry')
-    expect(watchSpotify(null, URI, { ...fresh, retried: true }, T + START_TIMEOUT_MS, 200_000)).toBe('give-up')
+    expect(watchSpotify(null, URI, fresh(), T + START_TIMEOUT_MS, D, 7000)).toBe('retry')
+    expect(watchSpotify(null, URI, { ...fresh(), retried: true }, T + START_TIMEOUT_MS, D, 7000)).toBe('give-up')
   })
 
-  it('confirms when Spotify plays our song', () => {
-    expect(watchSpotify(playing(), URI, fresh, T + 2000, 200_000)).toBe('confirmed')
+  const ok = (): StartState => ({ ...fresh(), confirmed: true })
+
+  it('Spotify going quiet mid-song is "lost", not "finished" (the jump-to-end bug)', () => {
+    expect(watchSpotify(null, URI, ok(), T + 10_000, D, 10_000)).toBe('lost')
+    expect(watchSpotify(pb('spotify:track:other', 5000, false), URI, ok(), T + 10_000, D, 10_000)).toBe('lost')
+    expect(watchSpotify(pb('spotify:track:radio'), URI, ok(), T + 10_000, D, 10_000)).toBe('lost')
   })
 
-  const confirmed = { ...fresh, confirmed: true }
-
-  it('after confirming: another song means ours ended (or autoplay moved on)', () => {
-    expect(watchSpotify(playing('spotify:track:radio'), URI, confirmed, T + 60_000, 200_000)).toBe('ended')
-    expect(watchSpotify(null, URI, confirmed, T + 60_000, 200_000)).toBe('ended')
+  it('finishes near the end, including when Spotify autoplays something next', () => {
+    expect(watchSpotify(pb(URI, 199_500), URI, ok(), T, D, 199_000)).toBe('ended')
+    expect(watchSpotify(pb(URI, 199_000, false), URI, ok(), T, D, 199_000)).toBe('ended')
+    expect(watchSpotify(pb('spotify:track:radio', 2000), URI, ok(), T, D, 198_000)).toBe('ended')
   })
 
-  it('after confirming: reaching the end means ended; paused mid-song means paused', () => {
-    expect(watchSpotify(playing(URI, 199_500), URI, confirmed, T, 200_000)).toBe('ended')
-    expect(watchSpotify(playing(URI, 199_000, false), URI, confirmed, T, 200_000)).toBe('ended')
-    expect(watchSpotify(playing(URI, 60_000, false), URI, confirmed, T, 200_000)).toBe('paused')
+  it('paused in the Spotify app mid-song means paused', () => {
+    expect(watchSpotify(pb(URI, 60_000, false), URI, ok(), T, D, 60_000)).toBe('paused')
   })
 })

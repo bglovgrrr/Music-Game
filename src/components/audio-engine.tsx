@@ -129,7 +129,12 @@ function SpotifyEngine({ track }: { track: Track }) {
   const { isPlaying, positionMs, updatedAt } = state.playback
   const sent = useRef<{ uri: string; playing: boolean; at: number } | null>(null)
   // Has Spotify confirmed it is playing *this* song since we asked it to?
-  const start = useRef<{ at: number; confirmed: boolean; retried: boolean; device: string }>({ at: 0, confirmed: false, retried: false, device: '' })
+  const start = useRef<{ at: number; confirmed: boolean; retried: boolean; device: string; lastProgress?: number }>({
+    at: 0,
+    confirmed: false,
+    retried: false,
+    device: '',
+  })
   const startedHere = useRef(false)
   const now = useNow(isPlaying, 2000)
 
@@ -141,7 +146,7 @@ function SpotifyEngine({ track }: { track: Track }) {
   }
 
   const startSong = (pos: number) => {
-    start.current = { ...start.current, at: Date.now(), confirmed: false }
+    start.current = { ...start.current, at: Date.now(), confirmed: false, lastProgress: undefined }
     startedHere.current = true
     playTrack(uri, pos)
       .then((d) => {
@@ -178,7 +183,7 @@ function SpotifyEngine({ track }: { track: Track }) {
     getPlayback()
       .then((pb) => {
         if (!sent.current?.playing) return
-        const action = watchSpotify(pb, uri, s, Date.now(), track.durationMs)
+        const action = watchSpotify(pb, uri, s, Date.now(), track.durationMs, playbackPosition(state))
         if (action === 'confirmed') s.confirmed = true
         else if (action === 'retry') {
           s.retried = true
@@ -197,6 +202,12 @@ function SpotifyEngine({ track }: { track: Track }) {
         } else if (action === 'paused') {
           sent.current = { uri, playing: false, at: updatedAt }
           dispatch({ type: 'pause' })
+        } else if (action === 'lost') {
+          sent.current = { uri, playing: false, at: updatedAt }
+          dispatch({ type: 'pause' })
+          toast.error(`Spotify stopped playing${s.device ? ` on “${s.device}”` : ''}. Tap play to try again, or use “Test Spotify” on the Spotify card.`, {
+            duration: 10_000,
+          })
         }
       })
       .catch(() => {})
