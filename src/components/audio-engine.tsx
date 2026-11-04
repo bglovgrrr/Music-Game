@@ -7,6 +7,7 @@ import { useSpotifyConnected } from '@/hooks/use-spotify'
 import { SpotifyError } from '@/music/spotify-auth'
 import { getPlayback, pausePlayback, playTrack, seekTo } from '@/music/spotify-player'
 import { findPreview } from '@/music/search'
+import { watchSpotify } from '@/music/spotify-watch'
 
 const SILENT_WAV = 'data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQAAAAA='
 let shared: HTMLAudioElement | null = null
@@ -127,14 +128,26 @@ function SpotifyEngine({ track }: { track: Track }) {
   const uri = track.spotifyUri!
   const { isPlaying, positionMs, updatedAt } = state.playback
   const sent = useRef<{ uri: string; playing: boolean; at: number } | null>(null)
+  // Has Spotify confirmed it is playing *this* song since we asked it to?
+  const start = useRef<{ at: number; confirmed: boolean; retried: boolean; device: string }>({ at: 0, confirmed: false, retried: false, device: '' })
   const startedHere = useRef(false)
-  const now = useNow(isPlaying, 2500)
+  const now = useNow(isPlaying, 2000)
 
   const fail = (err: unknown) => {
     const msg = err instanceof SpotifyError ? err.message : 'Couldn’t control Spotify.'
-    toast.error(msg)
+    toast.error(msg, { duration: 10_000 })
     sent.current = null
     dispatch({ type: 'pause' })
+  }
+
+  const startSong = (pos: number) => {
+    start.current = { ...start.current, at: Date.now(), confirmed: false }
+    startedHere.current = true
+    playTrack(uri, pos)
+      .then((d) => {
+        start.current.device = d.name
+      })
+      .catch(fail)
   }
 
   // Follow play / pause / seek.
@@ -144,8 +157,8 @@ function SpotifyEngine({ track }: { track: Track }) {
     if (isPlaying) {
       if (!prev || prev.uri !== uri || !prev.playing) {
         sent.current = { uri, playing: true, at: updatedAt }
-        startedHere.current = true
-        playTrack(uri, pos).catch(fail)
+        if (!prev || prev.uri !== uri) start.current.retried = false
+        startSong(pos)
       } else if (prev.at !== updatedAt) {
         sent.current = { ...prev, at: updatedAt }
         seekTo(pos).catch(fail)
@@ -157,19 +170,31 @@ function SpotifyEngine({ track }: { track: Track }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [uri, isPlaying, positionMs, updatedAt])
 
-  // Watch Spotify: song finished, or Spotify moved on / was paused in its own app.
+  // Watch Spotify while we think it's playing.
   useEffect(() => {
     if (!isPlaying || !sent.current?.playing) return
-    if (Date.now() - updatedAt < 3000) return // give Spotify a moment to start
+    const s = start.current
+    if (Date.now() - s.at < 1500) return
     getPlayback()
       .then((pb) => {
-        if (!pb) return
-        const nearEnd = (pb.durationMs ?? track.durationMs) - pb.progressMs < 3000
-        if (pb.uri !== uri || (!pb.isPlaying && nearEnd) || nearEnd) {
-          if (pb.uri !== uri && pb.isPlaying) void pausePlayback().catch(() => {}) // stop autoplay
+        if (!sent.current?.playing) return
+        const action = watchSpotify(pb, uri, s, Date.now(), track.durationMs)
+        if (action === 'confirmed') s.confirmed = true
+        else if (action === 'retry') {
+          s.retried = true
+          startSong(playbackPosition(state))
+        } else if (action === 'give-up') {
+          const where = s.device ? `“${s.device}”` : 'the selected device'
+          fail(
+            new SpotifyError(
+              `Spotify didn’t start playing on ${where}. On iPhone, open the Spotify app and start any song first (iOS can’t wake Spotify up from the background), or pick another device under “Play on”.`,
+            ),
+          )
+        } else if (action === 'ended') {
+          if (pb && pb.uri !== uri && pb.isPlaying) void pausePlayback().catch(() => {}) // stop autoplay
           sent.current = { uri, playing: false, at: updatedAt }
           dispatch({ type: 'trackEnded' })
-        } else if (!pb.isPlaying) {
+        } else if (action === 'paused') {
           sent.current = { uri, playing: false, at: updatedAt }
           dispatch({ type: 'pause' })
         }

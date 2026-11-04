@@ -15,24 +15,25 @@ export async function listDevices(): Promise<SpotifyDevice[]> {
 }
 
 /** The device to play on: the one picked in Side B, else Spotify's active one, else the first available. */
-async function targetDevice(): Promise<string | undefined> {
+async function targetDevice(): Promise<SpotifyDevice> {
   const devices = await listDevices()
   if (!devices.length) {
     throw new SpotifyError('Open the Spotify app on the speaker phone (play any song for a second), then tap play again.', 'no_device')
   }
   const picked = chosenDeviceId()
-  return (devices.find((d) => d.id === picked) ?? devices.find((d) => d.is_active) ?? devices[0]).id
+  return devices.find((d) => d.id === picked) ?? devices.find((d) => d.is_active) ?? devices[0]
 }
 
 const q = (deviceId?: string) => (deviceId ? `?device_id=${encodeURIComponent(deviceId)}` : '')
 
-/** Play one song from a position. Only this song plays (no queue, no autoplay context). */
-export async function playTrack(uri: string, positionMs: number) {
-  const deviceId = await targetDevice()
-  await spotifyApi(`/me/player/play${q(deviceId)}`, {
+/** Play one song from a position. Only this song plays (no queue, no autoplay context). Returns the device used. */
+export async function playTrack(uri: string, positionMs: number): Promise<SpotifyDevice> {
+  const device = await targetDevice()
+  await spotifyApi(`/me/player/play${q(device.id)}`, {
     method: 'PUT',
     body: JSON.stringify({ uris: [uri], position_ms: Math.max(0, Math.round(positionMs)) }),
   })
+  return device
 }
 
 export async function pausePlayback() {
