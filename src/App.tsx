@@ -11,6 +11,7 @@ import { OnlineGameClient } from '@/game/online-client'
 import { useCues } from '@/hooks/use-cues'
 import { GameContext, useGame } from '@/hooks/use-game'
 import { unlockChime } from '@/lib/chime'
+import { setDemoActive } from '@/lib/pwa'
 import { onlineAvailable } from '@/lib/supabase'
 import { AskingScreen } from '@/screens/asking'
 import { BetweenScreen } from '@/screens/between'
@@ -77,6 +78,7 @@ export default function App() {
 
   useEffect(() => {
     window.scrollTo({ top: 0 })
+    setDemoActive(client?.mode === 'demo')
   }, [client])
 
   const exit = () => {

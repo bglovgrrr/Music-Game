@@ -15,10 +15,17 @@ export default defineConfig(({ mode }) => {
     plugins: [
       react(),
       tailwindcss(),
-      preview
-        ? viteSingleFile()
-        : VitePWA({
-            registerType: 'autoUpdate',
+      ...(preview ? [viteSingleFile()] : []),
+      VitePWA({
+            // The preview build is a single file without a service worker.
+            disable: preview,
+            // We register it ourselves (src/lib/pwa.ts) to apply updates promptly.
+            injectRegister: false,
+            registerType: 'prompt',
+            workbox: {
+              navigateFallbackDenylist: [/^\/api\//],
+              cleanupOutdatedCaches: true,
+            },
             includeAssets: ['favicon.svg', 'apple-touch-icon.png'],
             manifest: {
               name: 'Side B',

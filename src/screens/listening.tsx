@@ -225,11 +225,11 @@ export function ListeningScreen() {
 
         <div className="flex justify-center gap-2 text-sm">
           <Button variant="link" size="sm" asChild>
-            <a href={spotifySearchUrl(pick.track)} target="_blank" rel="noreferrer">
+            <a href={pick.track.source === 'spotify' && pick.track.externalUrl ? pick.track.externalUrl : spotifySearchUrl(pick.track)} target="_blank" rel="noreferrer">
               Open in Spotify <ExternalLink />
             </a>
           </Button>
-          {pick.track.externalUrl && (
+          {pick.track.externalUrl && pick.track.source === 'itunes' && (
             <Button variant="link" size="sm" asChild>
               <a href={pick.track.externalUrl} target="_blank" rel="noreferrer">
                 Apple Music <ExternalLink />
