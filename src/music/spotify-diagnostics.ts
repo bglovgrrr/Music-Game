@@ -100,6 +100,13 @@ export async function testSpotify(log: (line: string) => void) {
 
   const dev = `device_id=${encodeURIComponent(target.id)}`
   const attempts: [string, () => Promise<{ status: number; body: Record<string, unknown> | null }>][] = [
+    [
+      '1: play from its album (what Side B uses)',
+      () =>
+        albumUri
+          ? call(`/me/player/play?${dev}`, { method: 'PUT', body: JSON.stringify({ context_uri: albumUri, offset: { uri } }) })
+          : Promise.resolve({ status: 0, body: { error: { message: 'album unknown' } } }),
+    ],
     ['A: play song', () => call(`/me/player/play?${dev}`, { method: 'PUT', body: JSON.stringify({ uris: [uri], position_ms: 30_000 }) })],
     ['B: play song, no start position', () => call(`/me/player/play?${dev}`, { method: 'PUT', body: JSON.stringify({ uris: [uri] }) })],
     [
@@ -110,13 +117,6 @@ export async function testSpotify(log: (line: string) => void) {
         await wait(1000)
         return call(`/me/player/play?${dev}`, { method: 'PUT', body: JSON.stringify({ uris: [uri] }) })
       },
-    ],
-    [
-      'D: play from its album',
-      () =>
-        albumUri
-          ? call(`/me/player/play?${dev}`, { method: 'PUT', body: JSON.stringify({ context_uri: albumUri, offset: { uri } }) })
-          : Promise.resolve({ status: 0, body: { error: { message: 'album unknown' } } }),
     ],
     [
       'E: add to queue, then skip to it',
@@ -134,7 +134,7 @@ export async function testSpotify(log: (line: string) => void) {
     const r = await run()
     log(`${label}: HTTP ${r.status}${errorText(r.body)}`)
     if (r.status >= 300 || r.status === 0) continue
-    if (await observe(label.slice(0, 1), uri)) {
+    if (await observe(label.split(':')[0], uri)) {
       worked.push(label)
       log(`  ✓ ${label} WORKS`)
       break
