@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import { toast } from 'sonner'
 import { AudioEngine, unlockAudio } from '@/components/audio-engine'
 import { ReactionLayer } from '@/components/reactions'
+import { ReactionTally } from '@/components/reaction-tally'
 import { SpotifyKeepAlive } from '@/components/spotify-keepalive'
 import { spotifyConfigured } from '@/music/spotify-auth'
 import { Toaster } from '@/components/ui/sonner'
@@ -27,7 +28,7 @@ import { PickingScreen } from '@/screens/picking'
 import { RecapScreen } from '@/screens/recap'
 
 function Game({ onExit }: { onExit: () => void }) {
-  const { state, client, meId } = useGame()
+  const { state, client, meId, isHost } = useGame()
   useCues(state, meId)
   useWakeLock(client.isSpeaker && state.phase !== 'lobby' && state.phase !== 'recap')
   const screens = {
@@ -42,6 +43,7 @@ function Game({ onExit }: { onExit: () => void }) {
     <GameShell onExit={onExit}>
       {client.isSpeaker && state.phase === 'listening' && <AudioEngine />}
       <ReactionLayer />
+      {isHost && <ReactionTally />}
       {client.isSpeaker && spotifyConfigured && <SpotifyKeepAlive />}
       <AnimatePresence mode="wait">
         <motion.div

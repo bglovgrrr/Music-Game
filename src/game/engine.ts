@@ -1,5 +1,5 @@
 import { clock } from '@/lib/clock'
-import type { Action, GameState, Pick, Player, Round, Settings } from './types'
+import { REACTION_EMOJIS, type Action, type GameState, type Pick, type Player, type Round, type Settings } from './types'
 
 export const MIN_PLAYERS = 2
 export const MAX_PLAYERS = 8
@@ -72,6 +72,32 @@ export function voteResults(r: Round) {
   const winners = top > 0 ? Object.keys(counts).filter((o) => counts[o] === top) : []
   return { counts, winners }
 }
+
+/** Reactions each player's songs received across the game, and their most-used emoji. */
+export function reactionTotals(s: GameState): Record<string, { total: number; top?: string }> {
+  const out: Record<string, { total: number; byEmoji: Record<string, number> }> = {}
+  for (const r of s.rounds) {
+    for (const [owner, counts] of Object.entries(r.reactions ?? {})) {
+      const o = (out[owner] ??= { total: 0, byEmoji: {} })
+      for (const [emoji, n] of Object.entries(counts)) {
+        o.total += n
+        o.byEmoji[emoji] = (o.byEmoji[emoji] ?? 0) + n
+      }
+    }
+  }
+  return Object.fromEntries(
+    Object.entries(out).map(([id, o]) => [id, { total: o.total, top: Object.entries(o.byEmoji).sort((a, b) => b[1] - a[1])[0]?.[0] }]),
+  )
+}
+
+/** The player(s) whose songs got the most reactions (needs at least one). */
+export function fanFavorites(s: GameState): string[] {
+  const t = reactionTotals(s)
+  const best = Math.max(0, ...Object.values(t).map((x) => x.total))
+  return best > 0 ? Object.keys(t).filter((id) => t[id].total === best) : []
+}
+
+export const songReactionTotal = (r: Round, owner: string) => Object.values(r.reactions?.[owner] ?? {}).reduce((a, b) => a + b, 0)
 
 /** Pick timer ran out. */
 export const pickTimeUp = (r: Round, now = clock.now()) => r.pickDeadline !== undefined && now >= r.pickDeadline
@@ -329,6 +355,23 @@ export function reduce(s: GameState, a: Action, actorId: string, now = clock.now
       const target = s.rounds[idx]
       if (a.type === 'photo' && !a.path) fail('No photo to save.')
       const updated: Round = a.type === 'photo' ? { ...target, photo: { path: a.path, by: actorId, takenAt: now } } : { ...target, photo: undefined }
+      return { ...s, rounds: s.rounds.map((r, i) => (i === idx ? updated : r)) }
+    }
+
+    case 'reactions': {
+      if (!isHost) fail('Only the host records reactions.')
+      const idx = s.rounds.findIndex((r) => r.id === a.roundId)
+      if (idx < 0) return s
+      const target = s.rounds[idx]
+      if (!target.order.includes(a.owner)) fail('That song isn’t in this round.')
+      const prev = target.reactions?.[a.owner] ?? {}
+      const merged = { ...prev }
+      for (const [emoji, n] of Object.entries(a.counts)) {
+        if (!(REACTION_EMOJIS as readonly string[]).includes(emoji)) continue
+        const add = Math.max(0, Math.min(1000, Math.floor(Number(n) || 0)))
+        if (add) merged[emoji] = (merged[emoji] ?? 0) + add
+      }
+      const updated: Round = { ...target, reactions: { ...target.reactions, [a.owner]: merged } }
       return { ...s, rounds: s.rounds.map((r, i) => (i === idx ? updated : r)) }
     }
 

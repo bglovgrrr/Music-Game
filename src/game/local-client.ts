@@ -64,7 +64,8 @@ export class LocalGameClient implements GameClient {
   }
 
   private emitReaction(emoji: string, playerId: string) {
-    const r: Reaction = { id: uid('rx_'), emoji, playerId }
+    const round = currentRound(this.state)
+    const r: Reaction = { id: uid('rx_'), emoji, playerId, roundId: round?.id, owner: round?.order[round.current] }
     this.reactionListeners.forEach((l) => l(r))
   }
 

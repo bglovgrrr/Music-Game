@@ -57,7 +57,12 @@ export type Round = {
   votes?: Record<string, string>
   /** Group selfie taken after this round. */
   photo?: Photo
+  /** Emoji reactions each song received: reactions[songOwnerId][emoji] = count (from other players). */
+  reactions?: Record<string, Record<string, number>>
 }
+
+/** The reaction emojis. */
+export const REACTION_EMOJIS = ['❤️', '😂', '😭', '🔥', '🙌'] as const
 
 export type Photo = {
   /** Storage path (online) or a local object URL (demo). */
@@ -127,3 +132,5 @@ export type Action =
   /** Attach a group selfie to a round (replaces any earlier one). */
   | { type: 'photo'; roundId: string; path: string }
   | { type: 'removePhoto'; roundId: string }
+  /** Add reaction counts to a song (recorded by the host's device). */
+  | { type: 'reactions'; roundId: string; owner: string; counts: Record<string, number> }

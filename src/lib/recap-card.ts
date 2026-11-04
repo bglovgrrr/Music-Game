@@ -1,4 +1,4 @@
-import { playerById, scores, voteResults } from '@/game/engine'
+import { fanFavorites, playerById, reactionTotals, scores, voteResults } from '@/game/engine'
 import type { GameState } from '@/game/types'
 
 /** Draws a 1080×1350 image of the night's mixtape (good for Instagram / Messages). */
@@ -87,7 +87,8 @@ async function drawCard(s: GameState, photo: HTMLImageElement | null): Promise<B
   const rounds = s.rounds.filter((r) => r.order.length)
   const pts = scores(s)
   const guessing = s.rounds.some((r) => r.guessMode)
-  const footerH = guessing ? 120 : 70
+  const favs = fanFavorites(s)
+  const footerH = 70 + (guessing ? 50 : 0) + (favs.length ? 50 : 0)
   const maxY = H - PAD - footerH
   let y = PAD + (photo ? 420 : 270)
   let shownRounds = 0
@@ -196,11 +197,22 @@ async function drawCard(s: GameState, photo: HTMLImageElement | null): Promise<B
   c.fillStyle = 'rgba(35,32,47,0.12)'
   c.fillRect(PAD, H - PAD - footerH + 24, W - PAD * 2, 2)
   c.fillStyle = INK
+  let line = H - PAD - 34
+  if (favs.length) {
+    const rx = reactionTotals(s)
+    const names = favs.map((id) => playerById(s, id)?.name ?? '?').join(' & ')
+    const top = rx[favs[0]].top
+    c.font = sans(30, 600)
+    c.fillStyle = INK
+    c.fillText(`Fan favorite: ${names} (${rx[favs[0]].total} reactions${top ? ` · ${top}` : ''})`, PAD, line)
+    line -= 50
+  }
   if (guessing) {
     const top = Math.max(0, ...Object.values(pts))
     const leaders = s.players.filter((p) => top > 0 && pts[p.id] === top).map((p) => p.name)
     c.font = sans(30, 600)
-    c.fillText(leaders.length ? `Best guesser: ${leaders.join(' & ')} (${top})` : 'Nobody guessed right. Mysterious bunch.', PAD, H - PAD - 34)
+    c.fillStyle = INK
+    c.fillText(leaders.length ? `Best guesser: ${leaders.join(' & ')} (${top})` : 'Nobody guessed right. Mysterious bunch.', PAD, line)
   }
   c.font = sans(24)
   c.fillStyle = MUTED

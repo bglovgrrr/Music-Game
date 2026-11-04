@@ -1,9 +1,17 @@
+import { REACTION_EMOJIS } from './types'
 import type { Action, GameState } from './types'
 
-export const REACTIONS = ['❤️', '😂', '😭', '🔥', '🙌'] as const
+export const REACTIONS = REACTION_EMOJIS
 
 /** A quick emoji tap while a song plays. Not saved; it just floats up on every screen. */
-export type Reaction = { id: string; emoji: string; playerId: string }
+export type Reaction = {
+  id: string
+  emoji: string
+  playerId: string
+  /** The song it was sent during (for the Fan favorite tally). */
+  roundId?: string
+  owner?: string
+}
 
 /**
  * How the UI talks to a game. Demo mode runs everything on this device with bots;

@@ -20,7 +20,8 @@ Side B is a relaxed music game for 2–8 friends in the same room. Someone asks 
 - **No accounts.** Start a game and friends scan the QR code (or enter the 4-letter code) and join with just a name.
 - **Guess who picked it** (optional). Everyone guesses whose song is playing before the reveal. 1 point per correct guess.
 - **Pick timer** (optional). 60s, 90s, or 2 min; listening starts automatically when time's up.
-- **Reactions.** Tap ❤️ 😂 😭 🔥 🙌 while a song plays and they float up on every screen.
+- **Reactions.** Tap ❤️ 😂 😭 🔥 🙌 while a song plays and they float up on every screen. Hold a button to keep them coming; the longer you hold, the more it powers up (4 levels, each with a wobble).
+- **Fan favorite.** Every reaction a song gets counts for the person who picked it. The end of each round shows each song's tally, and the scoreboard, recap, and recap card crown the night's fan favorite.
 - **Song of the round.** Vote for your favourite after each round; the winner gets a crown.
 - **Group selfies.** Snap a selfie after any round; it's saved privately with the game, shown as polaroids in the recap, and added to the recap card.
 - **Recap card.** A shareable image of the night's mixtape.

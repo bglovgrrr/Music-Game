@@ -3,7 +3,7 @@ import { motion } from 'motion/react'
 import { useState } from 'react'
 import { GameSettings } from '@/components/game-settings'
 import { AlbumArt, CrownedName, PlayerAvatar, PromptCard } from '@/components/game-ui'
-import { Scoreboard } from '@/components/scoreboard'
+import { FanFavoriteBanner, Scoreboard } from '@/components/scoreboard'
 import { SelfieCard } from '@/components/selfie'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
@@ -60,6 +60,18 @@ export function BetweenScreen() {
                       <AlbumArt track={p.track} className="size-12 shrink-0" rounded="rounded-lg" />
                       <div className="min-w-0 flex-1">
                         <div className="truncate font-semibold">{p.track.title}</div>
+                        {round.reactions?.[pid] && (
+                          <div className="flex gap-2 pt-0.5 text-xs text-muted-foreground tabular-nums">
+                            {Object.entries(round.reactions[pid])
+                              .sort((a, b) => b[1] - a[1])
+                              .slice(0, 3)
+                              .map(([emoji, n]) => (
+                                <span key={emoji}>
+                                  {emoji} {n}
+                                </span>
+                              ))}
+                          </div>
+                        )}
                         <div className="flex min-w-0 items-baseline gap-1 pt-1 text-sm text-muted-foreground">
                           <span className="truncate">{p.track.artist} ·</span>
                           <CrownedName name={mine ? 'you' : (who?.name ?? '')} crowned={isWinner} className={cn('shrink-0', isWinner && 'font-semibold text-foreground')} />
@@ -89,7 +101,9 @@ export function BetweenScreen() {
           Next: {nextAsker.id === meId ? 'you ask' : `${nextAsker.name} asks`} <ArrowRight />
         </Button>
 
-        <Card className="p-3">
+        <FanFavoriteBanner />
+
+        <Card className="p-3 empty:hidden">
           <Scoreboard />
         </Card>
 

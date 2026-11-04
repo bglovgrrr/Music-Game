@@ -3,7 +3,7 @@ import { AnimatePresence, motion } from 'motion/react'
 import { useEffect, useState } from 'react'
 import { toast } from 'sonner'
 import { CrownedName, PlayerAvatar, TrackRow } from '@/components/game-ui'
-import { Scoreboard } from '@/components/scoreboard'
+import { FanFavoriteBanner, Scoreboard } from '@/components/scoreboard'
 import { Polaroid, SelfieCard } from '@/components/selfie'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -179,6 +179,8 @@ export function RecapScreen({ onExit }: { onExit: () => void }) {
           </Button>
         </div>
       </div>
+
+      <FanFavoriteBanner />
 
       <Card className="p-3 empty:hidden">
         <Scoreboard />

@@ -72,6 +72,13 @@ export function ReactionLayer() {
 /** First repeat delay, starting interval, fastest interval (ms). Stays under ~8 per second. */
 const HOLD = { firstDelay: 260, start: 150, fastest: 120 }
 
+/** Holding powers the button up through 4 levels, one every LEVEL_MS: each level-up wobbles and grows. */
+export const MAX_LEVEL = 4
+const LEVEL_MS = 1800
+/** Button scale at each level (index = level). */
+const LEVEL_SCALE = [1, 1.1, 1.22, 1.34, 1.48]
+const WOBBLE = { rotate: [0, -16, 13, -9, 6, -2, 0], scale: [1, 1.4, 0.92, 1.12, 1] }
+
 /**
  * Reaction buttons. Tap for one emoji; press and hold for a steady stream until you let go
  * (speeding up a little the longer you hold).
@@ -79,12 +86,17 @@ const HOLD = { firstDelay: 260, start: 150, fastest: 120 }
 export function ReactionBar({ className }: { className?: string }) {
   const { client } = useGame()
   const [holding, setHolding] = useState<string | null>(null)
+  const [level, setLevel] = useState(0)
   const timer = useRef<number | undefined>(undefined)
+  const levelTimer = useRef<number | undefined>(undefined)
 
   const stop = () => {
     window.clearTimeout(timer.current)
+    window.clearInterval(levelTimer.current)
     timer.current = undefined
+    levelTimer.current = undefined
     setHolding(null)
+    setLevel(0)
   }
   useEffect(() => stop, [])
 
@@ -103,7 +115,19 @@ export function ReactionBar({ className }: { className?: string }) {
     ;(e.currentTarget as HTMLElement).setPointerCapture(e.pointerId)
     stop()
     setHolding(emoji)
+    setLevel(1)
     send(emoji)
+    levelTimer.current = window.setInterval(() => {
+      setLevel((l) => {
+        if (l >= MAX_LEVEL) return l
+        try {
+          navigator.vibrate?.(12 + l * 8)
+        } catch {
+          /* ignore */
+        }
+        return l + 1
+      })
+    }, LEVEL_MS)
     let interval = HOLD.start
     const loop = () => {
       send(emoji)
@@ -114,7 +138,7 @@ export function ReactionBar({ className }: { className?: string }) {
   }
 
   return (
-    <div className={cn('flex justify-center gap-1.5', className)} role="group" aria-label="React to this song (hold for more)">
+    <div className={cn('flex justify-center gap-1.5', className)} role="group" aria-label="React to this song (hold for more; it powers up 4 times)">
       {REACTIONS.map((e) => (
         <motion.button
           key={e}
@@ -130,16 +154,26 @@ export function ReactionBar({ className }: { className?: string }) {
               send(e)
             }
           }}
-          animate={holding === e ? { scale: [1.12, 1.22, 1.12] } : { scale: 1 }}
-          transition={holding === e ? { duration: 0.45, repeat: Infinity, ease: 'easeInOut' } : { type: 'spring', stiffness: 400, damping: 15 }}
-          whileTap={{ scale: 0.9 }}
+          data-level={holding === e ? level : 0}
+          animate={{ scale: holding === e ? LEVEL_SCALE[level] : 1 }}
+          transition={{ type: 'spring', stiffness: 380, damping: 14 }}
+          whileTap={holding ? undefined : { scale: 0.9 }}
           className={cn(
-            'grid size-11 cursor-pointer touch-none place-items-center rounded-full border bg-card text-xl select-none hover:bg-muted [-webkit-touch-callout:none]',
-            holding === e && 'border-transparent bg-secondary shadow-[0_0_0_4px_var(--pastel-2)]',
+            'relative grid size-11 cursor-pointer touch-none place-items-center rounded-full border bg-card text-xl select-none hover:bg-muted [-webkit-touch-callout:none]',
+            holding === e && 'z-10 border-transparent bg-secondary',
           )}
+          style={holding === e ? { boxShadow: `0 0 0 ${2 + level * 2}px var(--pastel-2)` } : undefined}
           aria-label={`React ${e}`}
         >
-          {e}
+          {/* Re-keyed on each level so the wobble plays once per level-up */}
+          <motion.span
+            key={holding === e ? `lvl-${level}` : 'idle'}
+            className="pointer-events-none block"
+            animate={holding === e ? WOBBLE : { rotate: 0, scale: 1 }}
+            transition={{ duration: 0.6, ease: 'easeInOut' }}
+          >
+            {e}
+          </motion.span>
         </motion.button>
       ))}
     </div>

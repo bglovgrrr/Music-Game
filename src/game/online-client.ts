@@ -4,7 +4,7 @@ import { clock } from '@/lib/clock'
 import { ensureSession, friendlyError, OnlineError, supabase, syncClock } from '@/lib/supabase'
 import { safeStorage } from '@/lib/utils'
 import type { GameClient, Reaction } from './client'
-import { GameError, reduce } from './engine'
+import { currentRound, GameError, reduce } from './engine'
 import type { Action, GameState } from './types'
 
 type RoomRow = { id: string; code: string; state: GameState; version: number }
@@ -99,7 +99,14 @@ export class OnlineGameClient implements GameClient {
   }
 
   react = (emoji: string) => {
-    const r: Reaction = { id: `${this.meId}-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`, emoji, playerId: this.meId }
+    const round = currentRound(this.shown)
+    const r: Reaction = {
+      id: `${this.meId}-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
+      emoji,
+      playerId: this.meId,
+      roundId: round?.id,
+      owner: this.shown.phase === 'listening' ? round?.order[round.current] : undefined,
+    }
     this.reactionListeners.forEach((l) => l(r)) // show my own instantly
     void this.channel?.send({ type: 'broadcast', event: 'reaction', payload: r })
   }
