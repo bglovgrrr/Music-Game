@@ -15,6 +15,7 @@ function useTrackSearch(query: string) {
   const [results, setResults] = useState<Track[]>([])
   const [loading, setLoading] = useState(false)
   const [offline, setOffline] = useState(false)
+  const [reason, setReason] = useState<string | undefined>()
 
   useEffect(() => {
     const q = query.trim()
@@ -26,11 +27,12 @@ function useTrackSearch(query: string) {
         const r = await searchTracks(q, ctrl.signal)
         setResults(r.tracks)
         setOffline(r.offline)
+        setReason(r.reason)
         setLoading(false)
       } catch {
         /* aborted */
       }
-    }, 300)
+    }, 450)
     return () => {
       clearTimeout(t)
       ctrl.abort()
@@ -38,7 +40,7 @@ function useTrackSearch(query: string) {
   }, [query])
 
   const empty = !query.trim()
-  return { results: empty ? [] : results, loading: !empty && loading, offline }
+  return { results: empty ? [] : results, loading: !empty && loading, offline, reason }
 }
 
 /** Quick listen on your own phone before you lock it in. */
@@ -115,7 +117,7 @@ export function PickingScreen() {
   const [selected, setSelected] = useState<Track | null>(null)
   const [note, setNote] = useState('')
   const [changing, setChanging] = useState(false)
-  const { results, loading, offline } = useTrackSearch(query)
+  const { results, loading, offline, reason } = useTrackSearch(query)
   const waitingOn = state.players.filter((p) => !round.picks.some((x) => x.playerId === p.id))
   const canForce = (isHost || asker?.id === meId) && round.picks.length > 0 && waitingOn.length > 0
 
@@ -183,8 +185,12 @@ export function PickingScreen() {
                 {loading && <Loader2 className="absolute top-1/2 right-4 size-5 -translate-y-1/2 animate-spin text-muted-foreground" />}
               </div>
               {offline && (
-                <p className="flex items-center gap-2 text-xs text-muted-foreground">
-                  <WifiOff className="size-3.5" /> Live search is unavailable here. Showing a small built-in song list.
+                <p className="flex items-start gap-2 text-xs text-muted-foreground">
+                  <WifiOff className="mt-0.5 size-3.5 shrink-0" />
+                  <span>
+                    Live search is unavailable here. Showing a small built-in song list.
+                    {reason && <span className="block opacity-80">{reason}</span>}
+                  </span>
                 </p>
               )}
               {changing && (

@@ -1,5 +1,8 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
-import { RETRY_AFTER_MS, searchTracks } from './search'
+import { beforeEach } from 'vitest'
+import { RETRY_AFTER_MS, resetSearchState, searchTracks } from './search'
+
+beforeEach(() => resetSearchState())
 
 const ok = () =>
   new Response(JSON.stringify({ results: [{ trackId: 1, trackName: 'Landslide', artistName: 'Fleetwood Mac', previewUrl: 'https://x/p.m4a' }] }), { status: 200 })
@@ -17,6 +20,32 @@ describe('song search', () => {
     expect(r.tracks[0]).toMatchObject({ title: 'Landslide', artist: 'Fleetwood Mac', source: 'itunes' })
   })
 
+  it('works on older iPhones without AbortSignal.any / AbortSignal.timeout', async () => {
+    const any = AbortSignal.any
+    const timeout = AbortSignal.timeout
+    // @ts-expect-error simulate an older browser
+    delete AbortSignal.any
+    // @ts-expect-error simulate an older browser
+    delete AbortSignal.timeout
+    try {
+      vi.stubGlobal('fetch', vi.fn(async () => ok()))
+      const r = await searchTracks('landslide', new AbortController().signal)
+      expect(r.offline).toBe(false)
+      expect(r.tracks[0].title).toBe('Landslide')
+    } finally {
+      AbortSignal.any = any
+      AbortSignal.timeout = timeout
+    }
+  })
+
+  it('stops a search when the user keeps typing (abort)', async () => {
+    vi.stubGlobal('fetch', vi.fn((_url: string, init: RequestInit) => new Promise((_res, rej) => init.signal!.addEventListener('abort', () => rej(new DOMException('aborted', 'AbortError'))))))
+    const ctrl = new AbortController()
+    const pending = searchTracks('land', ctrl.signal)
+    ctrl.abort()
+    await expect(pending).rejects.toThrow(/abort/i)
+  })
+
   it('falls back to the built-in list after a failure, then tries iTunes again', async () => {
     vi.useFakeTimers({ toFake: ['Date'] })
     vi.setSystemTime(1_000_000)
@@ -25,6 +54,7 @@ describe('song search', () => {
 
     const first = await searchTracks('landslide')
     expect(first.offline).toBe(true)
+    expect(first.reason).toMatch(/busy right now \(403\)/)
     expect(first.tracks.some((t) => t.title === 'Landslide')).toBe(true) // from the built-in list
 
     // Right after a failure: don't hammer iTunes
@@ -34,8 +64,16 @@ describe('song search', () => {
     // After the pause, iTunes is tried again and works
     vi.setSystemTime(1_000_000 + RETRY_AFTER_MS)
     fetchMock.mockImplementation(async () => ok())
-    const later = await searchTracks('landslide')
+    const later = await searchTracks('landslide fleetwood')
     expect(later.offline).toBe(false)
     expect(fetchMock).toHaveBeenCalledTimes(2)
+  })
+  it('remembers results and skips one-letter searches (fewer requests to Apple)', async () => {
+    const fetchMock = vi.fn(async () => ok())
+    vi.stubGlobal('fetch', fetchMock)
+    expect((await searchTracks('l')).tracks).toEqual([])
+    await searchTracks('Landslide')
+    await searchTracks('landslide ')
+    expect(fetchMock).toHaveBeenCalledTimes(1)
   })
 })
