@@ -57,30 +57,89 @@ export async function testSpotify(log: (line: string) => void) {
   } catch {
     /* keep default */
   }
+  const id = uri.split(':').pop()!
 
-  const play = await call(`/me/player/play?device_id=${encodeURIComponent(target.id)}`, {
-    method: 'PUT',
-    body: JSON.stringify({ uris: [uri], position_ms: 30_000 }),
-  })
-  log(play.status < 300 ? `✓ Play command accepted (HTTP ${play.status})` : `✗ Play command refused: HTTP ${play.status}${errorText(play.body)}`)
-
-  let last: number | null = null
-  for (const ms of [1500, 2500, 3000]) {
-    await wait(ms)
-    const st = await call('/me/player')
-    if (st.status === 204 || !st.body) {
-      log(`  after ${ms / 1000}s: Spotify reports nothing playing (HTTP ${st.status})`)
-      continue
-    }
-    const item = st.body.item as { uri?: string; name?: string } | undefined
-    const device = st.body.device as { name?: string; volume_percent?: number } | undefined
-    const progress = st.body.progress_ms as number
+  // 1. Is this song playable for this account?
+  const tr = await call(`/tracks/${id}?market=from_token`)
+  if (tr.status === 200) {
+    const b = tr.body as { is_playable?: boolean; restrictions?: { reason?: string }; album?: { uri?: string }; explicit?: boolean; linked_from?: { uri?: string } }
     log(
-      `  after ${ms / 1000}s: ${st.body.is_playing ? 'PLAYING' : 'paused'} · ${item?.uri === uri ? 'test song' : item?.name ?? 'other/none'} · ${Math.round(progress / 1000)}s · on ${device?.name ?? '?'} · vol ${device?.volume_percent ?? '?'}%`,
+      `Song check: playable=${b.is_playable ?? '?'}${b.restrictions?.reason ? ` · restricted: ${b.restrictions.reason}` : ''}${b.explicit ? ' · explicit' : ''}${b.linked_from ? ' · relinked' : ''}`,
     )
-    if (last !== null && item?.uri === uri) log(progress > last ? '  ✓ progress is moving' : '  ✗ progress is NOT moving')
-    last = progress
+  } else log(`Song check: HTTP ${tr.status}${errorText(tr.body)}`)
+  const albumUri = (tr.body as { album?: { uri?: string } } | null)?.album?.uri
+
+  // Watch what Spotify does after a command. Returns true when the song is really playing.
+  const observe = async (label: string, want: string) => {
+    let last: number | null = null
+    let ok = false
+    for (const ms of [1500, 2000]) {
+      await wait(ms)
+      const st = await call('/me/player')
+      if (st.status === 204 || !st.body) {
+        log(`    ${label} +${ms / 1000}s: nothing playing (HTTP ${st.status})`)
+        continue
+      }
+      const b = st.body as {
+        is_playing?: boolean
+        progress_ms?: number
+        item?: { uri?: string; name?: string } | null
+        currently_playing_type?: string
+        device?: { name?: string; is_private_session?: boolean }
+        actions?: { disallows?: Record<string, boolean> }
+      }
+      const disallows = Object.keys(b.actions?.disallows ?? {}).filter((k) => b.actions!.disallows![k])
+      log(
+        `    ${label} +${ms / 1000}s: ${b.is_playing ? 'PLAYING' : 'paused'} · ${b.item?.uri === want ? 'test song' : (b.item?.name ?? `no song (${b.currently_playing_type ?? 'unknown'})`)} · ${Math.round((b.progress_ms ?? 0) / 1000)}s${b.device?.is_private_session ? ' · private session' : ''}${disallows.length ? ` · not allowed: ${disallows.join(',')}` : ''}`,
+      )
+      if (b.item?.uri === want && b.is_playing && last !== null && (b.progress_ms ?? 0) > last) ok = true
+      last = b.item?.uri === want ? (b.progress_ms ?? 0) : last
+    }
+    return ok
+  }
+
+  const dev = `device_id=${encodeURIComponent(target.id)}`
+  const attempts: [string, () => Promise<{ status: number; body: Record<string, unknown> | null }>][] = [
+    ['A: play song', () => call(`/me/player/play?${dev}`, { method: 'PUT', body: JSON.stringify({ uris: [uri], position_ms: 30_000 }) })],
+    ['B: play song, no start position', () => call(`/me/player/play?${dev}`, { method: 'PUT', body: JSON.stringify({ uris: [uri] }) })],
+    [
+      'C: switch to device, then play',
+      async () => {
+        const t = await call('/me/player', { method: 'PUT', body: JSON.stringify({ device_ids: [target.id], play: false }) })
+        log(`    (switch: HTTP ${t.status}${errorText(t.body)})`)
+        await wait(1000)
+        return call(`/me/player/play?${dev}`, { method: 'PUT', body: JSON.stringify({ uris: [uri] }) })
+      },
+    ],
+    [
+      'D: play from its album',
+      () =>
+        albumUri
+          ? call(`/me/player/play?${dev}`, { method: 'PUT', body: JSON.stringify({ context_uri: albumUri, offset: { uri } }) })
+          : Promise.resolve({ status: 0, body: { error: { message: 'album unknown' } } }),
+    ],
+    [
+      'E: add to queue, then skip to it',
+      async () => {
+        const qd = await call(`/me/player/queue?uri=${encodeURIComponent(uri)}&${dev}`, { method: 'POST' })
+        log(`    (queue: HTTP ${qd.status}${errorText(qd.body)})`)
+        await wait(800)
+        return call(`/me/player/next?${dev}`, { method: 'POST' })
+      },
+    ],
+  ]
+
+  const worked: string[] = []
+  for (const [label, run] of attempts) {
+    const r = await run()
+    log(`${label}: HTTP ${r.status}${errorText(r.body)}`)
+    if (r.status >= 300 || r.status === 0) continue
+    if (await observe(label.slice(0, 1), uri)) {
+      worked.push(label)
+      log(`  ✓ ${label} WORKS`)
+      break
+    }
   }
   await call('/me/player/pause', { method: 'PUT' })
-  log('Paused the test song.')
+  log(worked.length ? `RESULT: ${worked[0]}` : 'RESULT: nothing played the test song.')
 }
