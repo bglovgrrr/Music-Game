@@ -26,13 +26,35 @@ async function targetDevice(): Promise<SpotifyDevice> {
 
 const q = (deviceId?: string) => (deviceId ? `?device_id=${encodeURIComponent(deviceId)}` : '')
 
-/** Play one song from a position. Only this song plays (no queue, no autoplay context). Returns the device used. */
-export async function playTrack(uri: string, positionMs: number): Promise<SpotifyDevice> {
+const albumCache = new Map<string, string | null>()
+
+/** The album a song belongs to (looked up once if the search result didn't include it). */
+async function albumOf(uri: string, known?: string): Promise<string | null> {
+  if (known) return known
+  if (albumCache.has(uri)) return albumCache.get(uri)!
+  try {
+    const t = await spotifyApi<{ album?: { uri?: string } }>(`/tracks/${uri.split(':').pop()}`)
+    albumCache.set(uri, t?.album?.uri ?? null)
+  } catch {
+    albumCache.set(uri, null)
+  }
+  return albumCache.get(uri)!
+}
+
+/**
+ * Play one song from a position. Returns the device used.
+ *
+ * Songs are started *from their album* (context_uri + offset). Playing a bare track
+ * (`uris: [...]`) is accepted by Spotify but plays nothing for Development Mode apps
+ * (seen with Side B's app in Nov 2026: player ends up empty with controls disallowed).
+ * When the song ends, the game pauses Spotify before the next album track gets far.
+ */
+export async function playTrack(uri: string, positionMs: number, albumUri?: string): Promise<SpotifyDevice> {
   const device = await targetDevice()
-  await spotifyApi(`/me/player/play${q(device.id)}`, {
-    method: 'PUT',
-    body: JSON.stringify({ uris: [uri], position_ms: Math.max(0, Math.round(positionMs)) }),
-  })
+  const position_ms = Math.max(0, Math.round(positionMs))
+  const album = await albumOf(uri, albumUri)
+  const body = album ? { context_uri: album, offset: { uri }, position_ms } : { uris: [uri], position_ms }
+  await spotifyApi(`/me/player/play${q(device.id)}`, { method: 'PUT', body: JSON.stringify(body) })
   return device
 }
 

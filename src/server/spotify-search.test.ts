@@ -8,7 +8,7 @@ const item = {
   name: 'Landslide',
   duration_ms: 199_000,
   artists: [{ name: 'Fleetwood Mac' }],
-  album: { name: 'Fleetwood Mac', images: [{ url: 'big', width: 640 }, { url: 'small', width: 64 }] },
+  album: { name: 'Fleetwood Mac', uri: 'spotify:album:fm', images: [{ url: 'big', width: 640 }, { url: 'small', width: 64 }] },
   external_urls: { spotify: 'https://open.spotify.com/track/1' },
 }
 
@@ -70,6 +70,7 @@ describe('/api/spotify-search', () => {
       externalUrl: 'https://open.spotify.com/track/1',
       source: 'spotify',
       spotifyUri: 'spotify:track:1',
+      spotifyAlbumUri: 'spotify:album:fm',
     })
   })
 

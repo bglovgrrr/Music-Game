@@ -148,7 +148,7 @@ function SpotifyEngine({ track }: { track: Track }) {
   const startSong = (pos: number) => {
     start.current = { ...start.current, at: Date.now(), confirmed: false, lastProgress: undefined }
     startedHere.current = true
-    playTrack(uri, pos)
+    playTrack(uri, pos, track.spotifyAlbumUri)
       .then((d) => {
         start.current.device = d.name
       })

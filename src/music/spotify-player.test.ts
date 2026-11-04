@@ -40,19 +40,38 @@ afterEach(() => vi.unstubAllGlobals())
 const devices = { devices: [{ id: 'phone', name: 'iPhone', type: 'Smartphone', is_active: false }, { id: 'sonos', name: 'Living Room', type: 'Speaker', is_active: true }] }
 
 describe('Spotify playback control', () => {
-  it('plays one song from a position on the active device', async () => {
+  it('starts the song from its album (bare-track playback plays nothing in Development Mode)', async () => {
     const calls = fakeSpotify((c) => (c.url.endsWith('/me/player/devices') ? json(200, devices) : json(204)))
-    await playTrack('spotify:track:1', 12_345.6)
+    await playTrack('spotify:track:1', 12_345.6, 'spotify:album:A')
     const play = calls.find((c) => c.url.includes('/me/player/play'))!
     expect(play.method).toBe('PUT')
     expect(play.url).toContain('device_id=sonos')
-    expect(play.body).toEqual({ uris: ['spotify:track:1'], position_ms: 12_346 })
+    expect(play.body).toEqual({ context_uri: 'spotify:album:A', offset: { uri: 'spotify:track:1' }, position_ms: 12_346 })
+  })
+
+  it('looks up the album when the pick does not know it (once per song)', async () => {
+    const calls = fakeSpotify((c) =>
+      c.url.endsWith('/me/player/devices') ? json(200, devices) : c.url.includes('/tracks/7') ? json(200, { album: { uri: 'spotify:album:B' } }) : json(204),
+    )
+    await playTrack('spotify:track:7', 0)
+    await playTrack('spotify:track:7', 5000)
+    expect(calls.filter((c) => c.url.includes('/tracks/7'))).toHaveLength(1)
+    expect(calls.filter((c) => c.url.includes('/me/player/play')).map((c) => c.body)).toEqual([
+      { context_uri: 'spotify:album:B', offset: { uri: 'spotify:track:7' }, position_ms: 0 },
+      { context_uri: 'spotify:album:B', offset: { uri: 'spotify:track:7' }, position_ms: 5000 },
+    ])
+  })
+
+  it('falls back to playing the bare song if the album is unknown', async () => {
+    const calls = fakeSpotify((c) => (c.url.endsWith('/me/player/devices') ? json(200, devices) : c.url.includes('/tracks/') ? json(404, {}) : json(204)))
+    await playTrack('spotify:track:9', 0)
+    expect(calls.find((c) => c.url.includes('/me/player/play'))!.body).toEqual({ uris: ['spotify:track:9'], position_ms: 0 })
   })
 
   it('uses the device picked in Side B', async () => {
     chooseDevice('phone')
     const calls = fakeSpotify((c) => (c.url.endsWith('/me/player/devices') ? json(200, devices) : json(204)))
-    await playTrack('spotify:track:1', 0)
+    await playTrack('spotify:track:1', 0, 'spotify:album:A')
     expect(calls.find((c) => c.url.includes('/me/player/play'))!.url).toContain('device_id=phone')
   })
 

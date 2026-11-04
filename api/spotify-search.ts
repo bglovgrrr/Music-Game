@@ -13,7 +13,7 @@ type SpotifyTrack = {
   name: string
   duration_ms: number
   artists: { name: string }[]
-  album?: { name?: string; images?: { url: string; width?: number | null }[] }
+  album?: { name?: string; uri?: string; images?: { url: string; width?: number | null }[] }
   external_urls?: { spotify?: string }
 }
 
@@ -28,6 +28,7 @@ export type SearchTrack = {
   externalUrl?: string
   source: 'spotify'
   spotifyUri: string
+  spotifyAlbumUri?: string
 }
 
 let cached: { token: string; expiresAt: number } | null = null
@@ -65,6 +66,7 @@ export function toTrack(t: SpotifyTrack): SearchTrack {
     externalUrl: t.external_urls?.spotify,
     source: 'spotify',
     spotifyUri: t.uri,
+    spotifyAlbumUri: t.album?.uri,
   }
 }
 

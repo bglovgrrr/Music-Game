@@ -12,6 +12,8 @@ export type Track = {
   source: 'itunes' | 'demo' | 'spotify'
   /** spotify:track:… — lets the host's Spotify play the full song. */
   spotifyUri?: string
+  /** spotify:album:… — songs are started from their album (see spotify-player.ts). */
+  spotifyAlbumUri?: string
   /** Used to draw a gradient cover when there is no artwork. */
   hue?: number
 }
