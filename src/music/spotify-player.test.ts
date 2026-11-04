@@ -83,6 +83,22 @@ describe('Spotify playback control', () => {
     expect(calls.find((c) => c.url.includes('/me/player/play'))!.url).toContain('device_id=sideb-local')
   })
 
+  it('retries the built-in player when Spotify does not know it yet (switching playback to it first)', async () => {
+    sdk.id = 'sideb-local'
+    let plays = 0
+    const calls = fakeSpotify((c) => {
+      if (c.url.includes('/me/player/play')) return ++plays < 2 ? json(404, { error: { message: 'Device not found' } }) : json(204)
+      return json(204)
+    })
+    vi.useFakeTimers()
+    const p = playTrack('spotify:track:1', 0, 'spotify:album:A')
+    await vi.runAllTimersAsync()
+    await p
+    vi.useRealTimers()
+    expect(plays).toBe(2)
+    expect(calls.some((c) => c.method === 'PUT' && c.url.endsWith('/me/player') && JSON.stringify(c.body).includes('sideb-local'))).toBe(true)
+  })
+
   it('falls back to Spotify devices when the built-in player can’t run here', async () => {
     const calls = fakeSpotify((c) => (c.url.endsWith('/me/player/devices') ? json(200, devices) : json(204)))
     await playTrack('spotify:track:1', 0, 'spotify:album:A')

@@ -62,9 +62,29 @@ export async function playTrack(uri: string, positionMs: number, albumUri?: stri
   const device = await targetDevice()
   const position_ms = Math.max(0, Math.round(positionMs))
   const album = await albumOf(uri, albumUri)
-  const body = album ? { context_uri: album, offset: { uri }, position_ms } : { uris: [uri], position_ms }
-  await spotifyApi(`/me/player/play${q(device.id)}`, { method: 'PUT', body: JSON.stringify(body) })
-  return device
+  const body = JSON.stringify(album ? { context_uri: album, offset: { uri }, position_ms } : { uris: [uri], position_ms })
+  const play = () => spotifyApi(`/me/player/play${q(device.id)}`, { method: 'PUT', body })
+  const isLocal = device.id === localDeviceId()
+  for (let attempt = 0; ; attempt++) {
+    try {
+      await play()
+      return device
+    } catch (err) {
+      // A freshly started built-in player can take a few seconds before Spotify knows it.
+      // Switch playback to it explicitly, wait, and try again.
+      if (!(isLocal && err instanceof SpotifyError && err.code === 'no_device') || attempt >= 3) {
+        if (isLocal && err instanceof SpotifyError && err.code === 'no_device') {
+          throw new SpotifyError(
+            'Spotify can’t reach Side B’s built-in player on this browser yet. Try again in a moment, or pick another device under “Play on”.',
+            'no_device',
+          )
+        }
+        throw err
+      }
+      await spotifyApi('/me/player', { method: 'PUT', body: JSON.stringify({ device_ids: [device.id], play: false }) }).catch(() => {})
+      await new Promise((r) => setTimeout(r, 1200 * (attempt + 1)))
+    }
+  }
 }
 
 export async function pausePlayback() {

@@ -51,6 +51,22 @@ export async function testSpotify(log: (line: string) => void) {
     const again = await call('/me/player/devices')
     devices.splice(0, devices.length, ...((again.body?.devices as Device[]) ?? []).filter((d) => d.id))
   }
+  if (picked && !devices.some((d) => d.id === picked)) {
+    for (const ms of [2000, 3000, 4000]) {
+      await wait(ms)
+      const again = await call('/me/player/devices')
+      const listed = ((again.body?.devices as Device[]) ?? []).some((d) => d.id === picked)
+      log(`  Spotify lists Side B after +${ms / 1000}s: ${listed ? 'yes' : 'no'}`)
+      if (listed) {
+        devices.splice(0, devices.length, ...((again.body?.devices as Device[]) ?? []).filter((d) => d.id))
+        break
+      }
+      if (ms === 3000) {
+        const t = await call('/me/player', { method: 'PUT', body: JSON.stringify({ device_ids: [picked], play: false }) })
+        log(`  switch playback to Side B: HTTP ${t.status}${errorText(t.body)}`)
+      }
+    }
+  }
   // Side B's own player may not be listed until it has played something: use it directly.
   if (picked && !devices.some((d) => d.id === picked) && (!chosenDeviceId() || chosenDeviceId() === LOCAL)) {
     devices.unshift({ id: picked, name: 'Side B (this device)', type: 'Browser', is_active: false })
