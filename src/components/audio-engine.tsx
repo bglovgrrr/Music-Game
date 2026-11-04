@@ -7,6 +7,7 @@ import { useSpotifyConnected } from '@/hooks/use-spotify'
 import { SpotifyError } from '@/music/spotify-auth'
 import { getPlayback, pausePlayback, playTrack, seekTo } from '@/music/spotify-player'
 import { findPreview } from '@/music/search'
+import { logSpotify } from '@/music/spotify-log'
 import { watchSpotify } from '@/music/spotify-watch'
 
 const SILENT_WAV = 'data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQAAAAA='
@@ -140,6 +141,7 @@ function SpotifyEngine({ track }: { track: Track }) {
 
   const fail = (err: unknown) => {
     const msg = err instanceof SpotifyError ? err.message : 'Couldn’t control Spotify.'
+    logSpotify(`error: ${msg}`)
     toast.error(msg, { duration: 10_000 })
     sent.current = null
     dispatch({ type: 'pause' })
@@ -148,9 +150,11 @@ function SpotifyEngine({ track }: { track: Track }) {
   const startSong = (pos: number) => {
     start.current = { ...start.current, at: Date.now(), confirmed: false, lastProgress: undefined }
     startedHere.current = true
+    logSpotify(`play “${track.title}” from ${Math.round(pos / 1000)}s`)
     playTrack(uri, pos, track.spotifyAlbumUri)
       .then((d) => {
         start.current.device = d.name
+        logSpotify(`  accepted by ${d.name}`)
       })
       .catch(fail)
   }
@@ -166,10 +170,12 @@ function SpotifyEngine({ track }: { track: Track }) {
         startSong(pos)
       } else if (prev.at !== updatedAt) {
         sent.current = { ...prev, at: updatedAt }
+        logSpotify(`seek to ${Math.round(pos / 1000)}s`)
         seekTo(pos).catch(fail)
       }
     } else if (prev?.playing) {
       sent.current = { uri, playing: false, at: updatedAt }
+      logSpotify('pause')
       pausePlayback().catch(() => {})
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -183,7 +189,11 @@ function SpotifyEngine({ track }: { track: Track }) {
     getPlayback()
       .then((pb) => {
         if (!sent.current?.playing) return
-        const action = watchSpotify(pb, uri, s, Date.now(), track.durationMs, playbackPosition(state))
+        const gamePos = playbackPosition(state)
+        const action = watchSpotify(pb, uri, s, Date.now(), track.durationMs, gamePos)
+        logSpotify(
+          `check: spotify ${pb ? `${pb.isPlaying ? 'playing' : 'paused'} ${pb.uri === uri ? 'this song' : 'other/none'} at ${Math.round(pb.progressMs / 1000)}s/${Math.round((pb.durationMs ?? 0) / 1000)}s` : 'nothing'} · game at ${Math.round(gamePos / 1000)}s → ${action}`,
+        )
         if (action === 'confirmed') s.confirmed = true
         else if (action === 'retry') {
           s.retried = true

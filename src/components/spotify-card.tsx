@@ -1,10 +1,11 @@
 import { Check, Copy, Loader2, RefreshCw, Speaker, Stethoscope } from 'lucide-react'
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useState, useSyncExternalStore } from 'react'
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import { useSpotifyConnected } from '@/hooks/use-spotify'
 import { connectSpotify, disconnectSpotify, SpotifyError, spotifyConfigured } from '@/music/spotify-auth'
 import { testSpotify } from '@/music/spotify-diagnostics'
+import { onSpotifyLog, spotifyLogLines } from '@/music/spotify-log'
 import { chooseDevice, chosenDeviceId, listDevices, type SpotifyDevice } from '@/music/spotify-player'
 import { cn } from '@/lib/utils'
 
@@ -107,13 +108,7 @@ export function SpotifyCard({ compact, className }: { compact?: boolean; classNa
   }
 
   const active = devices?.find((d) => d.id === device) ?? devices?.find((d) => d.is_active) ?? devices?.[0]
-  if (compact) {
-    return (
-      <p className={cn('flex items-center justify-center gap-1.5 text-xs text-muted-foreground', className)}>
-        <SpotifyLogo className="size-3.5" /> Full songs on Spotify{active ? ` · ${active.name}` : ''}
-      </p>
-    )
-  }
+  if (compact) return <CompactStatus active={active?.name} className={className} />
 
   return (
     <div className={cn('grid gap-3', className)}>
@@ -179,3 +174,46 @@ export function SpotifyCard({ compact, className }: { compact?: boolean; classNa
     </div>
   )
 }
+
+let logSnapshot: string[] = []
+const readLog = () => {
+  const next = spotifyLogLines()
+  if (next.length !== logSnapshot.length || next[next.length - 1] !== logSnapshot[logSnapshot.length - 1]) logSnapshot = next
+  return logSnapshot
+}
+
+/** One line under the controls; tap it to see what Spotify reported (to copy when something goes wrong). */
+function CompactStatus({ active, className }: { active?: string; className?: string }) {
+  const [open, setOpen] = useState(false)
+  const log = useSyncExternalStore(onSpotifyLog, readLog)
+  const copy = async () => {
+    try {
+      await navigator.clipboard.writeText(log.join('\n'))
+      toast.success('Copied')
+    } catch {
+      toast.error('Couldn’t copy. Take a screenshot instead.')
+    }
+  }
+  return (
+    <div className={cn('grid justify-items-center gap-2', className)}>
+      <button
+        onClick={() => setOpen((v) => !v)}
+        aria-expanded={open}
+        className="flex cursor-pointer items-center gap-1.5 text-xs text-muted-foreground underline-offset-2 hover:underline"
+      >
+        <SpotifyLogo className="size-3.5" /> Full songs on Spotify{active ? ` · ${active}` : ''}
+      </button>
+      {open && (
+        <div className="grid w-full max-w-md gap-2 rounded-xl bg-muted p-3">
+          <pre className="max-h-56 overflow-auto font-mono text-[10px] leading-relaxed whitespace-pre-wrap">
+            {log.length ? log.join('\n') : 'Nothing yet. Tap play.'}
+          </pre>
+          <Button variant="ghost" size="sm" onClick={copy} className="justify-self-start">
+            <Copy /> Copy log
+          </Button>
+        </div>
+      )}
+    </div>
+  )
+}
+

@@ -37,9 +37,12 @@ export function watchSpotify(
 ): WatchAction {
   const ours = !!pb && pb.uri === uri
   const duration = (ours && pb.durationMs) || durationMs
+  // Only believe "finished" if the game's own clock agrees the song is nearly over.
+  // (Spotify on iPhone has reported end-of-song positions seconds after starting.)
+  const gameNearEnd = durationMs - sharedPosMs < 15_000
 
   if (ours && pb.isPlaying) {
-    if (s.confirmed) return duration - pb.progressMs < 1000 ? 'ended' : 'confirmed'
+    if (s.confirmed) return duration - pb.progressMs < 1000 && gameNearEnd ? 'ended' : 'confirmed'
     const moving = s.lastProgress !== undefined && pb.progressMs > s.lastProgress
     s.lastProgress = pb.progressMs
     if (moving) return 'confirmed'
@@ -50,7 +53,7 @@ export function watchSpotify(
     return s.retried ? 'give-up' : 'retry'
   }
 
-  if (ours) return duration - pb.progressMs < 2500 ? 'ended' : 'paused'
+  if (ours) return duration - pb.progressMs < 2500 && gameNearEnd ? 'ended' : 'paused'
   // Our song is gone. If the game clock says it was basically over, Spotify moved on after it ended.
   if (pb?.isPlaying && durationMs - sharedPosMs < 5000) return 'ended'
   return 'lost'

@@ -39,6 +39,11 @@ describe('watching the host’s Spotify', () => {
     expect(watchSpotify(pb('spotify:track:radio', 2000), URI, ok(), T, D, 198_000)).toBe('ended')
   })
 
+  it('ignores an end-of-song position from Spotify when the game clock says the song just started (iPhone)', () => {
+    expect(watchSpotify(pb(URI, 199_800), URI, ok(), T, D, 4000)).toBe('confirmed')
+    expect(watchSpotify(pb(URI, 199_800, false), URI, ok(), T, D, 4000)).toBe('paused')
+  })
+
   it('paused in the Spotify app mid-song means paused', () => {
     expect(watchSpotify(pb(URI, 60_000, false), URI, ok(), T, D, 60_000)).toBe('paused')
   })
