@@ -2,6 +2,7 @@ import { Check, Eye, ExternalLink, MessageCircle, Pause, Play, SkipBack, SkipFor
 import { AnimatePresence, motion } from 'motion/react'
 import { AlbumArt, Equalizer, PlayerAvatar, PromptCard } from '@/components/game-ui'
 import { ReactionBar } from '@/components/reactions'
+import { TiltAlbum } from '@/components/tilt-album'
 import { SpotifyCard } from '@/components/spotify-card'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
@@ -131,7 +132,17 @@ export function ListeningScreen() {
                   <AlbumArt track={pick.track} rounded="rounded-full" className="size-full" />
                 </div>
               </div>
-              <AlbumArt track={pick.track} className="relative w-full shadow-[0_24px_48px_-20px_rgb(40_30_80/0.45)]" />
+              <TiltAlbum
+                track={pick.track}
+                floating={isPlaying}
+                back={
+                  picker && revealed ? (
+                    <span className="mt-2 text-xs opacity-70">Picked by {picker.id === meId ? 'you' : picker.name}</span>
+                  ) : round.guessMode ? (
+                    <span className="mt-2 text-xs opacity-70">Who picked it? 🤫</span>
+                  ) : null
+                }
+              />
             </div>
 
             <div className="grid gap-1">
