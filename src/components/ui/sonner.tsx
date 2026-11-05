@@ -9,7 +9,7 @@ export function Toaster(props: ToasterProps) {
       theme={resolved}
       toastOptions={{
         classNames: {
-          toast: '!rounded-2xl !border-border !bg-card !text-card-foreground !shadow-lg !font-sans',
+          toast: 'paper paper-texture !rounded-[4px] !border-border !bg-card !text-card-foreground !shadow-lg !font-sans',
         },
       }}
       {...props}

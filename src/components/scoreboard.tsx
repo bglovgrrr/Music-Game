@@ -71,7 +71,7 @@ export function FanFavoriteBanner({ className }: { className?: string }) {
   const total = rx[favs[0]].total
   const top = rx[favs[0]].top
   return (
-    <div className={cn('flex items-center gap-3 rounded-2xl border bg-card p-3', className)}>
+    <div className={cn('paper paper-texture on-table flex items-center gap-3 rounded-[4px] bg-card p-3', className)}>
       <span className="grid size-11 shrink-0 place-items-center rounded-full bg-[var(--pastel-2)] text-2xl">{top ?? '🔥'}</span>
       <div className="grid min-w-0">
         <span className="text-xs font-semibold tracking-[0.14em] text-accent uppercase">Fan favorite</span>

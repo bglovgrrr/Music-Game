@@ -2,11 +2,10 @@ import { ArrowRight, Loader2, LogIn, Sparkles, Users } from 'lucide-react'
 import { motion } from 'motion/react'
 import { useEffect, useState } from 'react'
 import { AboutButton } from '@/components/about-card'
+import { Cassette } from '@/components/cassette'
 import { Logo } from '@/components/game-ui'
 import { ThemeToggle } from '@/components/theme-toggle'
 import { Button } from '@/components/ui/button'
-import { Card } from '@/components/ui/card'
-import { Input } from '@/components/ui/input'
 import { onlineAvailable } from '@/lib/supabase'
 import { safeStorage } from '@/lib/utils'
 
@@ -65,7 +64,7 @@ export function HomeScreen({
   }
 
   return (
-    <div className="mx-auto flex min-h-dvh w-full max-w-5xl flex-col px-4 pt-safe pb-safe sm:px-8">
+    <div className="mx-auto flex min-h-dvh w-full max-w-5xl flex-col px-4 pt-safe sm:px-8">
       <header className="flex h-16 items-center justify-between">
         <Logo />
         <div className="flex items-center gap-1">
@@ -74,90 +73,98 @@ export function HomeScreen({
         </div>
       </header>
 
-      <div className="mx-auto grid w-full max-w-md flex-1 content-center py-8">
-        <motion.div initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2, duration: 0.5 }}>
-          <Card className="p-5 sm:p-7">
-            <form
-              onSubmit={(e) => {
-                e.preventDefault()
-                if (!onlineAvailable) demo()
-                else run(joining ? 'join' : 'create')
-              }}
-              className="grid gap-4"
-            >
-              <label className="grid gap-2">
-                <span className="text-sm font-medium">Your name</span>
-                <Input
-                  id="player-name"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  placeholder="e.g. Brian"
-                  maxLength={24}
-                  autoComplete="nickname"
-                  enterKeyHint="go"
-                />
-              </label>
-
-              {onlineAvailable ? (
-                <>
-                  {joining ? (
-                    <div className="grid gap-3">
-                      <label className="grid gap-2">
-                        <span className="text-sm font-medium">Room code</span>
-                        <Input
-                          id="room-code"
-                          value={code}
-                          onChange={(e) => setCode(e.target.value.toUpperCase().replace(/[^A-Z]/g, '').slice(0, 4))}
-                          placeholder="ABCD"
-                          autoCapitalize="characters"
-                          autoComplete="off"
-                          spellCheck={false}
-                          inputMode="text"
-                          className="text-center font-mono text-2xl tracking-[0.5em] uppercase placeholder:tracking-[0.5em]"
-                        />
-                      </label>
-                      <Button type="submit" variant="brand" size="lg" disabled={!trimmed || !codeOk || !!busy}>
-                        {busy === 'join' ? <Loader2 className="animate-spin" /> : <LogIn />} Join game
-                      </Button>
-                      <Button type="button" variant="ghost" onClick={() => setJoining(false)}>
-                        Start a new game instead
-                      </Button>
-                    </div>
-                  ) : (
-                    <div className="grid gap-3">
-                      <Button type="submit" variant="brand" size="lg" disabled={!trimmed || !!busy}>
-                        {busy === 'create' ? <Loader2 className="animate-spin" /> : <Sparkles />} Start a game
-                        <span className="ml-1 inline-flex items-center gap-1 rounded-full bg-white/50 px-2 py-0.5 text-xs font-semibold text-ink/80 dark:bg-black/15">
-                          2–8 <Users className="size-3.5" />
-                        </span>
-                      </Button>
-                      <Button type="button" variant="outline" size="lg" onClick={() => setJoining(true)}>
-                        <LogIn /> Join with a code
-                      </Button>
-                    </div>
-                  )}
-                  <div className="flex items-center gap-3 text-xs text-muted-foreground">
-                    <span className="h-px flex-1 bg-border" /> or <span className="h-px flex-1 bg-border" />
-                  </div>
-                  <Button type="button" variant="ghost" onClick={demo} disabled={!trimmed}>
-                    Try a demo with bot friends <ArrowRight />
-                  </Button>
-                </>
-              ) : (
-                <>
-                  <Button type="submit" variant="brand" size="lg" disabled={!trimmed}>
-                    Play a demo game <ArrowRight />
-                  </Button>
-                  <p className="text-center text-xs text-muted-foreground">
-                    You play with three bot friends on this device. Online rooms work in the real app, not in this preview.
-                  </p>
-                </>
-              )}
-            </form>
-          </Card>
+      {/* The tape on the table: pick it up and turn it. */}
+      <div className="grid flex-1 place-items-center py-6">
+        <motion.div initial={{ opacity: 0, y: 16, rotate: -4 }} animate={{ opacity: 1, y: 0, rotate: -3 }} transition={{ duration: 0.6 }} className="w-full max-w-[22rem]">
+          <Cassette />
         </motion.div>
       </div>
+
+      {/* A torn sheet of paper at the bottom of the screen */}
+      <motion.div
+        initial={{ y: 40, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        transition={{ delay: 0.15, type: 'spring', stiffness: 200, damping: 24 }}
+        className="-mx-4 drop-shadow-[0_-1px_2px_rgb(0_0_0/0.35)] sm:mx-auto sm:w-full sm:max-w-md"
+      >
+        <div className="paper paper-texture torn-top bg-[var(--paper)] px-6 pt-8 pb-[max(env(safe-area-inset-bottom),1.25rem)]">
+          <form
+            onSubmit={(e) => {
+              e.preventDefault()
+              if (!onlineAvailable) demo()
+              else run(joining ? 'join' : 'create')
+            }}
+            className="grid gap-4"
+          >
+            <div className="sketch">
+              <input
+                id="player-name"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                placeholder="Your name"
+                aria-label="Your name"
+                maxLength={24}
+                autoComplete="nickname"
+                enterKeyHint="go"
+                className="h-13 w-full bg-transparent px-4 font-note text-2xl italic outline-none placeholder:text-[#2a1e18]/45"
+              />
+            </div>
+
+            {onlineAvailable ? (
+              <>
+                {joining ? (
+                  <div className="grid gap-4">
+                    <div className="sketch">
+                      <input
+                        id="room-code"
+                        value={code}
+                        onChange={(e) => setCode(e.target.value.toUpperCase().replace(/[^A-Z]/g, '').slice(0, 4))}
+                        placeholder="CODE"
+                        aria-label="Room code"
+                        autoCapitalize="characters"
+                        autoComplete="off"
+                        spellCheck={false}
+                        inputMode="text"
+                        className="h-13 w-full bg-transparent px-4 text-center font-mono text-2xl tracking-[0.5em] uppercase outline-none placeholder:text-[#2a1e18]/35"
+                      />
+                    </div>
+                    <Button type="submit" variant="sketch-fill" size="lg" disabled={!trimmed || !codeOk || !!busy}>
+                      {busy === 'join' ? <Loader2 className="animate-spin" /> : <LogIn />} Join the mixtape
+                    </Button>
+                    <Button type="button" variant="ghost" onClick={() => setJoining(false)}>
+                      Start a new one instead
+                    </Button>
+                  </div>
+                ) : (
+                  <div className="grid gap-4">
+                    <Button type="submit" variant="sketch-fill" size="lg" disabled={!trimmed || !!busy}>
+                      {busy === 'create' ? <Loader2 className="animate-spin" /> : <Sparkles />} Start a mixtape
+                      <span className="ml-1 inline-flex items-center gap-1 font-mono text-xs opacity-70">
+                        2–8 <Users className="size-3.5" />
+                      </span>
+                    </Button>
+                    <Button type="button" variant="sketch" size="lg" onClick={() => setJoining(true)}>
+                      <LogIn /> Join with a code
+                    </Button>
+                  </div>
+                )}
+                <Button type="button" variant="link" className="text-muted-foreground" onClick={demo} disabled={!trimmed}>
+                  or try a demo with bot friends <ArrowRight />
+                </Button>
+              </>
+            ) : (
+              <>
+                <Button type="submit" variant="sketch-fill" size="lg" disabled={!trimmed}>
+                  Play a demo game <ArrowRight />
+                </Button>
+                <p className="text-center text-xs text-muted-foreground">
+                  You play with three bot friends on this device. Online rooms work in the real app, not in this preview.
+                </p>
+              </>
+            )}
+          </form>
+        </div>
+      </motion.div>
     </div>
   )
 }
-

@@ -105,7 +105,7 @@ export function AskingScreen() {
                 aria-pressed={on}
                 className={cn(
                   'flex shrink-0 cursor-pointer items-center gap-2 rounded-full border py-1.5 pr-4 pl-1.5 text-sm font-medium transition-all',
-                  on ? 'border-transparent text-ink shadow-sm' : 'bg-card hover:bg-muted',
+                  on ? 'border-transparent text-ink shadow-sm' : 'paper on-table bg-card hover:brightness-105',
                 )}
                 style={on ? { background: tint } : undefined}
               >
@@ -123,7 +123,7 @@ export function AskingScreen() {
               <button
                 onClick={() => ask(p, theme.id)}
                 disabled={used.has(p)}
-                className="flex h-full w-full cursor-pointer items-center rounded-2xl border bg-card p-4 text-left font-note text-[1.2rem] leading-snug italic transition hover:-translate-y-0.5 hover:border-ring/60 hover:shadow-md disabled:cursor-default disabled:opacity-40 disabled:hover:translate-y-0"
+                className="paper paper-texture on-table flex h-full w-full cursor-pointer items-center rounded-[3px] bg-card p-4 text-left font-note text-[1.2rem] leading-snug italic transition hover:-translate-y-0.5 hover:border-ring/60 hover:shadow-md disabled:cursor-default disabled:opacity-40 disabled:hover:translate-y-0"
               >
                 {p}
               </button>

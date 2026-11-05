@@ -160,7 +160,7 @@ export function ReactionBar({ className }: { className?: string }) {
           transition={{ type: 'spring', stiffness: 380, damping: 14 }}
           whileTap={holding ? undefined : { scale: 0.9 }}
           className={cn(
-            'relative grid size-11 cursor-pointer touch-none place-items-center rounded-full border bg-card text-xl select-none hover:bg-muted [-webkit-touch-callout:none]',
+            'paper on-table relative grid size-11 cursor-pointer touch-none place-items-center rounded-full bg-card text-xl select-none hover:bg-muted [-webkit-touch-callout:none]',
             holding === e && 'z-10 border-transparent bg-secondary',
           )}
           style={holding === e ? { boxShadow: `0 0 0 ${2 + level * 2}px var(--pastel-2)` } : undefined}

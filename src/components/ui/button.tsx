@@ -11,7 +11,11 @@ const buttonVariants = cva(
         default: 'key bg-primary text-primary-foreground hover:brightness-105',
         brand: 'key brand-gradient hover:brightness-105 [box-shadow:inset_0_-3px_0_rgb(0_0_0/0.22),inset_0_1px_0_rgb(255_255_255/0.35),0_2px_0_rgb(120_60_10/0.8),0_8px_26px_-6px_rgb(244_169_73/0.55)]',
         secondary: 'bg-secondary text-secondary-foreground hover:brightness-110 active:translate-y-px',
-        outline: 'key border border-border bg-card text-card-foreground hover:brightness-110',
+        outline: 'key paper border border-border bg-card text-card-foreground hover:brightness-105',
+        /** Hand-drawn: pencil outline on paper. */
+        sketch: 'sketch bg-transparent font-semibold text-[var(--sketch-ink)] transition-transform hover:-rotate-[0.4deg] active:translate-y-px',
+        /** Hand-drawn, coloured in with an amber marker. */
+        'sketch-fill': 'sketch sketch-fill bg-transparent font-semibold text-[#2a1e18] transition-transform hover:rotate-[0.4deg] active:translate-y-px',
         ghost: 'hover:bg-muted active:translate-y-px',
         destructive: 'bg-destructive text-white hover:bg-destructive/90',
         link: 'text-primary underline-offset-4 hover:underline',

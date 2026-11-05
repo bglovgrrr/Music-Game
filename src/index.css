@@ -51,12 +51,12 @@
   /* the table (light mode = lights on, pale oak) */
   --table: #b08660;
   --table-grain: 0.32;
-  --lamp: rgb(255 196 120 / 0.35);
-  --neon-glow: rgb(255 79 163 / 0.14);
+  --lamp: rgb(255 196 120 / 0.18);
+  --neon-glow: rgb(255 79 163 / 0.2);
   --background: #b08660;
   --foreground: #1e140f;
-  --card: #2f2119;
-  --card-foreground: #f3e7da;
+  --card: #f6efe2;
+  --card-foreground: #2a1e18;
   --muted: rgb(30 20 15 / 0.08);
   --muted-foreground: #3d2a1f;
   --primary: #f0a446;
@@ -86,14 +86,14 @@
 
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme='light']) {
-    --table: #24170f;
-    --table-grain: 0.55;
-    --lamp: rgb(255 170 80 / 0.2);
-    --neon-glow: rgb(255 79 163 / 0.13);
-    --background: #24170f;
+    --table: #1a100b;
+    --table-grain: 0.6;
+    --lamp: rgb(255 170 80 / 0.07);
+    --neon-glow: rgb(255 79 163 / 0.26);
+    --background: #1a100b;
     --foreground: #f3e7da;
-    --card: #2e1f17;
-    --card-foreground: #f3e7da;
+    --card: #e3d4c1;
+    --card-foreground: #2a1e18;
     --muted: rgb(243 231 218 / 0.07);
     --muted-foreground: #cdb8a5;
     --primary: #f4a949;
@@ -117,14 +117,14 @@
 }
 
 :root[data-theme='dark'] {
-  --table: #24170f;
-  --table-grain: 0.55;
-  --lamp: rgb(255 170 80 / 0.2);
-  --neon-glow: rgb(255 79 163 / 0.13);
-  --background: #24170f;
+  --table: #1a100b;
+  --table-grain: 0.6;
+  --lamp: rgb(255 170 80 / 0.07);
+  --neon-glow: rgb(255 79 163 / 0.26);
+  --background: #1a100b;
   --foreground: #f3e7da;
-  --card: #2e1f17;
-  --card-foreground: #f3e7da;
+  --card: #e3d4c1;
+  --card-foreground: #2a1e18;
   --muted: rgb(243 231 218 / 0.07);
   --muted-foreground: #cdb8a5;
   --primary: #f4a949;
@@ -146,6 +146,7 @@
   color-scheme: dark;
 }
 
+@layer components {
 /* Paper: cream card stock. Same in both themes (a touch dimmer at night, lit by the lamp). */
 .paper {
   --paper: #f6efe2;
@@ -175,15 +176,17 @@
 }
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme='light']) .paper {
-    --paper: #ece0cc;
-    --background: #ece0cc;
-    --card: #ece0cc;
+    --paper: #e3d4c1;
+    --background: #e3d4c1;
+    --card: #e3d4c1;
   }
 }
 :root[data-theme='dark'] .paper {
-  --paper: #ece0cc;
-  --background: #ece0cc;
-  --card: #ece0cc;
+  --paper: #e3d4c1;
+  --background: #e3d4c1;
+  --card: #e3d4c1;
+}
+
 }
 
 @theme inline {
@@ -307,7 +310,7 @@
   }
 }
 
-/* The coffee table: wood grain + plank seams, a lamp on the left, a neon sign on the right. */
+/* The coffee table: wood grain + plank seams, lit softly from above by a neon sign out of frame. */
 .app-backdrop {
   position: fixed;
   inset: 0;
@@ -332,11 +335,13 @@
 /* light: lamp glow top-left, neon sign top-right, darker edges */
 .app-backdrop::after {
   background:
-    radial-gradient(60rem 40rem at -5% -10%, var(--lamp), transparent 60%),
-    radial-gradient(40rem 30rem at 108% 4%, var(--neon-glow), transparent 62%),
-    radial-gradient(120% 90% at 50% 40%, transparent 55%, rgb(0 0 0 / 0.45));
+    radial-gradient(70rem 30rem at 50% -14rem, var(--neon-glow), transparent 70%),
+    radial-gradient(40rem 22rem at 50% -6rem, rgb(255 140 200 / 0.08), transparent 70%),
+    radial-gradient(60rem 40rem at -10% 110%, var(--lamp), transparent 60%),
+    radial-gradient(130% 100% at 50% 20%, transparent 40%, rgb(0 0 0 / 0.6));
 }
 
+@layer components {
 /* Paper texture: faint fibres. Add to anything with .paper. */
 .paper-texture {
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='p'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='3' seed='5'/%3E%3CfeColorMatrix values='0 0 0 0 0.35 0 0 0 0 0.25 0 0 0 0 0.15 0 0 0 0.09 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23p)'/%3E%3C/svg%3E");
@@ -386,6 +391,52 @@
   background: repeating-linear-gradient(90deg, rgb(244 169 73 / 0.72) 0 6px, rgb(248 194 122 / 0.72) 6px 12px);
   mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='24' preserveAspectRatio='none'%3E%3Cpath d='M2 0H8L10 3 8 6 10 9 8 12 10 15 8 18 10 21 8 24H2L0 21 2 18 0 15 2 12 0 9 2 6 0 3Z'/%3E%3C/svg%3E") 0 0 / 100% 100%;
   box-shadow: 0 1px 2px rgb(0 0 0 / 0.15);
+}
+
+/* Hand-drawn outline (double pencil stroke). Fill with --sketch-fill. */
+.sketch {
+  position: relative;
+  isolation: isolate;
+  --sketch-ink: #2a1e18;
+}
+.sketch::before,
+.sketch::after {
+  content: '';
+  position: absolute;
+  pointer-events: none;
+  z-index: -1;
+}
+.sketch::before {
+  inset: 0;
+  border: 2px solid var(--sketch-ink);
+  border-radius: 255px 14px 225px 16px / 16px 225px 14px 255px;
+  background: var(--sketch-fill, transparent);
+  transform: rotate(-0.5deg) skewX(-0.6deg);
+}
+.sketch::after {
+  inset: 3px -3px -2px 2px;
+  border: 1.25px solid var(--sketch-ink);
+  opacity: 0.4;
+  border-radius: 14px 225px 16px 255px / 255px 14px 225px 16px;
+  transform: rotate(0.7deg);
+}
+.sketch-fill {
+  --sketch-fill: linear-gradient(100deg, rgb(244 169 73 / 0.92), rgb(240 152 52 / 0.98) 55%, rgb(246 178 90 / 0.9));
+}
+}
+
+@keyframes cassette-spin {
+  to {
+    transform: rotate(-360deg);
+  }
+}
+.cassette-spin {
+  animation: cassette-spin 3.2s linear infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  .cassette-spin {
+    animation: none;
+  }
 }
 
 .vinyl {

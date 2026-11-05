@@ -60,7 +60,7 @@ function RecapCardDialog({ onClose }: { onClose: () => void }) {
       <motion.div
         initial={{ scale: 0.95, y: 10 }}
         animate={{ scale: 1, y: 0 }}
-        className="grid w-full max-w-sm gap-3 rounded-3xl bg-card p-4 shadow-2xl"
+        className="paper paper-texture grid w-full max-w-sm gap-3 rounded-[4px] bg-card p-4 shadow-2xl"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-center justify-between">
