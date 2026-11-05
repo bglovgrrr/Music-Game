@@ -1,21 +1,15 @@
-import { ArrowRight, Headphones, Info, Loader2, LogIn, MessageCircleQuestion, Music2, Sparkles, Users } from 'lucide-react'
+import { ArrowRight, Loader2, LogIn, Sparkles, Users } from 'lucide-react'
 import { motion } from 'motion/react'
-import { Popover } from 'radix-ui'
 import { useEffect, useState } from 'react'
+import { AboutButton } from '@/components/about-card'
 import { Logo } from '@/components/game-ui'
 import { ThemeToggle } from '@/components/theme-toggle'
-import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { onlineAvailable } from '@/lib/supabase'
 import { safeStorage } from '@/lib/utils'
 
-const STEPS = [
-  { icon: MessageCircleQuestion, title: 'Ask', text: 'Someone asks the group a question.', tint: 'var(--pastel-1)' },
-  { icon: Music2, title: 'Pick', text: 'Everyone secretly answers with a song.', tint: 'var(--pastel-2)' },
-  { icon: Headphones, title: 'Listen & talk', text: 'Play each one and tell the story behind it.', tint: 'var(--pastel-4)' },
-]
 
 /** Code from an invite link like https://…/?join=ABCD */
 function inviteCode() {
@@ -73,29 +67,14 @@ export function HomeScreen({
   return (
     <div className="mx-auto flex min-h-dvh w-full max-w-5xl flex-col px-4 pt-safe pb-safe sm:px-8">
       <header className="flex h-16 items-center justify-between">
+        <Logo />
         <div className="flex items-center gap-1">
-          <HowItWorks />
-          <Logo />
+          <AboutButton />
+          <ThemeToggle />
         </div>
-        <ThemeToggle />
       </header>
 
-      <div className="grid flex-1 items-center gap-10 py-8 md:grid-cols-2 md:gap-16">
-        <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
-          <Badge variant="outline" className="mb-5 h-7 bg-card px-3">
-            <Users /> 2–8 friends · one speaker
-          </Badge>
-          <h1 className="text-[3.25rem] leading-[1] font-medium font-soft sm:text-7xl">
-            Every song
-            <br />
-            has a <em className="brand-text pr-1 font-medium">story.</em>
-          </h1>
-          <p className="mt-5 max-w-md text-lg text-muted-foreground">
-            A slow, cozy music game for friends. Answer a question with a song, then listen together and talk about why you picked it.
-          </p>
-
-        </motion.div>
-
+      <div className="mx-auto grid w-full max-w-md flex-1 content-center py-8">
         <motion.div initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2, duration: 0.5 }}>
           <Card className="rounded-[1.6rem] p-5 sm:p-7">
             <form
@@ -148,6 +127,9 @@ export function HomeScreen({
                     <div className="grid gap-3">
                       <Button type="submit" variant="brand" size="lg" disabled={!trimmed || !!busy}>
                         {busy === 'create' ? <Loader2 className="animate-spin" /> : <Sparkles />} Start a game
+                        <span className="ml-1 inline-flex items-center gap-1 rounded-full bg-white/50 px-2 py-0.5 text-xs font-semibold text-ink/80 dark:bg-black/15">
+                          2–8 <Users className="size-3.5" />
+                        </span>
                       </Button>
                       <Button type="button" variant="outline" size="lg" onClick={() => setJoining(true)}>
                         <LogIn /> Join with a code
@@ -176,42 +158,6 @@ export function HomeScreen({
         </motion.div>
       </div>
     </div>
-  )
-}
-
-/** The 3 steps, tucked behind an info button in the top left. */
-function HowItWorks() {
-  return (
-    <Popover.Root>
-      <Popover.Trigger asChild>
-        <Button variant="ghost" size="icon-sm" aria-label="How it works" title="How it works" className="-ml-2">
-          <Info />
-        </Button>
-      </Popover.Trigger>
-      <Popover.Portal>
-        <Popover.Content
-          align="start"
-          sideOffset={8}
-          collisionPadding={16}
-          className="z-50 w-[min(20rem,calc(100vw-2rem))] rounded-2xl border bg-card p-4 text-card-foreground shadow-[0_12px_32px_-12px_rgb(40_30_80/0.35)] outline-none data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:zoom-in-95"
-        >
-          <p className="pb-3 text-xs font-semibold tracking-[0.14em] text-accent uppercase">How it works</p>
-          <ol className="grid gap-3.5">
-            {STEPS.map(({ icon: Icon, title, text, tint }) => (
-              <li key={title} className="flex items-center gap-3">
-                <span className="grid size-10 shrink-0 place-items-center rounded-full text-ink" style={{ background: tint }}>
-                  <Icon className="size-[18px]" />
-                </span>
-                <span className="grid">
-                  <span className="font-semibold">{title}</span>
-                  <span className="text-sm text-muted-foreground">{text}</span>
-                </span>
-              </li>
-            ))}
-          </ol>
-        </Popover.Content>
-      </Popover.Portal>
-    </Popover.Root>
   )
 }
 
