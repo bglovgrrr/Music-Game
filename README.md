@@ -30,7 +30,7 @@ Mixtape Memories is a relaxed music game for 2–8 friends in the same room. Som
 - **Gentle chimes.** A soft sound when it's your turn to ask, when picking starts, and when 10 seconds are left.
 - **Live sync.** Every phone stays in step: questions, picks, play/pause, and the progress bar.
 - **Rejoin anytime.** Refresh or lock your phone and you land back in the same game.
-- **Question themes.** Throwback, Family, Love & heartbreak, Hype, Deep cuts, Places, and Wildcard, plus your own questions and "Surprise me".
+- **Questions.** Write your own, or tap one of four torn paper strips (a fresh mix each round), or "Surprise me". Hold the pile to spread it out; let go and it settles back.
 - **Search any song (Spotify) and play it in full** on the host's Spotify. Falls back to 30-second iTunes previews.
 - **Demo mode.** Play a full game on one device with three bot friends.
 - **Made for phones and desktops.** Matches your device's light or dark mode; one tap on the sun/moon flips it. You can add it to your home screen like an app.
