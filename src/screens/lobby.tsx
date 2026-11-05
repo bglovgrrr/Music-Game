@@ -9,7 +9,9 @@ import { SpotifyCard } from '@/components/spotify-card'
 import { spotifyConfigured } from '@/music/spotify-auth'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
-import { MIN_PLAYERS } from '@/game/engine'
+import { MAX_PLAYERS, MIN_PLAYERS } from '@/game/engine'
+import type { Player } from '@/game/types'
+import { cn } from '@/lib/utils'
 import { useGame } from '@/hooks/use-game'
 
 export function LobbyScreen() {
@@ -67,31 +69,12 @@ export function LobbyScreen() {
       </div>
 
       <div className="grid content-start gap-4">
-        <Card className="p-2">
-          <ul>
-            <AnimatePresence initial={false}>
-              {state.players.map((p) => (
-                <motion.li
-                  key={p.id}
-                  layout
-                  initial={{ opacity: 0, y: 8, scale: 0.98 }}
-                  animate={{ opacity: 1, y: 0, scale: 1 }}
-                  className="flex items-center gap-3 rounded-xl p-2"
-                >
-                  <PlayerAvatar player={p} />
-                  <span className="font-semibold">{p.name}</span>
-                  {p.id === meId && <span className="text-sm text-muted-foreground">(you)</span>}
-                  {p.id === state.hostId && <span className="ml-auto text-xs font-medium text-muted-foreground">Host</span>}
-                </motion.li>
-              ))}
-            </AnimatePresence>
-            <li className="flex items-center gap-3 rounded-xl p-2 text-muted-foreground">
-              <span className="grid size-10 place-items-center rounded-full border-2 border-dashed">
-                <span className="size-2 animate-pulse rounded-full bg-muted-foreground" />
-              </span>
-              Waiting for friends…
-            </li>
-          </ul>
+        <Card className="px-4 pt-4 pb-3">
+          <div className="flex items-baseline justify-between pb-3">
+            <h3 className="text-xl leading-none font-bold font-soft">Who&rsquo;s here</h3>
+            <span className="font-mono text-xs tracking-[0.1em] text-muted-foreground">{state.players.length}/8</span>
+          </div>
+          <StickerSlots players={state.players} meId={meId} hostId={state.hostId} />
         </Card>
 
         <Card className="p-4">
@@ -120,5 +103,44 @@ export function LobbyScreen() {
         )}
       </div>
     </div>
+  )
+}
+
+/**
+ * Four dotted outlines per row; each player who joins slaps a sticker into the next one.
+ * Always shows at least 4 slots, and one free row while there's room (max 8 players).
+ */
+function StickerSlots({ players, meId, hostId }: { players: Player[]; meId: string; hostId: string }) {
+  const n = players.length
+  const slots = Math.min(MAX_PLAYERS, Math.max(4, Math.ceil(Math.min(n + 1, MAX_PLAYERS) / 4) * 4))
+  return (
+    <ul className="grid grid-cols-4 gap-x-3 gap-y-4">
+      {Array.from({ length: slots }, (_, i) => {
+        const p = players[i]
+        return (
+          <li key={p?.id ?? `empty-${i}`} className="grid justify-items-center gap-1.5">
+            <div className="relative grid aspect-square w-full place-items-center rounded-[22%] border-2 border-dashed border-[#2a1e18]/40">
+              <AnimatePresence>
+                {p && (
+                  <motion.div
+                    key={p.id}
+                    initial={{ scale: 1.7, opacity: 0, y: -24, rotate: -25 }}
+                    animate={{ scale: 1, opacity: 1, y: 0, rotate: 0 }}
+                    transition={{ type: 'spring', stiffness: 520, damping: 17 }}
+                    className="absolute inset-[-6%]"
+                  >
+                    <PlayerAvatar player={p} className="size-full" />
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+            <span className={cn('max-w-full truncate text-center text-xs font-semibold', !p && 'text-transparent')}>
+              {p ? (p.id === meId ? 'You' : p.name) : '·'}
+            </span>
+            {p && p.id === hostId && <span className="-mt-1.5 font-mono text-[0.6rem] tracking-[0.12em] text-muted-foreground uppercase">Host</span>}
+          </li>
+        )
+      })}
+    </ul>
   )
 }

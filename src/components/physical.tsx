@@ -21,7 +21,7 @@ export function IndexCard({
   tilt?: number
 }) {
   return (
-    <div className={cn('drop-on-table', className)} style={tilt ? { transform: `rotate(${tilt}deg)` } : undefined}>
+    <div className={cn('drop-on-table min-w-0', className)} style={tilt ? { transform: `rotate(${tilt}deg)` } : undefined}>
       <div className={cn('paper index-card rounded-[3px]', torn === 'bottom' && 'torn-bottom pb-4', torn === 'top' && 'torn-top pt-4', innerClassName)}>{children}</div>
     </div>
   )

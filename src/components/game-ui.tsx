@@ -2,6 +2,7 @@ import { Check, Crown } from 'lucide-react'
 import { motion } from 'motion/react'
 import { useState } from 'react'
 import { Washi } from '@/components/physical'
+import { Sticker } from '@/components/sticker'
 import { inkColor } from '@/game/colors'
 import type { Player, Track } from '@/game/types'
 import { cn } from '@/lib/utils'
@@ -30,6 +31,7 @@ export function Logo({ className }: { className?: string }) {
   )
 }
 
+/** A player's sticker (die-cut 80s vinyl sticker in their ink colour). */
 export function PlayerAvatar({
   player,
   size = 'md',
@@ -43,22 +45,13 @@ export function PlayerAvatar({
   ring?: boolean
   className?: string
 }) {
-  const sizes = { sm: 'size-7 text-xs', md: 'size-10 text-sm', lg: 'size-14 text-lg', xl: 'size-20 text-2xl' }
+  const sizes = { sm: 'size-7', md: 'size-10', lg: 'size-14', xl: 'size-20' }
   return (
-    <span className={cn('relative inline-grid shrink-0', className)}>
-      <span
-        className={cn(
-          'grid place-items-center rounded-full font-sans font-bold text-ink',
-          sizes[size],
-          ring && 'ring-2 ring-offset-2 ring-offset-background',
-        )}
-        style={{ backgroundColor: inkColor(player.color), ...(ring ? { ['--tw-ring-color' as string]: inkColor(player.color) } : {}) }}
-        title={player.name}
-      >
-        {player.name.slice(0, 1).toUpperCase()}
-      </span>
+    <span className={cn('relative inline-grid shrink-0', sizes[size], className)} title={player.name}>
+      <Sticker player={player} color={inkColor(player.color)} className={cn('size-full', ring && 'drop-shadow-[0_0_6px_var(--neon)]')} />
+      <span className="sr-only">{player.name}</span>
       {done && (
-        <span className="absolute -right-1 -bottom-1 grid size-5 place-items-center rounded-full border-2 border-card bg-success text-card">
+        <span className="absolute -right-1 -bottom-1 grid size-5 place-items-center rounded-full border-2 border-[#fffdf8] bg-success text-[#fffdf8]">
           <Check className="size-3" strokeWidth={3} />
         </span>
       )}
@@ -68,9 +61,9 @@ export function PlayerAvatar({
 
 export function AvatarStack({ players, max = 5 }: { players: Player[]; max?: number }) {
   return (
-    <div className="mr-1 flex -space-x-2">
+    <div className="mr-1 flex -space-x-1.5">
       {players.slice(0, max).map((p) => (
-        <PlayerAvatar key={p.id} player={p} size="sm" className="rounded-full ring-2 ring-background" />
+        <PlayerAvatar key={p.id} player={p} size="sm" />
       ))}
       {players.length > max && (
         <span className="grid size-7 place-items-center rounded-full bg-muted text-xs ring-2 ring-background">

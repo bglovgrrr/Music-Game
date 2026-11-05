@@ -9,3 +9,11 @@ export function inkColor(color?: string): string {
   const i = LEGACY.indexOf(color.toLowerCase())
   return i >= 0 ? PLAYER_COLORS[i] : color
 }
+
+/** Position of a colour in the palette (old pastel or new ink), or -1. */
+export function inkIndex(color?: string): number {
+  if (!color) return -1
+  const c = color.toLowerCase()
+  const i = LEGACY.indexOf(c)
+  return i >= 0 ? i : PLAYER_COLORS.indexOf(c)
+}

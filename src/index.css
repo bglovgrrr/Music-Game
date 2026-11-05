@@ -425,6 +425,15 @@
 }
 }
 
+/* Die-cut sticker edge: the artwork again, as a fat white silhouette. */
+.sticker-cut * {
+  fill: #fffdf8;
+  stroke: #fffdf8;
+  stroke-width: 9px;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+}
+
 @keyframes cassette-spin {
   to {
     transform: rotate(-360deg);

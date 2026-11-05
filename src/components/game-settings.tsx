@@ -32,7 +32,7 @@ export function GameSettings({ className }: { className?: string }) {
         <span className="grid size-9 shrink-0 place-items-center rounded-full bg-[var(--pastel-3)] text-ink">
           <Timer className="size-4" />
         </span>
-        <span className="grid flex-1 gap-0.5">
+        <span className="grid min-w-[12rem] flex-1 gap-0.5">
           <span className="text-sm font-semibold">Pick timer</span>
           <span className="text-xs text-muted-foreground">Keeps the game moving. Listening starts when time's up.</span>
         </span>

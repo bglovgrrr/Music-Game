@@ -31,7 +31,7 @@ export function BetweenScreen() {
         </div>
         <PromptCard prompt={round.prompt} asker={playerById(state, round.askerId)} compact />
 
-        <div className="grid gap-2">
+        <div className="grid min-w-0 gap-2">
           <IndexCard tilt={-0.8} className="mt-1">
             <IndexCardHeader>
               <h3 className="text-xl leading-none font-bold font-soft">Song of the round</h3>
