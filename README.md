@@ -32,7 +32,7 @@ Side B is a relaxed music game for 2–8 friends in the same room. Someone asks 
 - **Question themes.** Throwback, Family, Love & heartbreak, Hype, Deep cuts, Places, and Wildcard, plus your own questions and "Surprise me".
 - **Search any song (Spotify) and play it in full** on the host's Spotify. Falls back to 30-second iTunes previews.
 - **Demo mode.** Play a full game on one device with three bot friends.
-- **Made for phones and desktops.** Light, dark, or match-device theme. You can add it to your home screen like an app.
+- **Made for phones and desktops.** Matches your device's light or dark mode; one tap on the sun/moon flips it. You can add it to your home screen like an app.
 
 ## Getting started
 

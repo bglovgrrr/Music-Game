@@ -1,5 +1,6 @@
-import { ArrowRight, Headphones, Loader2, LogIn, MessageCircleQuestion, Music2, Sparkles, Users } from 'lucide-react'
+import { ArrowRight, Headphones, Info, Loader2, LogIn, MessageCircleQuestion, Music2, Sparkles, Users } from 'lucide-react'
 import { motion } from 'motion/react'
+import { Popover } from 'radix-ui'
 import { useEffect, useState } from 'react'
 import { Logo } from '@/components/game-ui'
 import { ThemeToggle } from '@/components/theme-toggle'
@@ -72,7 +73,10 @@ export function HomeScreen({
   return (
     <div className="mx-auto flex min-h-dvh w-full max-w-5xl flex-col px-4 pt-safe pb-safe sm:px-8">
       <header className="flex h-16 items-center justify-between">
-        <Logo />
+        <div className="flex items-center gap-1">
+          <HowItWorks />
+          <Logo />
+        </div>
         <ThemeToggle />
       </header>
 
@@ -90,25 +94,6 @@ export function HomeScreen({
             A slow, cozy music game for friends. Answer a question with a song, then listen together and talk about why you picked it.
           </p>
 
-          <ol className="mt-9 grid gap-3.5">
-            {STEPS.map(({ icon: Icon, title, text, tint }, i) => (
-              <motion.li
-                key={title}
-                initial={{ opacity: 0, x: -12 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: 0.15 + i * 0.1 }}
-                className="flex items-center gap-3"
-              >
-                <span className="grid size-10 shrink-0 place-items-center rounded-full text-ink" style={{ background: tint }}>
-                  <Icon className="size-[18px]" />
-                </span>
-                <span className="grid">
-                  <span className="font-semibold">{title}</span>
-                  <span className="text-sm text-muted-foreground">{text}</span>
-                </span>
-              </motion.li>
-            ))}
-          </ol>
         </motion.div>
 
         <motion.div initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2, duration: 0.5 }}>
@@ -193,3 +178,40 @@ export function HomeScreen({
     </div>
   )
 }
+
+/** The 3 steps, tucked behind an info button in the top left. */
+function HowItWorks() {
+  return (
+    <Popover.Root>
+      <Popover.Trigger asChild>
+        <Button variant="ghost" size="icon-sm" aria-label="How it works" title="How it works" className="-ml-2">
+          <Info />
+        </Button>
+      </Popover.Trigger>
+      <Popover.Portal>
+        <Popover.Content
+          align="start"
+          sideOffset={8}
+          collisionPadding={16}
+          className="z-50 w-[min(20rem,calc(100vw-2rem))] rounded-2xl border bg-card p-4 text-card-foreground shadow-[0_12px_32px_-12px_rgb(40_30_80/0.35)] outline-none data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:zoom-in-95"
+        >
+          <p className="pb-3 text-xs font-semibold tracking-[0.14em] text-accent uppercase">How it works</p>
+          <ol className="grid gap-3.5">
+            {STEPS.map(({ icon: Icon, title, text, tint }) => (
+              <li key={title} className="flex items-center gap-3">
+                <span className="grid size-10 shrink-0 place-items-center rounded-full text-ink" style={{ background: tint }}>
+                  <Icon className="size-[18px]" />
+                </span>
+                <span className="grid">
+                  <span className="font-semibold">{title}</span>
+                  <span className="text-sm text-muted-foreground">{text}</span>
+                </span>
+              </li>
+            ))}
+          </ol>
+        </Popover.Content>
+      </Popover.Portal>
+    </Popover.Root>
+  )
+}
+
