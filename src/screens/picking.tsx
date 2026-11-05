@@ -237,7 +237,7 @@ export function PickingScreen() {
           </Card>
         )}
         <Card className="p-4">
-          <h3 className="mb-3 text-lg font-medium font-soft">
+          <h3 className="mb-3 text-lg font-bold font-soft">
             {round.picks.length}/{state.players.length} picked
           </h3>
           <ul className="grid gap-3">

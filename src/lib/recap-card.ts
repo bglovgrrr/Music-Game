@@ -1,3 +1,4 @@
+import { inkColor } from '@/game/colors'
 import { fanFavorites, playerById, reactionTotals, scores, voteResults } from '@/game/engine'
 import type { GameState } from '@/game/types'
 
@@ -69,7 +70,7 @@ async function drawCard(s: GameState, photo: HTMLImageElement | null): Promise<B
   c.fillStyle = INK
   c.font = serif(40, true, 600)
   c.textBaseline = 'alphabetic'
-  c.fillText('Side B', PAD, PAD + 30)
+  c.fillText('Mixtape Memories', PAD, PAD + 30)
   c.font = sans(26)
   c.fillStyle = MUTED
   const date = new Date(s.createdAt).toLocaleDateString(undefined, { month: 'long', day: 'numeric', year: 'numeric' })
@@ -151,7 +152,7 @@ async function drawCard(s: GameState, photo: HTMLImageElement | null): Promise<B
       const pick = r.picks.find((p) => p.playerId === pid)!
       const who = playerById(s, pid)
       // colour dot for the player
-      c.fillStyle = who?.color ?? '#cfcaff'
+      c.fillStyle = inkColor(who?.color)
       c.beginPath()
       const dot = 14 * k
       c.arc(PAD + dot, y - 11 * k, dot, 0, Math.PI * 2)

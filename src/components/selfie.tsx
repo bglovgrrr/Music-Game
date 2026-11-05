@@ -42,7 +42,7 @@ export function Polaroid({ photo, caption, tilt = -2.5, className }: { photo: Ph
       <div className="grid aspect-[4/3] place-items-center overflow-hidden rounded-sm bg-[#eceaf2]">
         {url ? <img src={url} alt={caption ?? 'Group selfie'} className="size-full object-cover" /> : <Loader2 className="size-5 animate-spin text-[#8a86a0]" />}
       </div>
-      {caption && <figcaption className="mt-2 line-clamp-2 text-center font-display text-sm italic">{caption}</figcaption>}
+      {caption && <figcaption className="mt-2 line-clamp-2 text-center font-note text-base italic">{caption}</figcaption>}
     </motion.figure>
   )
 }

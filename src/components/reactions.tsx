@@ -2,6 +2,7 @@ import { AnimatePresence, motion } from 'motion/react'
 import { useEffect, useRef, useState } from 'react'
 import { REACTIONS, type Reaction } from '@/game/client'
 import { playerById } from '@/game/engine'
+import { inkColor } from '@/game/colors'
 import { useGame } from '@/hooks/use-game'
 import { cn } from '@/lib/utils'
 
@@ -29,7 +30,7 @@ export function ReactionLayer() {
           tilt: (Math.random() - 0.5) * 30,
           size: 0.85 + Math.random() * 0.45,
           name: inBurst ? undefined : p?.name,
-          color: p?.color,
+          color: inkColor(p?.color),
         }
         setItems((list) => [...list.slice(-40), item])
         setTimeout(() => setItems((list) => list.filter((i) => i.id !== r.id)), 2800)

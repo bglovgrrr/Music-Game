@@ -28,11 +28,11 @@ export default defineConfig(({ mode }) => {
             },
             includeAssets: ['favicon.svg', 'apple-touch-icon.png'],
             manifest: {
-              name: 'Side B',
-              short_name: 'Side B',
+              name: 'Mixtape Memories',
+              short_name: 'Mixtape',
               description: 'A music storytelling game to play with friends',
-              theme_color: '#f6f5fa',
-              background_color: '#f6f5fa',
+              theme_color: '#24170f',
+              background_color: '#24170f',
               display: 'standalone',
               start_url: '/',
               icons: [

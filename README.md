@@ -1,8 +1,8 @@
-# Side B
+# Mixtape Memories
 
 **Every song has a story.**
 
-Side B is a relaxed music game for 2–8 friends in the same room. Someone asks a question, everyone secretly answers with a song, and then you listen to each one together and talk about why it was picked.
+Mixtape Memories is a relaxed music game for 2–8 friends in the same room. Someone asks a question, everyone secretly answers with a song, and then you listen to each one together and talk about why it was picked.
 
 **▶ Play: [music-game-virid.vercel.app](https://music-game-virid.vercel.app)**
 
@@ -69,7 +69,7 @@ The app is hosted on Vercel (project `music-game`, team `personal`):
 
 ## Spotify (full songs)
 
-Side B uses a Spotify developer app (in Development Mode) for three things:
+Mixtape Memories uses a Spotify developer app (in Development Mode) for three things:
 
 - **Search for everyone:** `api/spotify-search.ts` runs on Vercel and searches Spotify's catalogue with the app's credentials. Guests don't need a Spotify account. Results are cached on Vercel's CDN.
 - **Full songs:** the host taps **Connect** (lobby). Songs then play in full on the host's Spotify app or Spotify Connect speaker; anyone's play / pause / skip / seek controls it. Without Spotify, songs play as 30-second previews.
@@ -128,7 +128,7 @@ To change how the game plays, start in `src/game/engine.ts`. Demo and online mod
 | --- | --- |
 | App | Vite, React 19, TypeScript |
 | UI | Tailwind CSS v4, shadcn/ui, Motion, Lucide icons |
-| Brand | Pastel palette with Fraunces and Figtree fonts (bundled). Colours are tokens in `src/index.css` |
+| Brand | "Basement sessions": everything sits on a dark wooden coffee table, lit by a lamp (amber) and a neon sign (magenta). UI pieces are physical objects: paper cards, a torn index card for votes, a taped note for the question, label-maker tape for room codes, deck keys for buttons. Fonts: Bricolage Grotesque, Geist, Geist Mono and Instrument Serif (bundled). Tokens and materials live in `src/index.css`; pieces in `src/components/physical.tsx` |
 | Backend | Supabase (Postgres, anonymous auth, Realtime) |
 | Music | Spotify Web API (search + playback control), iTunes previews as fallback |
 | Install | PWA via `vite-plugin-pwa` |

@@ -146,7 +146,7 @@ export function ListeningScreen() {
             </div>
 
             <div className="grid gap-1">
-              <h2 className="text-3xl font-medium font-soft sm:text-4xl">{pick.track.title}</h2>
+              <h2 className="text-3xl font-bold font-soft sm:text-4xl">{pick.track.title}</h2>
               <p className="text-lg text-muted-foreground">{pick.track.artist}</p>
             </div>
 
@@ -253,7 +253,7 @@ export function ListeningScreen() {
       {/* Queue */}
       <aside className="md:sticky md:top-20 md:self-start">
         <Card className="p-3">
-          <h3 className="px-2 pt-1 pb-2 text-lg font-medium font-soft">This round's mixtape</h3>
+          <h3 className="px-2 pt-1 pb-2 text-lg font-bold font-soft">This round's mixtape</h3>
           <ol className="grid gap-1">
             {round.order.map((pid, i) => {
               const p = round.picks.find((x) => x.playerId === pid)!

@@ -76,7 +76,7 @@ export function HomeScreen({
 
       <div className="mx-auto grid w-full max-w-md flex-1 content-center py-8">
         <motion.div initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2, duration: 0.5 }}>
-          <Card className="rounded-[1.6rem] p-5 sm:p-7">
+          <Card className="p-5 sm:p-7">
             <form
               onSubmit={(e) => {
                 e.preventDefault()

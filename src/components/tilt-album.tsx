@@ -12,7 +12,7 @@ const HOLD_MS = 180
 /**
  * The album sleeve. Press and hold to lift it, drag to turn it in 3D, let go and it
  * springs back with a gentle bounce. Flick it to spin; it settles on the front or on
- * the back (which reads "Side B"). Tap the back to flip it to the front again.
+ * the back (which reads "Mixtape Memories"). Tap the back to flip it to the front again.
  */
 export function TiltAlbum({ track, back, floating, className }: { track: Track; back?: React.ReactNode; floating?: boolean; className?: string }) {
   const reduce = useReducedMotion()
@@ -118,7 +118,7 @@ export function TiltAlbum({ track, back, floating, className }: { track: Track; 
           <AlbumArt track={track} className="size-full" rounded="rounded-xl" />
           <motion.div className="pointer-events-none absolute inset-0 mix-blend-soft-light" style={{ background: glare }} />
         </motion.div>
-        {/* Back: Side B */}
+        {/* Back: Mixtape Memories */}
         <motion.div
           className="absolute inset-0 overflow-hidden rounded-xl [backface-visibility:hidden] [transform:rotateY(180deg)]"
           style={{ boxShadow: shadow }}
@@ -127,7 +127,7 @@ export function TiltAlbum({ track, back, floating, className }: { track: Track; 
             <Logo className="[&>span:first-child]:size-6 [&>span:last-child]:text-base" />
             <div className="grid gap-1 text-left">
               <span className="text-[10px] font-semibold tracking-[0.2em] uppercase opacity-60">Now playing</span>
-              <span className="font-display text-2xl leading-tight font-medium italic font-soft">{track.title}</span>
+              <span className="font-note text-3xl leading-tight italic">{track.title}</span>
               <span className="text-sm opacity-70">{track.artist}</span>
               {back}
             </div>

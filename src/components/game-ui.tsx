@@ -1,18 +1,31 @@
-import { Check, Crown, Disc3 } from 'lucide-react'
+import { Check, Crown } from 'lucide-react'
 import { motion } from 'motion/react'
 import { useState } from 'react'
+import { Washi } from '@/components/physical'
+import { inkColor } from '@/game/colors'
 import type { Player, Track } from '@/game/types'
 import { cn } from '@/lib/utils'
 
+/** Neon cassette mark + wordmark. */
 export function Logo({ className }: { className?: string }) {
   return (
     <div className={cn('flex items-center gap-2', className)}>
-      <span className="brand-gradient grid size-8 place-items-center rounded-full">
-        <Disc3 className="size-[18px]" strokeWidth={2.25} />
-      </span>
-      <span className="font-display text-xl font-semibold tracking-tight font-soft">
-        Side <span className="italic">B</span>
-      </span>
+      <svg
+        viewBox="0 0 76 52"
+        className="h-[22px] w-8 shrink-0 text-neon drop-shadow-[0_0_6px_var(--neon)]"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth={4.5}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        aria-hidden
+      >
+        <rect x="2.5" y="2.5" width="71" height="47" rx="7" />
+        <circle cx="24" cy="22" r="7" />
+        <circle cx="52" cy="22" r="7" />
+        <path d="M31 22h14M16 49.5l4-8.5h36l4 8.5" />
+      </svg>
+      <span className="font-display text-xl leading-none font-extrabold tracking-[-0.01em] [font-stretch:78%]">Mixtape Memories</span>
     </div>
   )
 }
@@ -39,7 +52,7 @@ export function PlayerAvatar({
           sizes[size],
           ring && 'ring-2 ring-offset-2 ring-offset-background',
         )}
-        style={{ backgroundColor: player.color, ...(ring ? { ['--tw-ring-color' as string]: player.color } : {}) }}
+        style={{ backgroundColor: inkColor(player.color), ...(ring ? { ['--tw-ring-color' as string]: inkColor(player.color) } : {}) }}
         title={player.name}
       >
         {player.name.slice(0, 1).toUpperCase()}
@@ -84,7 +97,7 @@ export function AlbumArt({
   if (hidden || !track) {
     return (
       <div className={cn('relative grid aspect-square place-items-center overflow-hidden border border-dashed bg-muted', rounded, className)}>
-        <span className="font-display text-xl text-muted-foreground italic">?</span>
+        <span className="font-note text-2xl text-muted-foreground italic">?</span>
       </div>
     )
   }
@@ -102,32 +115,33 @@ export function AlbumArt({
   const hue = track.hue ?? [...track.title].reduce((h, c) => (h * 31 + c.charCodeAt(0)) % 360, 7)
   return (
     <div
-      className={cn('relative aspect-square overflow-hidden text-ink [container-type:inline-size]', rounded, className)}
+      className={cn('relative aspect-square overflow-hidden text-[#f6efe2] [container-type:inline-size]', rounded, className)}
       style={{
-        background: `radial-gradient(circle at 75% 20%, hsl(${(hue + 40) % 360} 95% 90%), transparent 55%), linear-gradient(150deg, hsl(${hue} 85% 84%), hsl(${(hue + 50) % 360} 75% 76%))`,
+        background: `radial-gradient(circle at 75% 20%, hsl(${(hue + 40) % 360} 55% 62% / 0.9), transparent 55%), linear-gradient(150deg, hsl(${hue} 42% 52%), hsl(${(hue + 50) % 360} 38% 34%))`,
       }}
     >
-      <span className="absolute top-[9cqw] right-[9cqw] @max-[5rem]:hidden size-[18cqw] rounded-full border-[1.5px] border-ink/25" />
-      <span className="absolute inset-x-0 bottom-0 line-clamp-3 p-[9cqw] @max-[5rem]:hidden font-display text-[clamp(0.4rem,12cqw,2.2rem)] leading-[1.05] font-semibold italic font-soft">
+      <span className="absolute top-[9cqw] right-[9cqw] @max-[5rem]:hidden size-[18cqw] rounded-full border-[1.5px] border-[#f6efe2]/40" />
+      <span className="absolute inset-x-0 bottom-0 line-clamp-3 p-[9cqw] @max-[5rem]:hidden font-display text-[clamp(0.4rem,12cqw,2.2rem)] leading-[1.05] font-bold font-soft">
         {track.title}
       </span>
     </div>
   )
 }
 
+/** The question for the round: a note on lined paper, taped to the table. */
 export function PromptCard({ prompt, asker, compact }: { prompt: string; asker?: Player; compact?: boolean }) {
   return (
-    <div className={cn('relative overflow-hidden rounded-[1.4rem] brand-gradient', compact ? 'px-4 py-3.5' : 'p-5 sm:p-7')}>
-      <div className="pointer-events-none absolute -top-16 -right-12 size-48 rounded-full bg-white/35 blur-3xl" />
-      {asker && (
-        <div className={cn('flex items-center gap-2 text-sm font-medium text-ink/70', compact ? 'mb-1' : 'mb-3')}>
-          <PlayerAvatar player={asker} size="sm" className="rounded-full ring-2 ring-white/60" />
-          {asker.name} asks
-        </div>
-      )}
-      <p className={cn('relative font-display leading-snug font-medium text-balance italic font-soft', compact ? 'text-lg' : 'text-[1.7rem] sm:text-4xl')}>
-        {prompt}
-      </p>
+    <div className={cn('drop-on-table relative', compact ? 'mt-2' : 'mt-3')} style={{ transform: `rotate(${compact ? -0.6 : -1}deg)` }}>
+      <Washi className="-top-3 left-1/2 -ml-12 z-10" tilt={-3} />
+      <div className={cn('paper paper-texture torn-bottom rounded-[3px] bg-[var(--paper)]', compact ? 'px-4 pt-4 pb-5' : 'px-5 pt-6 pb-7 sm:px-7')}>
+        {asker && (
+          <div className={cn('flex items-center gap-2 font-mono text-[0.7rem] tracking-[0.14em] text-muted-foreground uppercase', compact ? 'mb-1' : 'mb-2')}>
+            <PlayerAvatar player={asker} size="sm" />
+            {asker.name} asks
+          </div>
+        )}
+        <p className={cn('font-note leading-[1.15] text-balance italic', compact ? 'text-[1.35rem]' : 'text-[2rem] sm:text-[2.6rem]')}>{prompt}</p>
+      </div>
     </div>
   )
 }

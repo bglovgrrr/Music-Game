@@ -44,7 +44,7 @@ export async function testSpotify(log: (line: string) => void) {
   let picked = chosenDeviceId()
   if (!picked || picked === LOCAL) {
     const id = await ensureLocalPlayer()
-    log(id ? '✓ Side B’s built-in player is ready' : `✗ Side B’s built-in player: ${localPlayerProblem() ?? 'not ready'}`)
+    log(id ? '✓ Mixtape Memories’ built-in player is ready' : `✗ Mixtape Memories’ built-in player: ${localPlayerProblem() ?? 'not ready'}`)
     picked = id
   }
   if (picked && !devices.some((d) => d.id === picked)) {
@@ -56,24 +56,24 @@ export async function testSpotify(log: (line: string) => void) {
       await wait(ms)
       const again = await call('/me/player/devices')
       const listed = ((again.body?.devices as Device[]) ?? []).some((d) => d.id === picked)
-      log(`  Spotify lists Side B after +${ms / 1000}s: ${listed ? 'yes' : 'no'}`)
+      log(`  Spotify lists Mixtape Memories after +${ms / 1000}s: ${listed ? 'yes' : 'no'}`)
       if (listed) {
         devices.splice(0, devices.length, ...((again.body?.devices as Device[]) ?? []).filter((d) => d.id))
         break
       }
       if (ms === 3000) {
         const t = await call('/me/player', { method: 'PUT', body: JSON.stringify({ device_ids: [picked], play: false }) })
-        log(`  switch playback to Side B: HTTP ${t.status}${errorText(t.body)}`)
+        log(`  switch playback to Mixtape Memories: HTTP ${t.status}${errorText(t.body)}`)
       }
     }
   }
-  // Side B's own player may not be listed until it has played something: use it directly.
+  // Mixtape Memories' own player may not be listed until it has played something: use it directly.
   if (picked && !devices.some((d) => d.id === picked) && (!chosenDeviceId() || chosenDeviceId() === LOCAL)) {
-    devices.unshift({ id: picked, name: 'Side B (this device)', type: 'Browser', is_active: false })
+    devices.unshift({ id: picked, name: 'Mixtape Memories (this device)', type: 'Browser', is_active: false })
   }
   if (!devices.length) return log('✗ No devices. Open Spotify on the phone/computer/speaker and play any song for a second, then test again.')
   const target = devices.find((d) => d.id === picked) ?? devices.find((d) => d.is_active) ?? devices[0]
-  log(`Target: ${target.name}${target.id === picked ? ' (picked in Side B)' : target.is_active ? ' (Spotify’s active device)' : ' (first available)'}`)
+  log(`Target: ${target.name}${target.id === picked ? ' (picked in Mixtape Memories)' : target.is_active ? ' (Spotify’s active device)' : ' (first available)'}`)
   if (target.volume_percent === 0) log('⚠ That device’s Spotify volume is 0%.')
 
   let uri = 'spotify:track:4uLU6hMCjMI75M1A2tKUQC'
@@ -131,7 +131,7 @@ export async function testSpotify(log: (line: string) => void) {
   const dev = `device_id=${encodeURIComponent(target.id)}`
   const attempts: [string, () => Promise<{ status: number; body: Record<string, unknown> | null }>][] = [
     [
-      '1: play from its album (what Side B uses)',
+      '1: play from its album (what Mixtape Memories uses)',
       () =>
         albumUri
           ? call(`/me/player/play?${dev}`, { method: 'PUT', body: JSON.stringify({ context_uri: albumUri, offset: { uri } }) })

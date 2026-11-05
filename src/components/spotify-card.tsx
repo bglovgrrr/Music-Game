@@ -64,7 +64,7 @@ export function SpotifyCard({ compact, className }: { compact?: boolean; classNa
   const refresh = useCallback(async () => {
     setLoadingDevices(true)
     try {
-      // Side B's own player is listed separately (first), so leave it out here.
+      // Mixtape Memories' own player is listed separately (first), so leave it out here.
       setDevices((await listDevices()).filter((d) => d.name !== LOCAL_PLAYER_NAME))
     } catch (err) {
       setDevices([])
@@ -202,9 +202,9 @@ export function SpotifyCard({ compact, className }: { compact?: boolean; classNa
           {usingLocal
             ? localProblem
               ? `${localProblem}. Pick another device, or open Spotify on one and tap refresh.`
-              : 'Music plays right here in Side B. No Spotify app needed. Keep this screen open.'
+              : 'Music plays right here in Mixtape Memories. No Spotify app needed. Keep this screen open.'
             : active && needsKeepAlive(active)
-              ? 'Music plays through the Spotify app on this phone. Side B keeps it awake between songs (with silence), so you don’t need to switch apps.'
+              ? 'Music plays through the Spotify app on this phone. Mixtape Memories keeps it awake between songs (with silence), so you don’t need to switch apps.'
               : active
                 ? 'Music plays in Spotify on that device.'
                 : 'No Spotify found yet.'}
@@ -212,7 +212,7 @@ export function SpotifyCard({ compact, className }: { compact?: boolean; classNa
         {!canUseLocal && !(active && needsKeepAlive(active)) && (
           <div className="grid gap-2 rounded-xl bg-muted p-3">
             <p className="text-xs text-muted-foreground">
-              {isIOS() ? 'On iPhone, the music plays through the Spotify app. ' : ''}Tap below, then come straight back here. Side B keeps Spotify awake for the
+              {isIOS() ? 'On iPhone, the music plays through the Spotify app. ' : ''}Tap below, then come straight back here. Mixtape Memories keeps Spotify awake for the
               rest of the game.
             </p>
             <Button asChild size="sm" className="justify-self-start bg-[#1ED760] text-black hover:bg-[#1ED760]/90">

@@ -40,7 +40,7 @@ function RecapCardDialog({ onClose }: { onClose: () => void }) {
   const share = async () => {
     if (!file) return
     try {
-      await navigator.share({ files: [file], title: 'Our Side B mixtape' })
+      await navigator.share({ files: [file], title: 'Our Mixtape Memories mixtape' })
     } catch (err) {
       if ((err as Error).name !== 'AbortError') toast.error('Could not share')
     }
@@ -64,7 +64,7 @@ function RecapCardDialog({ onClose }: { onClose: () => void }) {
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-center justify-between">
-          <h3 className="text-lg font-medium font-soft">Your recap card</h3>
+          <h3 className="text-lg font-bold font-soft">Your recap card</h3>
           <Button variant="ghost" size="icon-sm" onClick={onClose} aria-label="Close">
             <X />
           </Button>
@@ -112,7 +112,7 @@ function SpotifyButton() {
     const date = new Date(state.createdAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })
     const prompts = state.rounds.filter((r) => r.order.length).map((r) => r.prompt)
     try {
-      const res = await saveToSpotify(`Side B · ${date}`, `Our Side B mixtape: ${prompts.join(' / ')}`.slice(0, 300), tracks, setBusy)
+      const res = await saveToSpotify(`Mixtape Memories · ${date}`, `Our Mixtape Memories mixtape: ${prompts.join(' / ')}`.slice(0, 300), tracks, setBusy)
       setResult(res)
       toast.success('Playlist saved to Spotify', {
         description: res.missing.length ? `${res.missing.length} song${res.missing.length > 1 ? 's' : ''} couldn't be found on Spotify.` : undefined,
@@ -150,7 +150,7 @@ export function RecapScreen({ onExit }: { onExit: () => void }) {
       })
       .join('\n\n')
     try {
-      await navigator.clipboard.writeText(`Side B — game ${state.code}\n\n${text}`)
+      await navigator.clipboard.writeText(`Mixtape Memories — game ${state.code}\n\n${text}`)
       toast.success('Song list copied')
     } catch {
       toast.error('Could not copy')
@@ -160,7 +160,7 @@ export function RecapScreen({ onExit }: { onExit: () => void }) {
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="mx-auto grid w-full max-w-2xl gap-6 py-6">
       <div className="text-center">
-        <h2 className="text-5xl font-medium font-soft">
+        <h2 className="text-5xl font-bold font-soft">
           That's a <em className="brand-text pr-1">wrap.</em>
         </h2>
         <p className="mt-2 text-muted-foreground">
@@ -188,7 +188,7 @@ export function RecapScreen({ onExit }: { onExit: () => void }) {
 
       {photos.length > 0 ? (
         <section className="grid gap-3">
-          <h3 className="px-1 text-lg font-medium font-soft">Photos</h3>
+          <h3 className="px-1 text-lg font-bold font-soft">Photos</h3>
           <div className="grid grid-cols-2 gap-x-4 gap-y-6 px-1 py-2 sm:grid-cols-3">
             {photos.map((r, i) => (
               <Polaroid key={r.id} photo={r.photo!} caption={r.prompt} tilt={i % 2 ? 2.5 : -2.5} />
@@ -209,7 +209,7 @@ export function RecapScreen({ onExit }: { onExit: () => void }) {
         <Card key={r.id} className="p-3">
           <div className="flex items-start gap-3 px-2 pt-1 pb-3">
             {playerById(state, r.askerId) && <PlayerAvatar player={playerById(state, r.askerId)!} size="sm" />}
-            <p className="font-display text-lg leading-snug italic">{r.prompt}</p>
+            <p className="font-note text-xl leading-snug italic">{r.prompt}</p>
           </div>
           {r.order.map((pid) => {
             const p = r.picks.find((x) => x.playerId === pid)!

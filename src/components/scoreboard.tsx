@@ -27,7 +27,7 @@ export function Scoreboard({ className, compact }: { className?: string; compact
   return (
     <div className={cn('grid gap-1', className)}>
       {!compact && (
-        <h3 className="px-2 pb-1 text-lg font-medium font-soft">
+        <h3 className="px-2 pb-1 text-lg font-bold font-soft">
           {guessing ? 'Scores' : Object.keys(crowns).length ? 'Song of the round wins' : 'Fan favorites'}
         </h3>
       )}
@@ -75,9 +75,9 @@ export function FanFavoriteBanner({ className }: { className?: string }) {
       <span className="grid size-11 shrink-0 place-items-center rounded-full bg-[var(--pastel-2)] text-2xl">{top ?? '🔥'}</span>
       <div className="grid min-w-0">
         <span className="text-xs font-semibold tracking-[0.14em] text-accent uppercase">Fan favorite</span>
-        <span className="truncate font-display text-xl font-medium font-soft">{names.join(' & ')}</span>
+        <span className="truncate font-display text-xl font-bold font-soft">{names.join(' & ')}</span>
         <span className="text-xs text-muted-foreground">
-          {total} reactions{favs.length > 1 ? ' each' : ''}
+          {total} {total === 1 ? 'reaction' : 'reactions'}{favs.length > 1 ? ' each' : ''}
           {top ? ` · mostly ${top}` : ''}
         </span>
       </div>

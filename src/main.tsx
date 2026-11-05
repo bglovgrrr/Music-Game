@@ -12,7 +12,7 @@ function SpotifyDone() {
     <div className="grid min-h-dvh place-items-center p-6 text-center">
       <div className="grid gap-2">
         <p className="font-display text-2xl">Connected to Spotify</p>
-        <p className="text-muted-foreground">You can close this window and go back to Side B.</p>
+        <p className="text-muted-foreground">You can close this window and go back to Mixtape Memories.</p>
       </div>
     </div>
   )

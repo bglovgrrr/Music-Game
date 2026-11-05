@@ -3,6 +3,7 @@ import { AnimatePresence, motion } from 'motion/react'
 import { toast } from 'sonner'
 import { GameSettings } from '@/components/game-settings'
 import { PlayerAvatar } from '@/components/game-ui'
+import { LabelTape } from '@/components/physical'
 import { QrCode } from '@/components/qr-code'
 import { SpotifyCard } from '@/components/spotify-card'
 import { spotifyConfigured } from '@/music/spotify-auth'
@@ -18,10 +19,10 @@ export function LobbyScreen() {
   const inviteUrl = `${window.location.origin}${window.location.pathname}?join=${state.code}`
 
   const invite = async () => {
-    const text = `Join my Side B game! Code: ${state.code}`
+    const text = `Join my Mixtape Memories game! Code: ${state.code}`
     try {
       if (navigator.share) {
-        await navigator.share({ title: 'Side B', text, url: inviteUrl })
+        await navigator.share({ title: 'Mixtape Memories', text, url: inviteUrl })
         return
       }
     } catch (err) {
@@ -50,7 +51,7 @@ export function LobbyScreen() {
         <div>
           <p className="text-sm font-medium text-muted-foreground">Room code</p>
           <button onClick={copy} className="group mt-1 inline-flex cursor-pointer items-center gap-3" aria-label={`Copy room code ${state.code}`}>
-            <span className="font-display text-7xl font-medium tracking-[0.12em] italic brand-text font-soft">{state.code}</span>
+            <LabelTape className="py-2 text-5xl">{state.code}</LabelTape>
             <Copy className="size-5 text-muted-foreground transition group-hover:text-foreground" />
           </button>
         </div>

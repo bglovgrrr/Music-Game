@@ -24,7 +24,7 @@ export function setupPwa() {
       }
       if (offered) return
       offered = true
-      toast('A new version of Side B is ready', {
+      toast('A new version of Mixtape Memories is ready', {
         duration: Infinity,
         action: { label: 'Update', onClick: () => void update(true) },
       })

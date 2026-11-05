@@ -12,9 +12,9 @@ export function QrCode({ value, className }: { value: string; className?: string
   }, [value])
 
   return (
-    <div className={cn('rounded-3xl bg-white p-3 shadow-[0_12px_32px_-16px_rgb(40_30_80/0.35)]', className)}>
+    <div className={cn('paper paper-texture on-table rotate-[1.5deg] rounded-[4px] bg-[var(--paper)] p-3', className)}>
       <svg viewBox={`0 0 ${size} ${size}`} className="block size-full" shapeRendering="crispEdges" role="img" aria-label="QR code to join this game">
-        <path d={path} fill="#23202f" />
+        <path d={path} fill="#1e140f" />
       </svg>
     </div>
   )

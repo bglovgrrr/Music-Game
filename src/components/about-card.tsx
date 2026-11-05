@@ -45,7 +45,7 @@ export function AboutButton() {
 
   return (
     <>
-      <Button variant="ghost" size="icon-sm" aria-label="About Side B" title="About Side B" aria-expanded={open} onClick={() => (open ? close() : setOpen(true))}>
+      <Button variant="ghost" size="icon-sm" aria-label="About Mixtape Memories" title="About Mixtape Memories" aria-expanded={open} onClick={() => (open ? close() : setOpen(true))}>
         <Info />
       </Button>
       <AnimatePresence>
@@ -64,8 +64,8 @@ export function AboutButton() {
             key="card"
             role="dialog"
             aria-modal="true"
-            aria-label="About Side B"
-            className="fixed inset-x-4 top-[max(4.5rem,calc(env(safe-area-inset-top)+4rem))] z-50 mx-auto max-w-sm cursor-grab touch-none rounded-[1.6rem] border bg-card p-6 text-card-foreground shadow-[0_24px_48px_-16px_rgb(40_30_80/0.4)] select-none active:cursor-grabbing"
+            aria-label="About Mixtape Memories"
+            className="fixed inset-x-4 top-[max(4.5rem,calc(env(safe-area-inset-top)+4rem))] z-50 mx-auto max-w-sm cursor-grab touch-none paper paper-texture rounded-[4px] bg-[var(--paper)] p-6 shadow-[0_2px_2px_rgb(0_0_0/0.3),0_30px_50px_-18px_rgb(0_0_0/0.8)] select-none active:cursor-grabbing"
             initial={{ opacity: 0, y: -24, scale: 0.92, rotate: -2 }}
             animate={{ opacity: 1, x: 0, y: 0, scale: 1, rotate: 0 }}
             exit={{ opacity: 0, scale: 0.9, ...exitTo, transition: { duration: 0.35, ease: 'easeIn' } }}
@@ -88,7 +88,7 @@ export function AboutButton() {
               <X className="size-4" />
             </button>
 
-            <h2 className="pr-8 text-[2.5rem] leading-[1] font-medium font-soft">
+            <h2 className="pr-8 text-[2.5rem] leading-[1] font-bold font-soft">
               Every song
               <br />
               has a <em className="brand-text pr-1 font-medium">story.</em>

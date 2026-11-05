@@ -1,7 +1,7 @@
 /**
- * Side B as its own Spotify speaker (Spotify Web Playback SDK).
+ * Mixtape Memories as its own Spotify speaker (Spotify Web Playback SDK).
  *
- * The host's browser registers a Spotify Connect device called "Side B (this device)"
+ * The host's browser registers a Spotify Connect device called "Mixtape Memories (this device)"
  * and plays full songs inside the page: no Spotify app to open or keep awake. Needs
  * Spotify Premium and the `streaming` scope. On iOS, activateElement() must run during
  * a tap before audio can start.
@@ -22,7 +22,7 @@ declare global {
   }
 }
 
-export const LOCAL_PLAYER_NAME = 'Side B (this device)'
+export const LOCAL_PLAYER_NAME = 'Mixtape Memories (this device)'
 
 let player: SdkPlayer | null = null
 let deviceId: string | null = null
@@ -95,7 +95,7 @@ function createPlayer(): SdkPlayer {
   }
   p.addListener('initialization_error', fail('This browser can’t play Spotify inside the page'))
   p.addListener('authentication_error', fail('Spotify sign-in needs to be refreshed. Disconnect and connect again'))
-  p.addListener('account_error', fail('Playing inside Side B needs Spotify Premium'))
+  p.addListener('account_error', fail('Playing inside Mixtape Memories needs Spotify Premium'))
   p.addListener('playback_error', (e) => logSpotify(`built-in player playback error: ${String(e?.message ?? '')}`))
   p.addListener('autoplay_failed', () => {
     problem = 'Tap anywhere on this screen, then play again (the browser blocked sound).'

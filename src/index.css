@@ -3,122 +3,187 @@
 
 /* Fonts are bundled (latin subset) so they work offline and in sandboxed previews. */
 @font-face {
-  font-family: 'Fraunces';
+  font-family: 'Bricolage Grotesque';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 200 800;
+  font-stretch: 75% 100%;
+  src: url('../node_modules/@fontsource-variable/bricolage-grotesque/files/bricolage-grotesque-latin-standard-normal.woff2') format('woff2-variations');
+}
+@font-face {
+  font-family: 'Geist';
   font-style: normal;
   font-display: swap;
   font-weight: 100 900;
-  src: url('../node_modules/@fontsource-variable/fraunces/files/fraunces-latin-soft-normal.woff2') format('woff2-variations');
+  src: url('../node_modules/@fontsource-variable/geist/files/geist-latin-wght-normal.woff2') format('woff2-variations');
 }
 @font-face {
-  font-family: 'Fraunces';
+  font-family: 'Geist Mono';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 100 900;
+  src: url('../node_modules/@fontsource-variable/geist-mono/files/geist-mono-latin-wght-normal.woff2') format('woff2-variations');
+}
+@font-face {
+  font-family: 'Instrument Serif';
   font-style: italic;
   font-display: swap;
-  font-weight: 100 900;
-  src: url('../node_modules/@fontsource-variable/fraunces/files/fraunces-latin-soft-italic.woff2') format('woff2-variations');
+  font-weight: 400;
+  src: url('../node_modules/@fontsource/instrument-serif/files/instrument-serif-latin-400-italic.woff2') format('woff2');
 }
 @font-face {
-  font-family: 'Figtree';
+  font-family: 'Instrument Serif';
   font-style: normal;
   font-display: swap;
-  font-weight: 300 900;
-  src: url('../node_modules/@fontsource-variable/figtree/files/figtree-latin-wght-normal.woff2') format('woff2-variations');
+  font-weight: 400;
+  src: url('../node_modules/@fontsource/instrument-serif/files/instrument-serif-latin-400-normal.woff2') format('woff2');
 }
 
 /*
-  Side B — "chill pastel".
-  Layout: one calm column on phones, content + side rail on desktop.
-  Surfaces stay quiet; colour lives in pastel washes (prompt card, covers, avatars).
+  Mixtape Memories: "basement sessions".
+  Everything sits on a dark wooden coffee table, lit by a lamp (amber) and a neon sign (magenta).
+  Two materials sit on the table:
+    - dark objects (cassette cases, black card): the default tokens below
+    - paper (index cards, notes, J-cards): `.paper` re-scopes the tokens so the same
+      utilities (text-muted-foreground, border, bg-muted…) read correctly on cream.
 */
 :root {
-  --background: #f6f5fa;
-  --foreground: #2a2735;
-  --card: #ffffff;
-  --card-foreground: #2a2735;
-  --muted: #eeecf4;
-  --muted-foreground: #6c6880;
-  --primary: #2a2735;
-  --primary-foreground: #fbfaff;
-  --secondary: #ece9fb;
-  --secondary-foreground: #3d3670;
-  --accent: #6f63d9;
-  --accent-foreground: #ffffff;
-  --success: #2f8f6b;
-  --destructive: #d14d5e;
-  --border: #e5e2ee;
-  --input: #dedaea;
-  --ring: #8f86e8;
-  --ink: #23202f; /* text on pastel surfaces, same in both themes */
-  --pastel-1: #cfcaff; /* lilac */
-  --pastel-2: #ffcade; /* rose */
-  --pastel-3: #ffdcc0; /* peach */
-  --pastel-4: #c5ecdc; /* mint */
-  --text-grad-1: #6f63d9;
-  --text-grad-2: #d0578d;
-  --text-grad-3: #d9804a;
-  --glow-1: rgb(207 202 255 / 0.55);
-  --glow-2: rgb(255 202 222 / 0.45);
-  --glow-3: rgb(197 236 220 / 0.45);
-  --vinyl: #2a2735;
-  --radius: 1.1rem;
+  /* the table (light mode = lights on, pale oak) */
+  --table: #b08660;
+  --table-grain: 0.32;
+  --lamp: rgb(255 196 120 / 0.35);
+  --neon-glow: rgb(255 79 163 / 0.14);
+  --background: #b08660;
+  --foreground: #1e140f;
+  --card: #2f2119;
+  --card-foreground: #f3e7da;
+  --muted: rgb(30 20 15 / 0.08);
+  --muted-foreground: #3d2a1f;
+  --primary: #f0a446;
+  --primary-foreground: #1e140f;
+  --secondary: rgb(30 20 15 / 0.12);
+  --secondary-foreground: #1e140f;
+  --accent: #7a3a00;
+  --accent-foreground: #fff8ef;
+  --neon: #c2185b;
+  --success: #2f6b2a;
+  --destructive: #b3261e;
+  --border: rgb(30 20 15 / 0.22);
+  --input: rgb(30 20 15 / 0.3);
+  --ring: #c77a1c;
+  --ink: #1e140f; /* text on coloured chips, same in both themes */
+  --pastel-1: #f4a949; /* lamp amber */
+  --pastel-2: #ff8fc4; /* neon pink */
+  --pastel-3: #e9b07a; /* tan */
+  --pastel-4: #9cc08a; /* plant green */
+  --text-grad-1: #7a3a00;
+  --text-grad-2: #9a2a14;
+  --text-grad-3: #a3124c;
+  --vinyl: #15100d;
+  --radius: 0.75rem;
   color-scheme: light;
 }
 
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme='light']) {
-    --background: #121119;
-    --foreground: #ecebf4;
-    --card: #1a1924;
-    --card-foreground: #ecebf4;
-    --muted: #22212e;
-    --muted-foreground: #a3a0b8;
-    --primary: #d9d5ff;
-    --primary-foreground: #1b1830;
-    --secondary: #26243a;
-    --secondary-foreground: #d9d5ff;
-    --accent: #b8b0ff;
-    --accent-foreground: #1b1830;
-    --success: #8fdcbc;
-    --destructive: #f08a98;
-    --border: #2b2a39;
-    --input: #33313f;
-    --ring: #b8b0ff;
-    --text-grad-1: #c9c3ff;
-    --text-grad-2: #ffbcd6;
-    --text-grad-3: #ffd2b0;
-    --glow-1: rgb(150 140 255 / 0.16);
-    --glow-2: rgb(255 160 200 / 0.09);
-    --glow-3: rgb(140 220 190 / 0.07);
-    --vinyl: #2c2a3c;
+    --table: #24170f;
+    --table-grain: 0.55;
+    --lamp: rgb(255 170 80 / 0.2);
+    --neon-glow: rgb(255 79 163 / 0.13);
+    --background: #24170f;
+    --foreground: #f3e7da;
+    --card: #2e1f17;
+    --card-foreground: #f3e7da;
+    --muted: rgb(243 231 218 / 0.07);
+    --muted-foreground: #cdb8a5;
+    --primary: #f4a949;
+    --primary-foreground: #1e140f;
+    --secondary: rgb(243 231 218 / 0.1);
+    --secondary-foreground: #f3e7da;
+    --accent: #f4a949;
+    --accent-foreground: #1e140f;
+    --neon: #ff4fa3;
+    --success: #9cc08a;
+    --destructive: #ff7b72;
+    --border: rgb(243 231 218 / 0.13);
+    --input: rgb(243 231 218 / 0.2);
+    --ring: #f4a949;
+    --text-grad-1: #f8c27a;
+    --text-grad-2: #f4a949;
+    --text-grad-3: #ff4fa3;
+    --vinyl: #0d0907;
     color-scheme: dark;
   }
 }
 
 :root[data-theme='dark'] {
-  --background: #121119;
-  --foreground: #ecebf4;
-  --card: #1a1924;
-  --card-foreground: #ecebf4;
-  --muted: #22212e;
-  --muted-foreground: #a3a0b8;
-  --primary: #d9d5ff;
-  --primary-foreground: #1b1830;
-  --secondary: #26243a;
-  --secondary-foreground: #d9d5ff;
-  --accent: #b8b0ff;
-  --accent-foreground: #1b1830;
-  --success: #8fdcbc;
-  --destructive: #f08a98;
-  --border: #2b2a39;
-  --input: #33313f;
-  --ring: #b8b0ff;
-  --text-grad-1: #c9c3ff;
-  --text-grad-2: #ffbcd6;
-  --text-grad-3: #ffd2b0;
-  --glow-1: rgb(150 140 255 / 0.16);
-  --glow-2: rgb(255 160 200 / 0.09);
-  --glow-3: rgb(140 220 190 / 0.07);
-  --vinyl: #0a0910;
+  --table: #24170f;
+  --table-grain: 0.55;
+  --lamp: rgb(255 170 80 / 0.2);
+  --neon-glow: rgb(255 79 163 / 0.13);
+  --background: #24170f;
+  --foreground: #f3e7da;
+  --card: #2e1f17;
+  --card-foreground: #f3e7da;
+  --muted: rgb(243 231 218 / 0.07);
+  --muted-foreground: #cdb8a5;
+  --primary: #f4a949;
+  --primary-foreground: #1e140f;
+  --secondary: rgb(243 231 218 / 0.1);
+  --secondary-foreground: #f3e7da;
+  --accent: #f4a949;
+  --accent-foreground: #1e140f;
+  --neon: #ff4fa3;
+  --success: #9cc08a;
+  --destructive: #ff7b72;
+  --border: rgb(243 231 218 / 0.13);
+  --input: rgb(243 231 218 / 0.2);
+  --ring: #f4a949;
+  --text-grad-1: #f8c27a;
+  --text-grad-2: #f4a949;
+  --text-grad-3: #ff4fa3;
+  --vinyl: #0d0907;
   color-scheme: dark;
+}
+
+/* Paper: cream card stock. Same in both themes (a touch dimmer at night, lit by the lamp). */
+.paper {
+  --paper: #f6efe2;
+  --background: #f6efe2;
+  --foreground: #2a1e18;
+  --card: #f6efe2;
+  --card-foreground: #2a1e18;
+  --muted: rgb(42 30 24 / 0.06);
+  --muted-foreground: #6b5546;
+  --primary: #2a1e18;
+  --primary-foreground: #f6efe2;
+  --secondary: rgb(160 86 11 / 0.12);
+  --secondary-foreground: #3a2a20;
+  --accent: #a0560b;
+  --accent-foreground: #fff8ef;
+  --neon: #c2185b;
+  --success: #3f7a3a;
+  --destructive: #b3261e;
+  --border: rgb(42 30 24 / 0.16);
+  --input: rgb(42 30 24 / 0.24);
+  --ring: #a0560b;
+  --text-grad-1: #a0560b;
+  --text-grad-2: #b4421f;
+  --text-grad-3: #c2185b;
+  color: var(--foreground);
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) .paper {
+    --paper: #ece0cc;
+    --background: #ece0cc;
+    --card: #ece0cc;
+  }
+}
+:root[data-theme='dark'] .paper {
+  --paper: #ece0cc;
+  --background: #ece0cc;
+  --card: #ece0cc;
 }
 
 @theme inline {
@@ -144,8 +209,11 @@
   --radius-md: calc(var(--radius) - 4px);
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) + 4px);
-  --font-sans: 'Figtree', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
-  --font-display: 'Fraunces', ui-serif, Georgia, 'Times New Roman', serif;
+  --color-neon: var(--neon);
+  --font-sans: 'Geist', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-display: 'Bricolage Grotesque', 'Geist', ui-sans-serif, system-ui, sans-serif;
+  --font-mono: 'Geist Mono', ui-monospace, 'SF Mono', Menlo, monospace;
+  --font-note: 'Instrument Serif', ui-serif, Georgia, serif;
 }
 
 @layer base {
@@ -165,8 +233,8 @@
   }
   h1, h2, h3 {
     @apply font-display;
-    font-variation-settings: 'SOFT' 100;
-    letter-spacing: -0.015em;
+    font-stretch: 80%;
+    letter-spacing: -0.01em;
     text-wrap: balance;
   }
   ::selection {
@@ -175,21 +243,53 @@
   }
 }
 
-/* Soft lilac → rose → peach wash. Text on it uses --ink. */
+/* The lamp-lit key: amber, with a lip. Text on it uses --ink. */
 @utility brand-gradient {
-  background-image: linear-gradient(125deg, var(--pastel-1) 0%, var(--pastel-2) 55%, var(--pastel-3) 100%);
+  background-image: linear-gradient(180deg, #f8bb62, #ec9c38);
   color: var(--ink);
 }
 
 @utility brand-text {
-  background-image: linear-gradient(110deg, var(--text-grad-1), var(--text-grad-2) 60%, var(--text-grad-3));
+  background-image: linear-gradient(110deg, var(--text-grad-1), var(--text-grad-2) 55%, var(--text-grad-3));
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
 }
 
+/* Poster headline: condensed and heavy (was a soft serif). */
 @utility font-soft {
-  font-variation-settings: 'SOFT' 100;
+  font-stretch: 80%;
+}
+
+/* A physical key: lip at the bottom, sinks when pressed. */
+@utility key {
+  box-shadow:
+    inset 0 -3px 0 rgb(0 0 0 / 0.22),
+    inset 0 1px 0 rgb(255 255 255 / 0.18),
+    0 2px 0 rgb(0 0 0 / 0.35),
+    0 8px 16px -8px rgb(0 0 0 / 0.6);
+  &:active:not(:disabled) {
+    transform: translateY(2px);
+    box-shadow:
+      inset 0 -1px 0 rgb(0 0 0 / 0.22),
+      inset 0 2px 3px rgb(0 0 0 / 0.2),
+      0 0 0 rgb(0 0 0 / 0.35),
+      0 4px 10px -6px rgb(0 0 0 / 0.6);
+  }
+}
+
+/* Something resting on the table: contact shadow plus a soft lamp shadow. */
+@utility on-table {
+  box-shadow:
+    0 1px 1px rgb(0 0 0 / 0.25),
+    0 3px 6px -2px rgb(0 0 0 / 0.35),
+    0 18px 36px -18px rgb(0 0 0 / 0.75);
+}
+
+@utility neon-glow {
+  box-shadow:
+    0 0 0 1px rgb(255 79 163 / 0.6),
+    0 0 18px rgb(255 79 163 / 0.45);
 }
 
 @utility pt-safe {
@@ -207,16 +307,85 @@
   }
 }
 
-/* Pastel haze behind everything */
+/* The coffee table: wood grain + plank seams, a lamp on the left, a neon sign on the right. */
 .app-backdrop {
   position: fixed;
   inset: 0;
   z-index: -1;
   pointer-events: none;
+  background-color: var(--table);
+}
+.app-backdrop::before,
+.app-backdrop::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+}
+/* grain and seams */
+.app-backdrop::before {
+  opacity: var(--table-grain);
+  background-image:
+    repeating-linear-gradient(180deg, transparent 0 calc(11rem - 2px), rgb(0 0 0 / 0.55) calc(11rem - 2px) 11rem, rgb(255 255 255 / 0.06) 11rem calc(11rem + 1px), transparent calc(11rem + 1px) 11rem),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='700' height='520'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.0035 0.11' numOctaves='4' seed='11'/%3E%3CfeColorMatrix values='0 0 0 0 0.08 0 0 0 0 0.04 0 0 0 0 0.02 0 0 0 1.4 -0.35'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23g)'/%3E%3C/svg%3E"),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' seed='3'/%3E%3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.35 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+/* light: lamp glow top-left, neon sign top-right, darker edges */
+.app-backdrop::after {
   background:
-    radial-gradient(48rem 28rem at 0% -5%, var(--glow-1), transparent 65%),
-    radial-gradient(40rem 26rem at 105% 15%, var(--glow-2), transparent 65%),
-    radial-gradient(44rem 30rem at 40% 115%, var(--glow-3), transparent 65%);
+    radial-gradient(60rem 40rem at -5% -10%, var(--lamp), transparent 60%),
+    radial-gradient(40rem 30rem at 108% 4%, var(--neon-glow), transparent 62%),
+    radial-gradient(120% 90% at 50% 40%, transparent 55%, rgb(0 0 0 / 0.45));
+}
+
+/* Paper texture: faint fibres. Add to anything with .paper. */
+.paper-texture {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='p'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='3' seed='5'/%3E%3CfeColorMatrix values='0 0 0 0 0.35 0 0 0 0 0.25 0 0 0 0 0.15 0 0 0 0.09 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23p)'/%3E%3C/svg%3E");
+}
+
+/* Index card: red header rule, blue lines, cream stock. */
+.index-card {
+  --rule: 1.75rem;
+  --head: 2.75rem;
+  background-color: var(--paper);
+  background-image:
+    linear-gradient(to bottom, transparent 0 var(--head), rgb(214 69 80 / 0.65) var(--head) calc(var(--head) + 2px), transparent calc(var(--head) + 2px)),
+    linear-gradient(var(--paper), var(--paper)),
+    repeating-linear-gradient(to bottom, transparent 0 calc(var(--rule) - 1px), rgb(88 140 210 / 0.4) calc(var(--rule) - 1px) var(--rule)),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='p'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='3' seed='5'/%3E%3CfeColorMatrix values='0 0 0 0 0.35 0 0 0 0 0.25 0 0 0 0 0.15 0 0 0 0.09 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23p)'/%3E%3C/svg%3E");
+  background-size: 100% 100%, 100% calc(var(--head) + 2px), 100% var(--rule), auto;
+  background-repeat: no-repeat, no-repeat, repeat, repeat;
+  background-position: 0 0, 0 0, 0 calc(var(--head) + 2px), 0 0;
+}
+
+/* Torn edges (the shadow comes from a drop-shadow on the parent, which follows the tear). */
+.torn-bottom {
+  mask:
+    linear-gradient(#000 0 0) top / 100% calc(100% - 9px) no-repeat,
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='90' height='10' preserveAspectRatio='none'%3E%3Cpath d='M0 0H90V3L86 7 81 4 77 8 71 5 66 9 61 4 56 7 50 3 45 8 40 5 34 9 29 4 24 6 19 3 14 8 9 5 4 9 0 4Z'/%3E%3C/svg%3E") bottom / 90px 10px repeat-x;
+}
+.torn-top {
+  mask:
+    linear-gradient(#000 0 0) bottom / 100% calc(100% - 9px) no-repeat,
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='90' height='10' preserveAspectRatio='none'%3E%3Cpath d='M0 10H90V6L85 2 80 6 74 1 69 5 63 2 58 7 53 3 47 6 42 1 36 5 31 2 26 6 20 3 15 7 10 2 5 6 0 3Z'/%3E%3C/svg%3E") top / 90px 10px repeat-x;
+}
+.drop-on-table {
+  filter: drop-shadow(0 1px 1px rgb(0 0 0 / 0.3)) drop-shadow(0 10px 14px rgb(0 0 0 / 0.45));
+}
+
+/* Label-maker tape: embossed letters. */
+.label-tape {
+  background: linear-gradient(180deg, #2a2522, #151210 55%, #0f0c0b);
+  color: #f3eee6;
+  text-shadow: 0 1px 0 rgb(0 0 0 / 0.9), 0 -1px 0 rgb(255 255 255 / 0.25);
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.12), 0 1px 1px rgb(0 0 0 / 0.4), 0 6px 12px -6px rgb(0 0 0 / 0.7);
+  border-radius: 3px;
+}
+
+/* Washi / masking tape holding paper down. */
+.washi {
+  background: repeating-linear-gradient(90deg, rgb(244 169 73 / 0.72) 0 6px, rgb(248 194 122 / 0.72) 6px 12px);
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='24' preserveAspectRatio='none'%3E%3Cpath d='M2 0H8L10 3 8 6 10 9 8 12 10 15 8 18 10 21 8 24H2L0 21 2 18 0 15 2 12 0 9 2 6 0 3Z'/%3E%3C/svg%3E") 0 0 / 100% 100%;
+  box-shadow: 0 1px 2px rgb(0 0 0 / 0.15);
 }
 
 .vinyl {

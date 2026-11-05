@@ -34,7 +34,7 @@ export function AskingScreen() {
           <PlayerAvatar player={asker} size="xl" ring />
         </motion.div>
         <div>
-          <h2 className="text-3xl font-medium font-soft">{asker.name} is asking</h2>
+          <h2 className="text-3xl font-bold font-soft">{asker.name} is asking</h2>
           <p className="mt-1 text-muted-foreground">Thinking of a question for the group…</p>
         </div>
         <span className="flex gap-1.5">
@@ -57,7 +57,7 @@ export function AskingScreen() {
     <div className="mx-auto grid w-full max-w-2xl gap-6 py-4">
       <div>
         <p className="text-xs font-semibold tracking-[0.14em] text-accent uppercase">Round {state.rounds.length + 1} · your turn</p>
-        <h2 className="mt-1.5 text-4xl font-medium font-soft">Ask the group a question</h2>
+        <h2 className="mt-1.5 text-4xl font-bold font-soft">Ask the group a question</h2>
         <p className="mt-1 text-muted-foreground">Everyone answers with a song.</p>
       </div>
 
@@ -123,7 +123,7 @@ export function AskingScreen() {
               <button
                 onClick={() => ask(p, theme.id)}
                 disabled={used.has(p)}
-                className="flex h-full w-full cursor-pointer items-center rounded-2xl border bg-card p-4 text-left font-display text-[1.05rem] italic transition hover:-translate-y-0.5 hover:border-ring/60 hover:shadow-md disabled:cursor-default disabled:opacity-40 disabled:hover:translate-y-0"
+                className="flex h-full w-full cursor-pointer items-center rounded-2xl border bg-card p-4 text-left font-note text-[1.2rem] leading-snug italic transition hover:-translate-y-0.5 hover:border-ring/60 hover:shadow-md disabled:cursor-default disabled:opacity-40 disabled:hover:translate-y-0"
               >
                 {p}
               </button>

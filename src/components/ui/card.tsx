@@ -1,11 +1,19 @@
 import * as React from 'react'
 import { cn } from '@/lib/utils'
 
-function Card({ className, ...props }: React.ComponentProps<'div'>) {
+/**
+ * Something lying on the table. `paper` (default): cream card stock. `dark`: a black
+ * card / cassette case. Paper re-scopes the colour tokens, so children just use the usual classes.
+ */
+function Card({ className, material = 'paper', ...props }: React.ComponentProps<'div'> & { material?: 'paper' | 'dark' }) {
   return (
     <div
       data-slot="card"
-      className={cn('rounded-2xl border bg-card text-card-foreground shadow-[0_1px_2px_rgb(0_0_0/0.03),0_8px_24px_-16px_rgb(60_50_120/0.18)]', className)}
+      className={cn(
+        'on-table rounded-[6px] bg-card text-card-foreground',
+        material === 'paper' ? 'paper paper-texture' : 'border border-white/10',
+        className,
+      )}
       {...props}
     />
   )

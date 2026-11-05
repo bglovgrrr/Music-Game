@@ -15,7 +15,7 @@ export type SpotifyPlayback = {
 }
 
 const DEVICE_KEY = 'sideb:spotify-device'
-/** Stored choice meaning "Side B's own in-page player" (its device id changes every visit). */
+/** Stored choice meaning "Mixtape Memories' own in-page player" (its device id changes every visit). */
 export const LOCAL = 'local'
 export const chosenDeviceId = () => safeStorage.get(DEVICE_KEY) || null
 export const chooseDevice = (id: string | null) => safeStorage.set(DEVICE_KEY, id ?? '')
@@ -26,7 +26,7 @@ export const isIOS = () =>
   (/iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1))
 
 const LOCAL_BROKEN_KEY = 'sideb:local-player-broken'
-/** Side B's built-in player can be used on this browser (not iOS, and it hasn't failed here before). */
+/** Mixtape Memories' built-in player can be used on this browser (not iOS, and it hasn't failed here before). */
 export const localPlayerUsable = () => !isIOS() && safeStorage.get(LOCAL_BROKEN_KEY) !== '1'
 const markLocalBroken = () => safeStorage.set(LOCAL_BROKEN_KEY, '1')
 
@@ -49,10 +49,10 @@ export async function listDevices(): Promise<SpotifyDevice[]> {
   return (d?.devices ?? []).filter((x) => x.id)
 }
 
-/** The device to play on: the one picked in Side B, else Spotify's active one, else the first available. */
+/** The device to play on: the one picked in Mixtape Memories, else Spotify's active one, else the first available. */
 async function targetDevice(): Promise<SpotifyDevice> {
   const picked = chosenDeviceId()
-  // Default: Side B's own in-page player (no Spotify app needed), where it works.
+  // Default: Mixtape Memories' own in-page player (no Spotify app needed), where it works.
   if ((!picked || picked === LOCAL) && localPlayerUsable()) {
     const id = localDeviceId() ?? (await ensureLocalPlayer())
     if (id) return { id, name: 'this device', type: 'Computer', is_active: true }
@@ -91,7 +91,7 @@ async function albumOf(uri: string, known?: string): Promise<string | null> {
  *
  * Songs are started *from their album* (context_uri + offset). Playing a bare track
  * (`uris: [...]`) is accepted by Spotify but plays nothing for Development Mode apps
- * (seen with Side B's app in Nov 2026: player ends up empty with controls disallowed).
+ * (seen with Mixtape Memories' app in Nov 2026: player ends up empty with controls disallowed).
  * When the song ends, the game pauses Spotify before the next album track gets far.
  */
 export async function playTrack(uri: string, positionMs: number, albumUri?: string): Promise<SpotifyDevice> {

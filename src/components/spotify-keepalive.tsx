@@ -18,7 +18,7 @@ import {
 /**
  * Host only. When the music plays on a phone's Spotify app, iOS puts that app to sleep
  * once it's paused. So whenever no song is playing, keep Spotify busy with silence.
- * Checks every 45s and whenever the host comes back to Side B.
+ * Checks every 45s and whenever the host comes back to Mixtape Memories.
  */
 export function SpotifyKeepAlive() {
   const { state, client } = useGame()

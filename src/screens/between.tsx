@@ -3,6 +3,7 @@ import { motion } from 'motion/react'
 import { useState } from 'react'
 import { GameSettings } from '@/components/game-settings'
 import { AlbumArt, CrownedName, PlayerAvatar, PromptCard } from '@/components/game-ui'
+import { IndexCard, IndexCardHeader } from '@/components/physical'
 import { FanFavoriteBanner, Scoreboard } from '@/components/scoreboard'
 import { SelfieCard } from '@/components/selfie'
 import { Button } from '@/components/ui/button'
@@ -26,20 +27,22 @@ export function BetweenScreen() {
       <div className="grid min-w-0 content-start gap-5">
         <div className="text-center">
           <p className="text-xs font-semibold tracking-[0.14em] text-accent uppercase">Round {round.number} complete</p>
-          <h2 className="mt-1.5 text-4xl font-medium font-soft">What a mixtape.</h2>
+          <h2 className="mt-1.5 text-4xl font-bold font-soft">What a mixtape.</h2>
         </div>
         <PromptCard prompt={round.prompt} asker={playerById(state, round.askerId)} compact />
 
         <div className="grid gap-2">
-          <div className="flex items-baseline justify-between px-1">
-            <h3 className="text-lg font-medium font-soft">Song of the round</h3>
-            <span className="text-xs text-muted-foreground">
-              {voted}/{voters} voted
-            </span>
-          </div>
-          <p className="px-1 text-sm text-muted-foreground">{myVote ? 'Tap another song to change your vote.' : 'Tap your favourite (not your own).'}</p>
-          <Card className="p-2">
-            <ul className="grid gap-1">
+          <IndexCard tilt={-0.8} className="mt-1">
+            <IndexCardHeader>
+              <h3 className="text-xl leading-none font-bold font-soft">Song of the round</h3>
+              <span className="font-mono text-xs tracking-[0.1em] text-muted-foreground">
+                {voted}/{voters} VOTED
+              </span>
+            </IndexCardHeader>
+            <p className="flex h-[1.75rem] items-center px-4 font-note text-[1.1rem] text-muted-foreground italic">
+              {myVote ? 'Tap another song to change your vote.' : 'Tap your favourite (not your own).'}
+            </p>
+            <ul className="grid px-2">
               {round.order.map((pid) => {
                 const p = round.picks.find((x) => x.playerId === pid)!
                 const who = playerById(state, pid)
@@ -52,12 +55,12 @@ export function BetweenScreen() {
                       onClick={() => dispatch({ type: 'vote', owner: pid })}
                       aria-pressed={myVote === pid}
                       className={cn(
-                        'flex w-full items-center gap-3 rounded-2xl p-2 text-left transition-colors',
+                        'flex min-h-[3.5rem] w-full items-center gap-3 rounded-md px-2 py-1 text-left transition-colors',
                         !mine && 'cursor-pointer hover:bg-muted',
                         myVote === pid && 'bg-secondary',
                       )}
                     >
-                      <AlbumArt track={p.track} className="size-12 shrink-0" rounded="rounded-lg" />
+                      <AlbumArt track={p.track} className="size-11 shrink-0 shadow-sm" rounded="rounded-[3px]" />
                       <div className="min-w-0 flex-1">
                         <div className="truncate font-semibold">{p.track.title}</div>
                         {round.reactions?.[pid] && (
@@ -88,7 +91,7 @@ export function BetweenScreen() {
                 )
               })}
             </ul>
-          </Card>
+          </IndexCard>
         </div>
       </div>
 
