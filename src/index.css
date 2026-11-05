@@ -373,6 +373,13 @@
     linear-gradient(#000 0 0) bottom / 100% calc(100% - 9px) no-repeat,
     url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='90' height='10' preserveAspectRatio='none'%3E%3Cpath d='M0 10H90V6L85 2 80 6 74 1 69 5 63 2 58 7 53 3 47 6 42 1 36 5 31 2 26 6 20 3 15 7 10 2 5 6 0 3Z'/%3E%3C/svg%3E") top / 90px 10px repeat-x;
 }
+.torn-both {
+  --tx: 0px;
+  mask:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='90' height='10' preserveAspectRatio='none'%3E%3Cpath d='M0 10H90V6L85 2 80 6 74 1 69 5 63 2 58 7 53 3 47 6 42 1 36 5 31 2 26 6 20 3 15 7 10 2 5 6 0 3Z'/%3E%3C/svg%3E") var(--tx) 0 / 90px 10px repeat-x,
+    linear-gradient(#000 0 0) center / 100% calc(100% - 18px) no-repeat,
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='90' height='10' preserveAspectRatio='none'%3E%3Cpath d='M0 0H90V3L86 7 81 4 77 8 71 5 66 9 61 4 56 7 50 3 45 8 40 5 34 9 29 4 24 6 19 3 14 8 9 5 4 9 0 4Z'/%3E%3C/svg%3E") calc(var(--tx) * -1) 100% / 90px 10px repeat-x;
+}
 .drop-on-table {
   filter: drop-shadow(0 1px 1px rgb(0 0 0 / 0.3)) drop-shadow(0 10px 14px rgb(0 0 0 / 0.45));
 }

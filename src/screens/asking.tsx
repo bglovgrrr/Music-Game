@@ -1,6 +1,6 @@
 import { CassetteTape, Dices, HeartCrack, House, MapPinned, Send, Shuffle, Waves, Zap, type LucideIcon } from 'lucide-react'
 import { motion } from 'motion/react'
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import { PlayerAvatar } from '@/components/game-ui'
 import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/input'
@@ -117,20 +117,121 @@ export function AskingScreen() {
             )
           })}
         </div>
-        <motion.ul key={themeId} initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="grid gap-2 sm:grid-cols-2">
-          {theme.prompts.map((p) => (
-            <li key={p}>
-              <button
-                onClick={() => ask(p, theme.id)}
-                disabled={used.has(p)}
-                className="paper paper-texture on-table flex h-full w-full cursor-pointer items-center rounded-[3px] bg-card p-4 text-left font-note text-[1.2rem] leading-snug italic transition hover:-translate-y-0.5 hover:border-ring/60 hover:shadow-md disabled:cursor-default disabled:opacity-40 disabled:hover:translate-y-0"
-              >
-                {p}
-              </button>
-            </li>
-          ))}
-        </motion.ul>
+        <QuestionStrips key={themeId} prompts={theme.prompts} used={used} onPick={(p) => ask(p, theme.id)} />
       </div>
     </div>
   )
 }
+
+const HOLD_MS = 320
+const STRIP_SPRING = { type: 'spring', stiffness: 260, damping: 26 } as const
+
+/** Small stable "randomness" per strip so the pile looks dropped by hand. */
+function jitter(i: number, salt: number) {
+  const x = Math.sin((i + 1) * 12.9898 + salt * 78.233) * 43758.5453
+  return x - Math.floor(x) - 0.5 // -0.5..0.5
+}
+
+/**
+ * The theme's questions as torn strips of paper piled on the table, overlapping.
+ * Tap a strip to ask it. Press and hold anywhere on the pile to spread the strips apart
+ * (hold again to pile them back up).
+ */
+function QuestionStrips({ prompts, used, onPick }: { prompts: string[]; used: Set<string>; onPick: (p: string) => void }) {
+  const [spread, setSpread] = useState(false)
+  const [lifted, setLifted] = useState<number | null>(null)
+  const press = useRef<{ timer: number; x: number; y: number; fired: boolean } | null>(null)
+
+  const cancel = () => {
+    if (press.current) window.clearTimeout(press.current.timer)
+    setLifted(null)
+  }
+  const down = (i: number, e: React.PointerEvent) => {
+    if (e.button !== 0) return
+    cancel()
+    setLifted(i)
+    press.current = {
+      x: e.clientX,
+      y: e.clientY,
+      fired: false,
+      timer: window.setTimeout(() => {
+        if (!press.current) return
+        press.current.fired = true
+        setSpread((v) => !v)
+        try {
+          navigator.vibrate?.(10)
+        } catch {
+          /* ignore */
+        }
+      }, HOLD_MS),
+    }
+  }
+  const move = (e: React.PointerEvent) => {
+    const p = press.current
+    if (p && !p.fired && Math.hypot(e.clientX - p.x, e.clientY - p.y) > 8) {
+      window.clearTimeout(p.timer)
+      press.current = null
+      setLifted(null)
+    }
+  }
+  const up = () => {
+    if (press.current) window.clearTimeout(press.current.timer)
+    setLifted(null)
+  }
+  const click = (p: string) => {
+    // A hold spreads the pile; it shouldn't also pick the question.
+    if (press.current?.fired) {
+      press.current = null
+      return
+    }
+    press.current = null
+    onPick(p)
+  }
+
+  return (
+    <div className="grid gap-2 pt-1">
+      <ul className="mx-auto grid w-full max-w-xl pb-2">
+        {prompts.map((p, i) => {
+          const done = used.has(p)
+          return (
+            <motion.li
+              key={p}
+              initial={{ opacity: 0, y: 18, rotate: jitter(i, 1) * 6 }}
+              animate={{
+                opacity: done ? 0.5 : 1,
+                y: 0,
+                marginTop: i === 0 ? 0 : spread ? 10 : -16,
+                rotate: jitter(i, 1) * (spread ? 1.2 : 3.4),
+                x: jitter(i, 2) * (spread ? 4 : 14),
+                scale: lifted === i ? 1.025 : 1,
+              }}
+              transition={{ ...STRIP_SPRING, delay: 0, opacity: { duration: 0.2 } }}
+              className="drop-on-table relative"
+              style={{ zIndex: lifted === i ? 20 : i }}
+            >
+              <button
+                onPointerDown={(e) => down(i, e)}
+                onPointerMove={move}
+                onPointerUp={up}
+                onPointerCancel={cancel}
+                onPointerLeave={up}
+                onContextMenu={(e) => e.preventDefault()}
+                onClick={() => click(p)}
+                disabled={done}
+                className="paper paper-texture torn-both block w-full cursor-pointer bg-[var(--paper)] px-5 pt-6 pb-6 text-left font-note text-[1.25rem] leading-snug italic select-none [-webkit-touch-callout:none] disabled:cursor-default"
+                style={{ ['--tx' as string]: `${Math.round(jitter(i, 3) * 80)}px` }}
+              >
+                {p}
+                {done && <span className="ml-2 font-mono text-[0.6rem] tracking-[0.14em] text-muted-foreground uppercase not-italic">asked</span>}
+              </button>
+            </motion.li>
+          )
+        })}
+      </ul>
+      <p className="text-center font-mono text-[0.65rem] tracking-[0.14em] text-muted-foreground uppercase">
+        Tap to ask · hold to {spread ? 'pile them up' : 'spread them out'}
+      </p>
+    </div>
+  )
+}
+
