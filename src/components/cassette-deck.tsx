@@ -1,8 +1,15 @@
 import { Pause, Play, Rewind, FastForward } from 'lucide-react'
+import { AnimatePresence, motion } from 'motion/react'
 import { useEffect, useState } from 'react'
 import { SongCassette } from '@/components/cassette'
 import type { Track } from '@/game/types'
 import { cn, formatTime } from '@/lib/utils'
+
+const SLIDE = {
+  enter: (d: number) => ({ x: `${d * 115}%` }),
+  center: { x: '0%' },
+  exit: (d: number) => ({ x: `${d * -115}%` }),
+}
 
 /**
  * An old black 80s portable cassette player: textured plastic, silver print, a smoked
@@ -22,6 +29,7 @@ export function CassetteDeck({
   onPrev,
   onNext,
   onSeek,
+  direction = 1,
 }: {
   track: Track
   playing: boolean
@@ -35,6 +43,8 @@ export function CassetteDeck({
   onPrev: () => void
   onNext: () => void
   onSeek: (ms: number) => void
+  /** 1 = next song (tape slides in from the right), -1 = previous (from the left). */
+  direction?: 1 | -1
 }) {
   const pct = durationMs ? Math.min(100, (positionMs / durationMs) * 100) : 0
   const paused = !playing && positionMs > 0
@@ -50,8 +60,21 @@ export function CassetteDeck({
       </div>
 
       {/* cassette door */}
-      <div className="deck-door relative overflow-hidden rounded-[10px] p-[6%] pb-[5%]">
-        <SongCassette track={track} playing={playing} progress={durationMs ? positionMs / durationMs : 0} back={back} />
+      <div className="deck-door relative grid overflow-hidden rounded-[10px] p-[6%] pb-[5%]">
+        <AnimatePresence initial={false} custom={direction}>
+          <motion.div
+            key={track.id}
+            custom={direction}
+            variants={SLIDE}
+            initial="enter"
+            animate="center"
+            exit="exit"
+            transition={{ type: 'spring', stiffness: 170, damping: 26 }}
+            className="[grid-area:1/1]"
+          >
+            <SongCassette track={track} playing={playing} progress={durationMs ? positionMs / durationMs : 0} back={back} />
+          </motion.div>
+        </AnimatePresence>
         <div className="deck-glass pointer-events-none absolute inset-0 rounded-[10px]" />
         <span className="absolute top-1.5 left-2.5 font-mono text-[0.5rem] tracking-[0.2em] text-[#8d867c] uppercase">◀ Eject</span>
       </div>

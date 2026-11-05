@@ -3,7 +3,6 @@ import { motion } from 'motion/react'
 import { useEffect, useState } from 'react'
 import { AboutButton } from '@/components/about-card'
 import { Cassette } from '@/components/cassette'
-import { Logo } from '@/components/game-ui'
 import { ThemeToggle } from '@/components/theme-toggle'
 import { Button } from '@/components/ui/button'
 import { onlineAvailable } from '@/lib/supabase'
@@ -65,8 +64,7 @@ export function HomeScreen({
 
   return (
     <div className="mx-auto flex min-h-dvh w-full max-w-5xl flex-col px-4 pt-safe sm:px-8">
-      <header className="flex h-16 items-center justify-between">
-        <Logo />
+      <header className="flex h-16 items-center justify-end">
         <div className="flex items-center gap-1">
           <AboutButton />
           <ThemeToggle />

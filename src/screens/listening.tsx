@@ -1,5 +1,6 @@
 import { Check, Eye, ExternalLink, MessageCircle, SkipForward, Speaker } from 'lucide-react'
 import { AnimatePresence, motion } from 'motion/react'
+import { useState } from 'react'
 import { AlbumArt, Equalizer, PlayerAvatar, PromptCard } from '@/components/game-ui'
 import { ReactionBar } from '@/components/reactions'
 import { CassetteDeck } from '@/components/cassette-deck'
@@ -104,21 +105,21 @@ export function ListeningScreen() {
   const fresh = !isPlaying && pos === 0
   const isLast = round.current === round.order.length - 1
   const revealed = isRevealed(round, pick.playerId)
+  // Which way the tape slides: forward (from the right) or back (from the left).
+  const [prevIdx, setPrevIdx] = useState(round.current)
+  const [dir, setDir] = useState<1 | -1>(1)
+  if (round.current !== prevIdx) {
+    setDir(round.current > prevIdx ? 1 : -1)
+    setPrevIdx(round.current)
+  }
 
   return (
     <div className="grid gap-6 py-4 md:grid-cols-[1fr_320px] md:gap-8">
       <div className="grid min-w-0 content-start gap-5">
         <PromptCard prompt={round.prompt} topic={themeName(round.themeId)} asker={asker} compact />
 
-        <AnimatePresence mode="wait">
-          <motion.div
-            key={pick.playerId}
-            initial={{ opacity: 0, y: 20, scale: 0.98 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: -20 }}
-            transition={{ type: 'spring', stiffness: 260, damping: 26 }}
-            className="grid justify-items-center gap-5 text-center"
-          >
+        {/* Changing song: only the tape slides (inside the deck) and the title cross-fades. */}
+        <div className="grid justify-items-center gap-5 text-center">
             {/* The 80s cassette player, with the song's tape in the door */}
             <CassetteDeck
               track={pick.track}
@@ -133,29 +134,45 @@ export function ListeningScreen() {
               onPrev={() => dispatch({ type: 'prev', from: round.current })}
               onNext={() => dispatch({ type: 'next', from: round.current })}
               onSeek={(ms) => dispatch({ type: 'seek', positionMs: ms })}
+              direction={dir}
             />
 
-            <div className="grid gap-1">
-              <h2 className="text-3xl font-bold font-soft sm:text-4xl">{pick.track.title}</h2>
-              <p className="text-lg text-muted-foreground">{pick.track.artist}</p>
+            {/* Fixed-height block: title, artist, who picked it and their note cross-fade together,
+                so nothing below moves when the song changes. */}
+            <div className="grid w-full">
+              <AnimatePresence initial={false}>
+                <motion.div
+                  key={pick.playerId}
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  transition={{ duration: 0.45, ease: 'easeInOut' }}
+                  className="grid content-start justify-items-center gap-1 [grid-area:1/1]"
+                >
+                  <h2 className="line-clamp-1 text-3xl font-bold font-soft sm:text-4xl">{pick.track.title}</h2>
+                  <p className="line-clamp-1 text-lg text-muted-foreground">{pick.track.artist}</p>
+                  <div className="mt-2 grid h-9 place-items-center">
+                    {picker && revealed && (
+                      <motion.div
+                        initial={round.guessMode ? { scale: 0.8, opacity: 0 } : false}
+                        animate={{ scale: 1, opacity: 1 }}
+                        transition={{ type: 'spring', stiffness: 300, damping: 18 }}
+                        className="flex items-center gap-2 rounded-full bg-secondary py-1 pr-4 pl-1 text-secondary-foreground"
+                      >
+                        <PlayerAvatar player={picker} size="sm" />
+                        <span className="text-sm font-medium">Picked by {picker.id === meId ? 'you' : picker.name}</span>
+                        <Equalizer playing={isPlaying} className="ml-1 text-accent" />
+                      </motion.div>
+                    )}
+                  </div>
+                  <p className="mt-1 line-clamp-2 min-h-[3rem] max-w-sm text-balance font-note text-lg leading-snug text-muted-foreground italic">
+                    {pick.note && revealed ? `“${pick.note}”` : ''}
+                  </p>
+                </motion.div>
+              </AnimatePresence>
             </div>
-
-            {picker && revealed && (
-              <motion.div
-                initial={round.guessMode ? { scale: 0.8, opacity: 0 } : false}
-                animate={{ scale: 1, opacity: 1 }}
-                transition={{ type: 'spring', stiffness: 300, damping: 18 }}
-                className="flex items-center gap-2 rounded-full bg-secondary py-1 pr-4 pl-1 text-secondary-foreground"
-              >
-                <PlayerAvatar player={picker} size="sm" />
-                <span className="text-sm font-medium">Picked by {picker.id === meId ? 'you' : picker.name}</span>
-                <Equalizer playing={isPlaying} className="ml-1 text-accent" />
-              </motion.div>
-            )}
             {round.guessMode && revealed && <GuessResult />}
-            {pick.note && revealed && <p className="max-w-sm text-balance text-muted-foreground italic">“{pick.note}”</p>}
-          </motion.div>
-        </AnimatePresence>
+        </div>
 
         {round.guessMode && !revealed && <GuessPanel />}
 
