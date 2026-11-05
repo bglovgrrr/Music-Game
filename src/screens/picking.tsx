@@ -1,7 +1,8 @@
 import { ArrowLeft, Headphones, Loader2, Lock, Pause, Play, Search, Timer, WifiOff } from 'lucide-react'
 import { AnimatePresence, motion } from 'motion/react'
 import { useEffect, useRef, useState } from 'react'
-import { AlbumArt, PlayerAvatar, PromptCard, TrackRow } from '@/components/game-ui'
+import { AlbumArt, PromptCard, TrackRow } from '@/components/game-ui'
+import { StickerBoard } from '@/components/sticker-board'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
@@ -236,25 +237,19 @@ export function PickingScreen() {
             <PickTimer />
           </Card>
         )}
-        <Card className="p-4">
+        <section className="px-1 pt-1">
           <h3 className="mb-3 text-lg font-bold font-soft">
             {round.picks.length}/{state.players.length} picked
           </h3>
-          <ul className="grid gap-3">
-            {state.players.map((p) => {
+          <StickerBoard
+            players={state.players}
+            meId={meId}
+            status={(p) => {
               const done = round.picks.some((x) => x.playerId === p.id)
-              return (
-                <li key={p.id} className="flex items-center gap-3">
-                  <PlayerAvatar player={p} size="sm" done={done} />
-                  <span className="flex-1 truncate text-sm font-medium">{p.id === meId ? 'You' : p.name}</span>
-                  <span className={done ? 'text-xs font-medium text-success' : 'text-xs text-muted-foreground'}>
-                    {done ? 'Ready' : 'Choosing…'}
-                  </span>
-                </li>
-              )
-            })}
-          </ul>
-        </Card>
+              return { done, label: done ? 'Ready' : 'Choosing' }
+            }}
+          />
+        </section>
         {canForce && (
           <Button variant="outline" onClick={() => dispatch({ type: 'startListening' })}>
             Start listening without {waitingOn.length === 1 ? waitingOn[0].name : `${waitingOn.length} players`}

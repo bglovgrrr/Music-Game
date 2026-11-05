@@ -18,7 +18,7 @@ Mixtape Memories is a relaxed music game for 2–8 friends in the same room. Som
 ## Features
 
 - **No accounts.** Start a game and friends scan the QR code (or enter the 4-letter code) and join with just a name.
-- **Player stickers.** Everyone gets a die-cut 80s sticker (cassette, boombox, headphones, shutter shades, lightning bolt, joystick, star, puzzle cube). In the lobby each new player's sticker slaps into a dotted outline, four to a row.
+- **Player stickers.** Everyone gets a die-cut 80s sticker (cassette, boombox, headphones, shutter shades, lightning bolt, joystick, star, puzzle cube). Stickers sit straight on the table (no card), four to a row. In the lobby four dotted outlines wait and each new player's sticker slaps into the next one; extra rows only appear as players arrive.
 - **Guess who picked it** (optional). Everyone guesses whose song is playing before the reveal. 1 point per correct guess.
 - **Pick timer** (optional). 60s, 90s, or 2 min; listening starts automatically when time's up.
 - **Reactions.** Tap ❤️ 😂 😭 🔥 🙌 while a song plays and they float up on every screen. Hold a button to keep them coming; the longer you hold, the more it powers up (4 levels, each with a wobble).
