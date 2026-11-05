@@ -1,15 +1,15 @@
-import { Check, Eye, ExternalLink, MessageCircle, Pause, Play, SkipBack, SkipForward, Speaker } from 'lucide-react'
+import { Check, Eye, ExternalLink, MessageCircle, SkipForward, Speaker } from 'lucide-react'
 import { AnimatePresence, motion } from 'motion/react'
 import { AlbumArt, Equalizer, PlayerAvatar, PromptCard } from '@/components/game-ui'
 import { ReactionBar } from '@/components/reactions'
-import { SongCassette } from '@/components/cassette'
+import { CassetteDeck } from '@/components/cassette-deck'
 import { SpotifyCard } from '@/components/spotify-card'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { currentPick, currentRound, guessersFor, isRevealed, playbackPosition, playerById } from '@/game/engine'
 import { useGame, useNow } from '@/hooks/use-game'
 import { spotifySearchUrl } from '@/music/search'
-import { cn, formatTime } from '@/lib/utils'
+import { cn } from '@/lib/utils'
 
 /** Guess who picked the song that's playing (guess mode, before the reveal). */
 function GuessPanel() {
@@ -102,7 +102,6 @@ export function ListeningScreen() {
   const ended = !isPlaying && pos >= dur - 250
   const fresh = !isPlaying && pos === 0
   const isLast = round.current === round.order.length - 1
-  const pct = Math.min(100, (pos / dur) * 100)
   const revealed = isRevealed(round, pick.playerId)
 
   return (
@@ -119,15 +118,21 @@ export function ListeningScreen() {
             transition={{ type: 'spring', stiffness: 260, damping: 26 }}
             className="grid justify-items-center gap-5 text-center"
           >
-            {/* The song, as a cassette (album art on the label) */}
-            <div className="w-[min(86vw,360px)] -rotate-2">
-              <SongCassette
-                track={pick.track}
-                playing={isPlaying}
-                progress={dur ? pos / dur : 0}
-                back={picker && revealed ? `Picked by ${picker.id === meId ? 'you' : picker.name}` : round.guessMode ? 'Who picked it?' : undefined}
-              />
-            </div>
+            {/* The 80s cassette player, with the song's tape in the door */}
+            <CassetteDeck
+              track={pick.track}
+              playing={isPlaying}
+              positionMs={pos}
+              durationMs={dur}
+              preview={!!pick.track.previewUrl || pick.track.source === 'demo'}
+              isLast={isLast}
+              back={picker && revealed ? `Picked by ${picker.id === meId ? 'you' : picker.name}` : round.guessMode ? 'Who picked it?' : undefined}
+              onPlay={() => !isPlaying && dispatch({ type: 'play' })}
+              onPause={() => isPlaying && dispatch({ type: 'pause' })}
+              onPrev={() => dispatch({ type: 'prev', from: round.current })}
+              onNext={() => dispatch({ type: 'next', from: round.current })}
+              onSeek={(ms) => dispatch({ type: 'seek', positionMs: ms })}
+            />
 
             <div className="grid gap-1">
               <h2 className="text-3xl font-bold font-soft sm:text-4xl">{pick.track.title}</h2>
@@ -152,42 +157,6 @@ export function ListeningScreen() {
         </AnimatePresence>
 
         {round.guessMode && !revealed && <GuessPanel />}
-
-        {/* Progress */}
-        <div className="mx-auto grid w-full max-w-md gap-1.5">
-          <div
-            className="group relative h-1.5 cursor-pointer rounded-full bg-muted"
-            onClick={(e) => {
-              const r = e.currentTarget.getBoundingClientRect()
-              dispatch({ type: 'seek', positionMs: ((e.clientX - r.left) / r.width) * dur })
-            }}
-          >
-            <div className="absolute inset-y-0 left-0 rounded-full bg-[linear-gradient(90deg,var(--text-grad-1),var(--text-grad-2))]" style={{ width: `${pct}%` }} />
-            <div className="absolute top-1/2 size-3.5 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-card bg-foreground opacity-0 shadow transition-opacity group-hover:opacity-100" style={{ left: `${pct}%` }} />
-          </div>
-          <div className="flex justify-between text-xs text-muted-foreground tabular-nums">
-            <span>{formatTime(pos)}</span>
-            <span>{pick.track.previewUrl || pick.track.source === 'demo' ? 'Preview · ' : ''}{formatTime(dur)}</span>
-          </div>
-        </div>
-
-        {/* Controls */}
-        <div className="flex items-center justify-center gap-4">
-          <Button variant="ghost" size="icon" onClick={() => dispatch({ type: 'prev', from: round.current })} aria-label="Previous">
-            <SkipBack className="size-6" />
-          </Button>
-          <Button
-            variant="brand"
-            size="icon-lg"
-            onClick={() => dispatch({ type: isPlaying ? 'pause' : 'play' })}
-            aria-label={isPlaying ? 'Pause' : 'Play'}
-          >
-            {isPlaying ? <Pause className="size-7" fill="currentColor" /> : <Play className="size-7 translate-x-0.5" fill="currentColor" />}
-          </Button>
-          <Button variant="ghost" size="icon" onClick={() => dispatch({ type: 'next', from: round.current })} aria-label={isLast ? 'Finish round' : 'Next song'}>
-            <SkipForward className="size-6" />
-          </Button>
-        </div>
 
         <ReactionBar />
 
