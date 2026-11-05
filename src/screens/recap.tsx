@@ -1,4 +1,4 @@
-import { Copy, ExternalLink, Home, ImageIcon, ListMusic, Loader2, Share, X } from 'lucide-react'
+import { Copy, ExternalLink, Home, ImageIcon, ListMusic, Loader2, Share, Trophy, X } from 'lucide-react'
 import { AnimatePresence, motion } from 'motion/react'
 import { useEffect, useState } from 'react'
 import { toast } from 'sonner'
@@ -11,6 +11,9 @@ import { Card } from '@/components/ui/card'
 import { playerById, voteResults } from '@/game/engine'
 import { drawRecapCard } from '@/lib/recap-card'
 import { saveToSpotify, spotifyAvailable, type ExportResult } from '@/music/spotify'
+import { PeekSheet } from '@/components/sheet'
+import { themeName } from '@/game/prompts'
+import type { Round } from '@/game/types'
 import { useGame } from '@/hooks/use-game'
 import { cn } from '@/lib/utils'
 
@@ -158,79 +161,113 @@ export function RecapScreen({ onExit }: { onExit: () => void }) {
   }
 
   return (
-    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="mx-auto grid w-full max-w-2xl gap-6 py-6">
-      <div className="text-center">
-        <h2 className="text-5xl font-bold font-soft">
-          That's a <em className="brand-text pr-1">wrap.</em>
-        </h2>
-        <p className="mt-2 text-muted-foreground">
-          {rounds.length} {rounds.length === 1 ? 'question' : 'questions'} · {songs} songs · {state.players.length} friends
-        </p>
+    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="mx-auto flex min-h-0 w-full max-w-md flex-1 flex-col gap-3 pt-1 pb-24">
+      {/* Goal: relive the night and share it. Swipe through the rounds; scores and photos in the sheet. */}
+      <div className="flex items-end justify-between gap-3">
+        <div>
+          <h2 className="text-4xl leading-none font-bold font-soft">
+            That's a <em className="brand-text pr-1">wrap.</em>
+          </h2>
+          <p className="mt-1.5 font-mono text-[0.65rem] tracking-[0.14em] text-muted-foreground uppercase">
+            {rounds.length} {rounds.length === 1 ? 'question' : 'questions'} · {songs} songs · {state.players.length} friends
+          </p>
+        </div>
+        <Button variant="ghost" size="icon-sm" onClick={onExit} aria-label="Back to start">
+          <Home />
+        </Button>
       </div>
 
-      <div className="grid gap-3">
+      <FanFavoriteBanner className="py-2" />
+
+      <RoundCarousel rounds={rounds} />
+
+      <div className="grid gap-2">
         <Button variant="brand" size="lg" onClick={() => setShowCard(true)} disabled={!songs}>
           <ImageIcon /> Share recap card
         </Button>
-        <div className="grid gap-3 sm:grid-cols-2">
+        <div className="grid grid-cols-2 gap-2">
           <SpotifyButton />
           <Button variant="outline" onClick={copyList} disabled={!songs}>
-            <Copy /> Copy song list
+            <Copy /> Copy list
           </Button>
         </div>
       </div>
 
-      <FanFavoriteBanner />
-
-      <Card className="p-3 empty:hidden">
-        <Scoreboard />
-      </Card>
-
-      {photos.length > 0 ? (
-        <section className="grid gap-3">
-          <h3 className="px-1 text-lg font-bold font-soft">Photos</h3>
-          <div className="grid grid-cols-2 gap-x-4 gap-y-6 px-1 py-2 sm:grid-cols-3">
-            {photos.map((r, i) => (
-              <Polaroid key={r.id} photo={r.photo!} caption={r.prompt} tilt={i % 2 ? 2.5 : -2.5} />
-            ))}
-          </div>
-        </section>
-      ) : (
-        lastRound && (
-          <Card className="p-4">
-            <SelfieCard round={lastRound} />
-          </Card>
-        )
-      )}
-
       <AnimatePresence>{showCard && <RecapCardDialog onClose={() => setShowCard(false)} />}</AnimatePresence>
 
-      {rounds.map((r) => (
-        <Card key={r.id} className="p-3">
-          <div className="flex items-start gap-3 px-2 pt-1 pb-3">
-            {playerById(state, r.askerId) && <PlayerAvatar player={playerById(state, r.askerId)!} size="sm" />}
-            <p className="font-note text-xl leading-snug italic">{r.prompt}</p>
-          </div>
-          {r.order.map((pid) => {
-            const p = r.picks.find((x) => x.playerId === pid)!
-            const who = playerById(state, pid)
-            const crowned = voteResults(r).winners.includes(pid)
-            return (
-              <TrackRow
-                key={pid}
-                track={p.track}
-                right={
-                  <CrownedName name={who?.name ?? ''} crowned={crowned} className={cn('pt-1 text-sm', crowned ? 'font-semibold text-foreground' : 'text-muted-foreground')} />
-                }
-              />
+      <PeekSheet label="Scores & photos" summary={photos.length ? `${photos.length} photo${photos.length > 1 ? 's' : ''}` : 'Add a group selfie'} icon={<Trophy />}>
+        <div className="grid gap-4 pt-1">
+          <Card className="p-3 empty:hidden">
+            <Scoreboard />
+          </Card>
+          {photos.length > 0 ? (
+            <div className="grid grid-cols-2 gap-x-4 gap-y-6 px-1 py-2">
+              {photos.map((r, i) => (
+                <Polaroid key={r.id} photo={r.photo!} caption={r.prompt} tilt={i % 2 ? 2.5 : -2.5} />
+              ))}
+            </div>
+          ) : (
+            lastRound && (
+              <Card className="p-4">
+                <SelfieCard round={lastRound} />
+              </Card>
             )
-          })}
-        </Card>
-      ))}
-
-      <Button variant="brand" size="lg" onClick={onExit}>
-        <Home /> Back to start
-      </Button>
+          )}
+        </div>
+      </PeekSheet>
     </motion.div>
+  )
+}
+
+/** Each round as a J-card you swipe through sideways. */
+function RoundCarousel({ rounds }: { rounds: Round[] }) {
+  const { state } = useGame()
+  const [at, setAt] = useState(0)
+  return (
+    <div className="flex min-h-0 flex-1 flex-col gap-2">
+      <div
+        className="no-scrollbar -mx-4 flex min-h-0 flex-1 snap-x snap-mandatory gap-3 overflow-x-auto px-4 py-1"
+        onScroll={(e) => {
+          const el = e.currentTarget
+          setAt(Math.round(el.scrollLeft / Math.max(1, el.scrollWidth / rounds.length)))
+        }}
+      >
+        {rounds.map((r, i) => (
+          <Card key={r.id} className="flex w-[86%] shrink-0 snap-center flex-col p-3" style={{ transform: `rotate(${i % 2 ? 0.6 : -0.6}deg)` }}>
+            <div className="flex items-start gap-2.5 px-1 pb-2">
+              {playerById(state, r.askerId) && <PlayerAvatar player={playerById(state, r.askerId)!} size="sm" />}
+              <div className="min-w-0">
+                <p className="font-mono text-[0.6rem] tracking-[0.14em] text-muted-foreground uppercase">
+                  Side {String.fromCharCode(65 + (i % 26))}
+                  {themeName(r.themeId) ? ` · ${themeName(r.themeId)}` : ''}
+                </p>
+                <p className="line-clamp-2 font-note text-lg leading-snug italic">{r.prompt}</p>
+              </div>
+            </div>
+            <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain">
+              {r.order.map((pid) => {
+                const p = r.picks.find((x) => x.playerId === pid)!
+                const who = playerById(state, pid)
+                const crowned = voteResults(r).winners.includes(pid)
+                return (
+                  <TrackRow
+                    key={pid}
+                    track={p.track}
+                    right={<CrownedName name={who?.name ?? ''} crowned={crowned} className={cn('pt-1 text-sm', crowned ? 'font-semibold text-foreground' : 'text-muted-foreground')} />}
+                  />
+                )
+              })}
+            </div>
+          </Card>
+        ))}
+      </div>
+      {rounds.length > 1 && (
+        <div className="flex justify-center gap-1.5" aria-hidden>
+          {rounds.map((r, i) => (
+            <span key={r.id} className={cn('h-1.5 rounded-full transition-all', i === at ? 'w-4 bg-accent' : 'w-1.5 bg-foreground/25')} />
+          ))}
+        </div>
+      )}
+    </div>
   )
 }

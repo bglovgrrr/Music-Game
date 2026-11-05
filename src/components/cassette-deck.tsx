@@ -23,6 +23,7 @@ export function CassetteDeck({
   durationMs,
   preview,
   back,
+  label,
   isLast,
   onPlay,
   onPause,
@@ -37,6 +38,8 @@ export function CassetteDeck({
   durationMs: number
   preview?: boolean
   back?: string
+  /** Printed in the top strip (e.g. who picked it). Defaults to the model name. */
+  label?: React.ReactNode
   isLast?: boolean
   onPlay: () => void
   onPause: () => void
@@ -50,17 +53,19 @@ export function CassetteDeck({
   const paused = !playing && positionMs > 0
 
   return (
-    <div className="deck-body relative w-full max-w-[26rem] rounded-[18px] p-3 pb-4 text-[#bdb6ac] select-none">
+    <div className="deck-body relative w-full max-w-[26rem] rounded-[18px] p-3 pb-3.5 text-[#bdb6ac] select-none">
       {/* top strip */}
-      <div className="flex items-center gap-2 px-1 pb-2 font-mono text-[0.55rem] tracking-[0.18em] uppercase">
+      <div className="flex items-center gap-2 px-1 pb-1.5 font-mono text-[0.55rem] tracking-[0.18em] uppercase">
         <span className={cn('size-2 rounded-full transition-all', playing ? 'bg-[#ff3b3b] shadow-[0_0_8px_#ff3b3b]' : 'bg-[#4a1515]')} />
         <span>Power</span>
-        <span className="ml-auto font-sans text-[0.6rem] font-bold tracking-[0.22em] text-[#d8d2c8]">Stereo cassette player</span>
+        <span className="ml-auto flex min-w-0 items-center gap-1.5 font-sans text-[0.6rem] font-bold tracking-[0.22em] text-[#d8d2c8]">
+          {label ?? 'Stereo cassette player'}
+        </span>
         <span className="ml-auto">MM-90</span>
       </div>
 
       {/* cassette door */}
-      <div className="deck-door relative grid overflow-hidden rounded-[10px] p-[6%] pb-[5%]">
+      <div className="deck-door relative grid overflow-hidden rounded-[10px] px-[11%] py-[4.5%] [@media(max-height:800px)]:px-[17%] [@media(max-height:700px)]:px-[22%] [@media(max-height:700px)]:py-[3%]">
         <AnimatePresence initial={false} custom={direction}>
           <motion.div
             key={track.id}
@@ -79,53 +84,45 @@ export function CassetteDeck({
         <span className="absolute top-1.5 left-2.5 font-mono text-[0.5rem] tracking-[0.2em] text-[#8d867c] uppercase">◀ Eject</span>
       </div>
 
-      {/* counter + meters */}
-      <div className="flex items-center gap-3 px-1 pt-3">
-        <div className="grid gap-1">
-          <div className="flex gap-[3px]" aria-label={`${formatTime(positionMs)} of ${formatTime(durationMs)}`}>
-            {formatTime(positionMs)
-              .padStart(5, '0')
-              .split('')
-              .map((ch, i) =>
-                ch === ':' ? (
-                  <span key={i} className="self-center font-mono text-sm text-[#8d867c]">
-                    :
-                  </span>
-                ) : (
-                  <span key={i} className="deck-digit grid h-7 w-[1.15rem] place-items-center rounded-[3px] font-mono text-[0.95rem] text-[#f1ece4]">
-                    {ch}
-                  </span>
-                ),
-              )}
-          </div>
-          <span className="font-mono text-[0.5rem] tracking-[0.18em] uppercase">
-            Counter · {preview ? 'preview ' : ''}
-            {formatTime(durationMs)}
-          </span>
+      {/* counter · tape position · meters, on one row */}
+      <div className="flex items-center gap-3 px-1 pt-2.5">
+        <div className="flex gap-[3px]" aria-label={`${formatTime(positionMs)} of ${formatTime(durationMs)}${preview ? ' (preview)' : ''}`}>
+          {formatTime(positionMs)
+            .padStart(5, '0')
+            .split('')
+            .map((ch, i) =>
+              ch === ':' ? (
+                <span key={i} className="self-center font-mono text-sm text-[#8d867c]">
+                  :
+                </span>
+              ) : (
+                <span key={i} className="deck-digit grid h-7 w-[1.1rem] place-items-center rounded-[3px] font-mono text-[0.95rem] text-[#f1ece4]">
+                  {ch}
+                </span>
+              ),
+            )}
+        </div>
+        <div
+          className="deck-groove group relative h-2 min-w-0 flex-1 cursor-pointer rounded-full"
+          onClick={(e) => {
+            const r = e.currentTarget.getBoundingClientRect()
+            onSeek(((e.clientX - r.left) / r.width) * durationMs)
+          }}
+          role="slider"
+          aria-label="Tape position"
+          aria-valuemin={0}
+          aria-valuemax={Math.round(durationMs / 1000)}
+          aria-valuenow={Math.round(positionMs / 1000)}
+          tabIndex={0}
+        >
+          <div className="absolute inset-y-0 left-0 rounded-full bg-[#f4a949]/70" style={{ width: `${pct}%` }} />
+          <div className="deck-knob absolute top-1/2 h-4 w-2.5 -translate-x-1/2 -translate-y-1/2 rounded-[2px]" style={{ left: `${pct}%` }} />
         </div>
         <LevelMeters playing={playing} />
       </div>
 
-      {/* tape position */}
-      <div
-        className="deck-groove group relative mx-1 mt-3 h-2 cursor-pointer rounded-full"
-        onClick={(e) => {
-          const r = e.currentTarget.getBoundingClientRect()
-          onSeek(((e.clientX - r.left) / r.width) * durationMs)
-        }}
-        role="slider"
-        aria-label="Tape position"
-        aria-valuemin={0}
-        aria-valuemax={Math.round(durationMs / 1000)}
-        aria-valuenow={Math.round(positionMs / 1000)}
-        tabIndex={0}
-      >
-        <div className="absolute inset-y-0 left-0 rounded-full bg-[#f4a949]/70" style={{ width: `${pct}%` }} />
-        <div className="deck-knob absolute top-1/2 h-4 w-2.5 -translate-x-1/2 -translate-y-1/2 rounded-[2px]" style={{ left: `${pct}%` }} />
-      </div>
-
       {/* piano keys */}
-      <div className="mt-4 grid grid-cols-4 gap-1.5 px-0.5">
+      <div className="mt-3.5 grid grid-cols-4 gap-1.5 px-0.5 [@media(max-height:800px)]:mt-2.5">
         <PianoKey label="Rew" onClick={onPrev} aria="Previous song">
           <Rewind className="size-4" fill="currentColor" />
         </PianoKey>
@@ -145,7 +142,7 @@ export function CassetteDeck({
 
 function PianoKey({ children, label, down, accent, onClick, aria }: { children: React.ReactNode; label: string; down?: boolean; accent?: boolean; onClick: () => void; aria: string }) {
   return (
-    <button onClick={onClick} aria-label={aria} aria-pressed={down} className={cn('deck-key group grid cursor-pointer justify-items-center gap-1 rounded-b-[6px] pt-3 pb-2', down && 'deck-key-down')}>
+    <button onClick={onClick} aria-label={aria} aria-pressed={down} className={cn('deck-key group grid cursor-pointer justify-items-center gap-0.5 rounded-b-[6px] pt-2.5 pb-1.5 [@media(max-height:800px)]:pt-1.5 [@media(max-height:800px)]:pb-1', down && 'deck-key-down')}>
       <span className={cn('text-[#e9e3da]', accent && 'text-[#f4a949]')}>{children}</span>
       <span className="font-mono text-[0.55rem] font-semibold tracking-[0.18em] text-[#a9a298] uppercase">{label}</span>
       {accent && <span className="absolute inset-x-3 top-1.5 h-[3px] rounded-full bg-[#f4a949]/80" />}
@@ -168,14 +165,14 @@ function LevelMeters({ playing }: { playing: boolean }) {
     return () => window.clearInterval(id)
   }, [playing])
   return (
-    <div className="ml-auto grid gap-1" aria-hidden>
+    <div className="grid gap-[3px]" aria-hidden>
       {(['L', 'R'] as const).map((ch, row) => (
         <div key={ch} className="flex items-center gap-[3px]">
-          <span className="w-2 font-mono text-[0.5rem]">{ch}</span>
-          {Array.from({ length: 10 }, (_, i) => {
-            const on = i < lv[row]
-            const color = i >= 8 ? '#ff3b3b' : i >= 6 ? '#f4a949' : '#9cc08a'
-            return <span key={i} className="h-2 w-[0.55rem] rounded-[1px] transition-opacity duration-75" style={{ background: color, opacity: on ? 1 : 0.14, boxShadow: on ? `0 0 5px ${color}` : 'none' }} />
+          <span className="w-1.5 font-mono text-[0.45rem]">{ch}</span>
+          {Array.from({ length: 6 }, (_, i) => {
+            const on = i < Math.round(lv[row] * 0.6)
+            const color = i >= 5 ? '#ff3b3b' : i >= 4 ? '#f4a949' : '#9cc08a'
+            return <span key={i} className="h-1.5 w-1.5 rounded-[1px] transition-opacity duration-75" style={{ background: color, opacity: on ? 1 : 0.14, boxShadow: on ? `0 0 5px ${color}` : 'none' }} />
           })}
         </div>
       ))}

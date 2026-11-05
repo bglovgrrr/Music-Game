@@ -1,8 +1,8 @@
-import { ArrowRight, Flag, Settings2 } from 'lucide-react'
+import { ArrowRight, Camera, Flag } from 'lucide-react'
 import { motion } from 'motion/react'
-import { useState } from 'react'
 import { GameSettings } from '@/components/game-settings'
-import { AlbumArt, CrownedName, PlayerAvatar, PromptCard } from '@/components/game-ui'
+import { AlbumArt, CrownedName, PlayerAvatar } from '@/components/game-ui'
+import { PeekSheet } from '@/components/sheet'
 import { IndexCard, IndexCardHeader } from '@/components/physical'
 import { FanFavoriteBanner, Scoreboard } from '@/components/scoreboard'
 import { SelfieCard } from '@/components/selfie'
@@ -15,7 +15,6 @@ import { cn } from '@/lib/utils'
 
 export function BetweenScreen() {
   const { state, dispatch, isHost, meId } = useGame()
-  const [showSettings, setShowSettings] = useState(false)
   const round = currentRound(state)!
   const nextAsker = state.players[(state.turn + 1) % state.players.length]
   const { counts, winners } = voteResults(round)
@@ -24,14 +23,13 @@ export function BetweenScreen() {
   const voted = Object.keys(round.votes ?? {}).length
 
   return (
-    <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} className="mx-auto grid w-full max-w-4xl gap-6 py-6 md:grid-cols-[1fr_300px] md:gap-8">
-      <div className="grid min-w-0 content-start gap-5">
-        <div className="text-center">
-          <p className="text-xs font-semibold tracking-[0.14em] text-accent uppercase">Round {round.number} complete</p>
-          <h2 className="mt-1.5 text-4xl font-bold font-soft">What a mixtape.</h2>
+    <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} className="mx-auto flex w-full max-w-md flex-1 flex-col gap-4 pt-1 pb-24">
+      {/* Goal: pick the song of the round, then move on. Selfie, scores and settings live in the sheet. */}
+      <div className="grid min-w-0 gap-2">
+        <div>
+          <p className="font-mono text-[0.65rem] tracking-[0.16em] text-accent uppercase">Round {round.number} complete{themeName(round.themeId) ? ` · ${themeName(round.themeId)}` : ''}</p>
+          <p className="mt-1 line-clamp-2 font-note text-xl leading-snug italic">“{round.prompt}”</p>
         </div>
-        <PromptCard prompt={round.prompt} topic={themeName(round.themeId)} asker={playerById(state, round.askerId)} compact />
-
         <div className="grid min-w-0 gap-2">
           <IndexCard tilt={-0.8} className="mt-1">
             <IndexCardHeader>
@@ -56,7 +54,7 @@ export function BetweenScreen() {
                       onClick={() => dispatch({ type: 'vote', owner: pid })}
                       aria-pressed={myVote === pid}
                       className={cn(
-                        'flex min-h-[3.5rem] w-full items-center gap-3 rounded-md px-2 py-1 text-left transition-colors',
+                        'flex min-h-[3.25rem] w-full items-center gap-3 rounded-md px-2 py-0.5 text-left transition-colors',
                         !mine && 'cursor-pointer hover:bg-muted',
                         myVote === pid && 'bg-secondary',
                       )}
@@ -96,37 +94,31 @@ export function BetweenScreen() {
         </div>
       </div>
 
-      <aside className="grid content-start gap-3 md:sticky md:top-20">
-        <Card className="p-4">
-          <SelfieCard round={round} />
-        </Card>
+      <Button variant="brand" size="lg" className="mt-auto" onClick={() => dispatch({ type: 'nextRound' })}>
+        Next: {nextAsker.id === meId ? 'you ask' : `${nextAsker.name} asks`} <ArrowRight />
+      </Button>
 
-        <Button variant="brand" size="lg" onClick={() => dispatch({ type: 'nextRound' })}>
-          Next: {nextAsker.id === meId ? 'you ask' : `${nextAsker.name} asks`} <ArrowRight />
-        </Button>
-
-        <FanFavoriteBanner />
-
-        <Card className="p-3 empty:hidden">
-          <Scoreboard />
-        </Card>
-
-        {isHost && (
-          <>
-            <Button variant="ghost" onClick={() => setShowSettings((v) => !v)} aria-expanded={showSettings}>
-              <Settings2 /> {showSettings ? 'Hide settings' : 'Change settings'}
-            </Button>
-            {showSettings && (
+      <PeekSheet label="Selfie & scores" summary={round.photo ? 'Selfie saved' : 'Take a group selfie'} icon={<Camera />}>
+        <div className="grid gap-4 pt-1">
+          <Card className="p-4">
+            <SelfieCard round={round} />
+          </Card>
+          <FanFavoriteBanner />
+          <Card className="p-3 empty:hidden">
+            <Scoreboard />
+          </Card>
+          {isHost && (
+            <>
               <Card className="p-4">
                 <GameSettings />
               </Card>
-            )}
-            <Button variant="ghost" onClick={() => dispatch({ type: 'end' })}>
-              <Flag /> End game & see recap
-            </Button>
-          </>
-        )}
-      </aside>
+              <Button variant="sketch" onClick={() => dispatch({ type: 'end' })}>
+                <Flag /> End game & see the recap
+              </Button>
+            </>
+          )}
+        </div>
+      </PeekSheet>
     </motion.div>
   )
 }

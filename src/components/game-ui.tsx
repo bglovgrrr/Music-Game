@@ -126,7 +126,7 @@ export function PromptCard({ prompt, asker, compact, topic }: { prompt: string; 
   return (
     <div className={cn('drop-on-table relative', compact ? 'mt-2' : 'mt-3')} style={{ transform: `rotate(${compact ? -0.6 : -1}deg)` }}>
       <Washi className="-top-3 left-1/2 -ml-12 z-10" tilt={-3} />
-      <div className={cn('paper paper-texture torn-bottom rounded-[3px] bg-[var(--paper)]', compact ? 'px-4 pt-4 pb-5' : 'px-5 pt-6 pb-7 sm:px-7')}>
+      <div className={cn('paper paper-texture torn-bottom rounded-[3px] bg-[var(--paper)]', compact ? 'px-4 pt-3 pb-4' : 'px-5 pt-6 pb-7 sm:px-7')}>
         {asker && (
           <div className={cn('flex items-center gap-2 font-mono text-[0.7rem] tracking-[0.14em] text-muted-foreground uppercase', compact ? 'mb-1' : 'mb-2')}>
             <PlayerAvatar player={asker} size="sm" />
@@ -134,7 +134,7 @@ export function PromptCard({ prompt, asker, compact, topic }: { prompt: string; 
             {topic && <span className="ml-auto truncate text-[#a0560b]">{topic}</span>}
           </div>
         )}
-        <p className={cn('font-note leading-[1.15] text-balance italic', compact ? 'text-[1.35rem]' : 'text-[2rem] sm:text-[2.6rem]')}>{prompt}</p>
+        <p className={cn('font-note leading-[1.15] text-balance italic', compact ? 'line-clamp-2 text-[1.2rem] [@media(max-height:700px)]:line-clamp-1' : 'text-[2rem] sm:text-[2.6rem]')}>{prompt}</p>
       </div>
     </div>
   )

@@ -35,6 +35,10 @@ Mixtape Memories is a relaxed music game for 2–8 friends in the same room. Som
 - **Demo mode.** Play a full game on one device with three bot friends.
 - **Made for phones and desktops.** Matches your device's light or dark mode; one tap on the sun/moon flips it. You can add it to your home screen like an app.
 
+## Layout
+
+Every screen fits a phone without scrolling and has one job (lobby: get everyone in; asking: pick a question; picking: lock in a song; listening: listen and react; between: vote; recap: relive and share). Secondary things (settings, the queue, scores, selfies) live in a paper sheet that peeks up from the bottom edge: tap it or drag it up (`src/components/sheet.tsx`). Very short screens tighten spacing with height media queries.
+
 ## Getting started
 
 Requires Node.js 20.19+ or 22.12+.

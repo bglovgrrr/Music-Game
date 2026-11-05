@@ -1,14 +1,14 @@
-import { Copy, Play, Share2, Speaker } from 'lucide-react'
+import { Play, Settings2, Share2, Speaker } from 'lucide-react'
 import { toast } from 'sonner'
 import { GameSettings } from '@/components/game-settings'
 import { LabelTape } from '@/components/physical'
 import { QrCode } from '@/components/qr-code'
+import { PeekSheet } from '@/components/sheet'
 import { StickerBoard } from '@/components/sticker-board'
 import { SpotifyCard } from '@/components/spotify-card'
 import { spotifyConfigured } from '@/music/spotify-auth'
 import { Button } from '@/components/ui/button'
-import { Card } from '@/components/ui/card'
-import { MIN_PLAYERS } from '@/game/engine'
+import { MIN_PLAYERS, settingsOf } from '@/game/engine'
 import { useGame } from '@/hooks/use-game'
 
 export function LobbyScreen() {
@@ -44,53 +44,43 @@ export function LobbyScreen() {
     }
   }
 
+  const settings = settingsOf(state)
+  const settingsSummary = [settings.guessMode ? 'Guessing on' : 'Guessing off', settings.pickSeconds ? `${settings.pickSeconds}s timer` : 'No timer'].join(' · ')
+
   return (
-    <div className="mx-auto grid w-full max-w-4xl flex-1 content-center gap-6 py-6 md:grid-cols-2 md:gap-10">
-      <div className="grid content-start justify-items-center gap-4 text-center">
-        <div>
-          <p className="text-sm font-medium text-muted-foreground">Room code</p>
-          <button onClick={copy} className="group mt-1 inline-flex cursor-pointer items-center gap-3" aria-label={`Copy room code ${state.code}`}>
-            <LabelTape className="py-2 text-5xl">{state.code}</LabelTape>
-            <Copy className="size-5 text-muted-foreground transition group-hover:text-foreground" />
+    <div className="mx-auto flex w-full max-w-md flex-1 flex-col gap-6 pt-2 pb-24">
+      {/* Goal: get everyone in. Code + QR up top, stickers in the middle, Start at the thumb. */}
+      <div className="flex items-center gap-4">
+        <QrCode value={inviteUrl} className="w-[7.5rem] shrink-0" />
+        <div className="grid min-w-0 justify-items-start gap-2">
+          <span className="font-mono text-[0.65rem] tracking-[0.16em] text-muted-foreground uppercase">Room code</span>
+          <button onClick={copy} className="cursor-pointer" aria-label={`Copy room code ${state.code}`}>
+            <LabelTape className="py-1.5 text-4xl">{state.code}</LabelTape>
           </button>
+          <span className="text-xs leading-snug text-muted-foreground">Scan to join{client.mode === 'demo' ? ' (not in the demo)' : ''}, or tap the code to copy it.</span>
+          {client.mode === 'online' && (
+            <Button variant="outline" size="sm" onClick={invite}>
+              <Share2 /> Invite link
+            </Button>
+          )}
         </div>
-        <QrCode value={inviteUrl} className="w-44 md:w-52" />
-        <p className="text-sm text-muted-foreground">
-          Scan with a phone camera to join{client.mode === 'demo' ? ' (not in the demo)' : ''}, or enter the code.
-        </p>
-        {client.mode === 'online' && (
-          <Button variant="outline" size="sm" onClick={invite}>
-            <Share2 /> Send invite link
-          </Button>
-        )}
       </div>
 
-      <div className="grid content-start gap-4">
-        <section className="px-1 pt-1 pb-2">
-          <div className="flex items-baseline justify-between pb-3">
-            <h3 className="text-xl leading-none font-bold font-soft">Who&rsquo;s here</h3>
-            <span className="font-mono text-xs tracking-[0.1em] text-muted-foreground">{state.players.length}/8</span>
-          </div>
-          <StickerBoard players={state.players} meId={meId} hostId={state.hostId} outlines={4} />
-        </section>
+      <section>
+        <div className="flex items-baseline justify-between pb-3">
+          <h3 className="text-xl leading-none font-bold font-soft">Who&rsquo;s here</h3>
+          <span className="font-mono text-xs tracking-[0.1em] text-muted-foreground">{state.players.length}/8</span>
+        </div>
+        <StickerBoard players={state.players} meId={meId} hostId={state.hostId} outlines={4} />
+      </section>
 
-        <Card className="p-4">
-          <GameSettings />
-        </Card>
-
-        {client.isSpeaker && spotifyConfigured && (
-          <Card className="p-4">
-            <SpotifyCard />
-          </Card>
-        )}
-
+      <div className="mt-auto grid gap-2">
         {client.mode === 'online' && host && (
-          <p className="flex items-center justify-center gap-2 text-center text-sm text-muted-foreground">
-            <Speaker className="size-4 shrink-0" />
-            {isHost ? 'Music plays from your device. Connect it to a speaker.' : `Music plays from ${host.name}'s device.`}
+          <p className="flex items-center justify-center gap-2 text-center text-xs text-muted-foreground">
+            <Speaker className="size-3.5 shrink-0" />
+            {isHost ? 'Music plays from your phone. Connect it to a speaker.' : `Music plays from ${host.name}'s phone.`}
           </p>
         )}
-
         {isHost ? (
           <Button variant="brand" size="lg" disabled={!enough} onClick={() => dispatch({ type: 'start' })}>
             <Play /> {enough ? `Start with ${state.players.length} players` : `Need ${MIN_PLAYERS - state.players.length} more`}
@@ -99,7 +89,13 @@ export function LobbyScreen() {
           <p className="text-center text-muted-foreground">Waiting for the host to start…</p>
         )}
       </div>
+
+      <PeekSheet label="Game settings" summary={settingsSummary} icon={<Settings2 />}>
+        <div className="grid gap-5 pt-1">
+          <GameSettings />
+          {client.isSpeaker && spotifyConfigured && <SpotifyCard />}
+        </div>
+      </PeekSheet>
     </div>
   )
 }
-

@@ -52,7 +52,7 @@ function Game({ onExit }: { onExit: () => void }) {
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: -12 }}
           transition={{ duration: 0.25 }}
-          className="flex flex-1 flex-col"
+          className="flex min-h-0 flex-1 flex-col"
         >
           {screens[state.phase]}
         </motion.div>

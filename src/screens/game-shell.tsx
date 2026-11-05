@@ -25,8 +25,8 @@ export function GameShell({ children, onExit }: { children: React.ReactNode; onE
   }
 
   return (
-    <div className="mx-auto flex min-h-dvh w-full max-w-5xl flex-col px-4 pt-safe pb-safe sm:px-8">
-      <header className="sticky top-0 z-20 -mx-4 mb-3 flex h-16 items-center gap-2.5 bg-[color-mix(in_oklab,var(--table)_70%,black_20%)]/80 px-4 backdrop-blur-md shadow-[0_8px_20px_-14px_rgb(0_0_0/0.8)] sm:-mx-8 sm:px-8">
+    <div className="mx-auto flex h-dvh w-full max-w-5xl flex-col px-4 pt-safe sm:px-8">
+      <header className="relative z-20 -mx-4 mb-2 flex h-14 shrink-0 items-center gap-2.5 bg-[color-mix(in_oklab,var(--table)_70%,black_20%)]/80 px-4 backdrop-blur-md shadow-[0_8px_20px_-14px_rgb(0_0_0/0.8)] sm:-mx-8 sm:px-8">
         <LabelTape className="text-[0.8rem]">{state.code}</LabelTape>
         {client.mode === 'demo' && <Badge variant="secondary" className="max-sm:hidden">Demo</Badge>}
         {round > 0 && state.phase !== 'recap' && <span className="font-mono text-xs tracking-[0.14em] text-muted-foreground uppercase max-sm:hidden">Round {String(round).padStart(2, '0')}</span>}
@@ -41,7 +41,7 @@ export function GameShell({ children, onExit }: { children: React.ReactNode; onE
           )}
         </div>
       </header>
-      <main className="flex flex-1 flex-col">{children}</main>
+      <main className="no-scrollbar -mx-4 flex min-h-0 flex-1 flex-col overflow-y-auto overscroll-contain px-4 pb-[env(safe-area-inset-bottom)] sm:-mx-8 sm:px-8">{children}</main>
     </div>
   )
 }
