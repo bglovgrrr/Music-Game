@@ -2,7 +2,7 @@ import { Check, Eye, ExternalLink, MessageCircle, Pause, Play, SkipBack, SkipFor
 import { AnimatePresence, motion } from 'motion/react'
 import { AlbumArt, Equalizer, PlayerAvatar, PromptCard } from '@/components/game-ui'
 import { ReactionBar } from '@/components/reactions'
-import { TiltAlbum } from '@/components/tilt-album'
+import { SongCassette } from '@/components/cassette'
 import { SpotifyCard } from '@/components/spotify-card'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
@@ -119,29 +119,13 @@ export function ListeningScreen() {
             transition={{ type: 'spring', stiffness: 260, damping: 26 }}
             className="grid justify-items-center gap-5 text-center"
           >
-            {/* Record + sleeve */}
-            <div className="relative w-[min(62vw,300px)]">
-              <div
-                className={cn(
-                  'vinyl absolute inset-y-[4%] right-0 aspect-square rounded-full transition-transform duration-700 ease-out',
-                  isPlaying ? 'translate-x-[24%] animate-spin-slow' : 'translate-x-[6%]',
-                )}
-                style={{ width: '92%' }}
-              >
-                <div className="absolute inset-[34%] overflow-hidden rounded-full">
-                  <AlbumArt track={pick.track} rounded="rounded-full" className="size-full" />
-                </div>
-              </div>
-              <TiltAlbum
+            {/* The song, as a cassette (album art on the label) */}
+            <div className="w-[min(86vw,360px)] -rotate-2">
+              <SongCassette
                 track={pick.track}
-                floating={isPlaying}
-                back={
-                  picker && revealed ? (
-                    <span className="mt-2 text-xs opacity-70">Picked by {picker.id === meId ? 'you' : picker.name}</span>
-                  ) : round.guessMode ? (
-                    <span className="mt-2 text-xs opacity-70">Who picked it? 🤫</span>
-                  ) : null
-                }
+                playing={isPlaying}
+                progress={dur ? pos / dur : 0}
+                back={picker && revealed ? `Picked by ${picker.id === meId ? 'you' : picker.name}` : round.guessMode ? 'Who picked it?' : undefined}
               />
             </div>
 
