@@ -8,6 +8,7 @@ import { Card } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { askerOf, currentRound, MAX_NOTE_LENGTH, pickTimeUp, playerById } from '@/game/engine'
 import type { Track } from '@/game/types'
+import { themeName } from '@/game/prompts'
 import { useGame, useNow } from '@/hooks/use-game'
 import { cn, formatTime } from '@/lib/utils'
 import { searchTracks } from '@/music/search'
@@ -136,7 +137,7 @@ export function PickingScreen() {
   return (
     <div className="grid gap-5 py-4 md:grid-cols-[1fr_280px] md:items-start md:gap-8">
       <div className="grid min-w-0 gap-5">
-        <PromptCard prompt={round.prompt} asker={asker} />
+        <PromptCard prompt={round.prompt} topic={themeName(round.themeId)} asker={asker} />
         {round.pickDeadline && (
           <div className="md:hidden">
             <PickTimer />

@@ -9,6 +9,7 @@ import { SelfieCard } from '@/components/selfie'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { currentRound, playerById, voteResults } from '@/game/engine'
+import { themeName } from '@/game/prompts'
 import { useGame } from '@/hooks/use-game'
 import { cn } from '@/lib/utils'
 
@@ -29,7 +30,7 @@ export function BetweenScreen() {
           <p className="text-xs font-semibold tracking-[0.14em] text-accent uppercase">Round {round.number} complete</p>
           <h2 className="mt-1.5 text-4xl font-bold font-soft">What a mixtape.</h2>
         </div>
-        <PromptCard prompt={round.prompt} asker={playerById(state, round.askerId)} compact />
+        <PromptCard prompt={round.prompt} topic={themeName(round.themeId)} asker={playerById(state, round.askerId)} compact />
 
         <div className="grid min-w-0 gap-2">
           <IndexCard tilt={-0.8} className="mt-1">

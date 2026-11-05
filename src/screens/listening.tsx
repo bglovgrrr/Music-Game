@@ -7,6 +7,7 @@ import { SpotifyCard } from '@/components/spotify-card'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { currentPick, currentRound, guessersFor, isRevealed, playbackPosition, playerById } from '@/game/engine'
+import { themeName } from '@/game/prompts'
 import { useGame, useNow } from '@/hooks/use-game'
 import { spotifySearchUrl } from '@/music/search'
 import { cn } from '@/lib/utils'
@@ -107,7 +108,7 @@ export function ListeningScreen() {
   return (
     <div className="grid gap-6 py-4 md:grid-cols-[1fr_320px] md:gap-8">
       <div className="grid min-w-0 content-start gap-5">
-        <PromptCard prompt={round.prompt} asker={asker} compact />
+        <PromptCard prompt={round.prompt} topic={themeName(round.themeId)} asker={asker} compact />
 
         <AnimatePresence mode="wait">
           <motion.div

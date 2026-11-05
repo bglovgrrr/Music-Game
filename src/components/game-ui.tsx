@@ -122,7 +122,7 @@ export function AlbumArt({
 }
 
 /** The question for the round: a note on lined paper, taped to the table. */
-export function PromptCard({ prompt, asker, compact }: { prompt: string; asker?: Player; compact?: boolean }) {
+export function PromptCard({ prompt, asker, compact, topic }: { prompt: string; asker?: Player; compact?: boolean; topic?: string }) {
   return (
     <div className={cn('drop-on-table relative', compact ? 'mt-2' : 'mt-3')} style={{ transform: `rotate(${compact ? -0.6 : -1}deg)` }}>
       <Washi className="-top-3 left-1/2 -ml-12 z-10" tilt={-3} />
@@ -131,6 +131,7 @@ export function PromptCard({ prompt, asker, compact }: { prompt: string; asker?:
           <div className={cn('flex items-center gap-2 font-mono text-[0.7rem] tracking-[0.14em] text-muted-foreground uppercase', compact ? 'mb-1' : 'mb-2')}>
             <PlayerAvatar player={asker} size="sm" />
             {asker.name} asks
+            {topic && <span className="ml-auto truncate text-[#a0560b]">{topic}</span>}
           </div>
         )}
         <p className={cn('font-note leading-[1.15] text-balance italic', compact ? 'text-[1.35rem]' : 'text-[2rem] sm:text-[2.6rem]')}>{prompt}</p>

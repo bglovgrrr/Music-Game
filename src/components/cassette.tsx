@@ -358,7 +358,7 @@ export function Cassette({
       front={
         <CassetteFace
           side="A"
-          title="Basement sessions"
+          title="Mixtape Memories"
           subtitle="every song has a story"
           spinning={spinning}
         />
@@ -366,7 +366,7 @@ export function Cassette({
       back={
         <CassetteFace
           side="B"
-          title="Mixtape Memories"
+          title="Rewind, replay"
           subtitle="play loud, tell the story"
           spinning={spinning}
           wound={0.35}

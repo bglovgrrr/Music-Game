@@ -5,7 +5,7 @@ import { PlayerAvatar } from '@/components/game-ui'
 import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/input'
 import { askerOf, MAX_PROMPT_LENGTH } from '@/game/engine'
-import { ALL_PROMPTS } from '@/game/prompts'
+import { ALL_PROMPTS, themeName } from '@/game/prompts'
 import { useGame } from '@/hooks/use-game'
 import { cn, sample } from '@/lib/utils'
 
@@ -78,6 +78,7 @@ export function AskingScreen() {
 
       <QuestionStrips
         prompts={picks.map((p) => p.prompt)}
+        topicOf={(p) => themeName(picks.find((x) => x.prompt === p)?.themeId)}
         used={used}
         onPick={(p) => ask(p, picks.find((x) => x.prompt === p)?.themeId)}
         onSurprise={() => {
@@ -114,7 +115,19 @@ function jitter(i: number, salt: number) {
  * "Surprise me" strip at the bottom. Tap a strip to ask it. Press and hold to spread the
  * pile apart so it's easier to read; let go and it gently settles back into a pile.
  */
-function QuestionStrips({ prompts, used, onPick, onSurprise }: { prompts: string[]; used: Set<string>; onPick: (p: string) => void; onSurprise: () => void }) {
+function QuestionStrips({
+  prompts,
+  topicOf,
+  used,
+  onPick,
+  onSurprise,
+}: {
+  prompts: string[]
+  topicOf?: (p: string) => string | undefined
+  used: Set<string>
+  onPick: (p: string) => void
+  onSurprise: () => void
+}) {
   const [spread, setSpread] = useState(false)
   const [lifted, setLifted] = useState<number | null>(null)
   const press = useRef<{ timer: number; x: number; y: number; fired: boolean } | null>(null)
@@ -202,6 +215,9 @@ function QuestionStrips({ prompts, used, onPick, onSurprise }: { prompts: string
                 </span>
               ) : (
                 <>
+                  {topicOf?.(it.label) && (
+                    <span className="mb-0.5 block font-mono text-[0.58rem] tracking-[0.16em] text-[#a0560b] uppercase not-italic">{topicOf(it.label)}</span>
+                  )}
                   {it.label}
                   {it.done && <span className="ml-2 font-mono text-[0.6rem] tracking-[0.14em] text-muted-foreground uppercase not-italic">asked</span>}
                 </>
