@@ -161,3 +161,17 @@ Add more shadcn components with `npx shadcn@latest add <component>`.
 - [ ] Play a first real game with friends
 - [ ] Game history: browse past games and their mixtapes
 - [x] Spotify: search any song and play it in full on the host's Spotify
+
+### Someday: accounts (not started)
+
+Optional accounts, so playing without one stays as easy as today.
+
+- **What they'd add:** game history (past nights and their mixtapes), favorite songs, choosing your own sticker, and a theme picker.
+- **Privacy first:**
+  - Sign in with a passwordless email link, or Apple or Google. We never store passwords.
+  - Keep the least data we can: a display name and an email, and nothing else unless the player adds it.
+  - Each player only sees their own history, plus the games they played with others (database row-level security).
+  - Selfies and notes stay private to the people in that game, as they are today.
+  - Players can download all their data and delete their account in one tap.
+  - Your existing guest games move into your account only if you choose.
+- **Plan:** Supabase Auth, upgrading today's anonymous player IDs in place; a plain-language privacy page; a security review before launch.
