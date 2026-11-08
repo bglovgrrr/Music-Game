@@ -11,8 +11,10 @@ import {
   LOCAL,
   localPlayerUsable,
   needsKeepAlive,
+  isIOS,
   playSilence,
   setKeepAliveDevice,
+  setPhoneSpotify,
 } from '@/music/spotify-player'
 
 /**
@@ -30,6 +32,7 @@ export function SpotifyKeepAlive() {
   useEffect(() => {
     if (!connected || !client.isSpeaker) {
       setKeepAliveDevice(null)
+      setPhoneSpotify('unknown')
       return
     }
     let busy = false
@@ -47,6 +50,7 @@ export function SpotifyKeepAlive() {
         }
         const phone = target && needsKeepAlive(target) ? target : null
         setKeepAliveDevice(phone?.id ?? null)
+        if (isIOS() && !localPlayerUsable()) setPhoneSpotify(devices.some(needsKeepAlive) ? 'awake' : 'asleep')
         if (!phone || songPlaying.current) return
         const pb = await getPlayback().catch(() => null)
         if (pb?.isPlaying && pb.deviceId === phone.id) return // already awake (silence or music)

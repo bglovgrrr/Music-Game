@@ -115,7 +115,7 @@ describe('Spotify playback control', () => {
 
   it('explains what to do when Spotify is not open anywhere', async () => {
     fakeSpotify(() => json(200, { devices: [] }))
-    await expect(playTrack('spotify:track:1', 0)).rejects.toThrow(/Open the Spotify app/)
+    await expect(playTrack('spotify:track:1', 0)).rejects.toThrow(/Spotify isn’t open/)
   })
 
   it('explains Premium and allowlist problems', async () => {
@@ -242,6 +242,26 @@ describe('keeping a phone’s Spotify awake', () => {
       if (c.url.endsWith('/me/player/devices')) return json(200, { devices: [] })
       return json(204)
     })
-    await expect(playTrack('spotify:track:1', 0, 'spotify:album:A')).rejects.toThrow(/Wake up Spotify/)
+    await expect(playTrack('spotify:track:1', 0, 'spotify:album:A')).rejects.toThrow(/Spotify isn’t open/)
+  })
+})
+
+describe('waking Spotify on an iPhone', () => {
+  it('remembers that Spotify was just opened, so the game can resume by itself on return', async () => {
+    const { wakeSpotify, justWoke, clearWoke, setPhoneSpotify, phoneSpotify, onPhoneSpotify } = await import('./spotify-player')
+    expect(justWoke()).toBe(false)
+    wakeSpotify()
+    expect((globalThis as unknown as { window: { location: { href: string } } }).window.location.href).toBe('spotify:')
+    expect(justWoke()).toBe(true)
+    clearWoke()
+    expect(justWoke()).toBe(false)
+    let calls = 0
+    const off = onPhoneSpotify(() => calls++)
+    setPhoneSpotify('asleep')
+    setPhoneSpotify('asleep')
+    expect(phoneSpotify()).toBe('asleep')
+    expect(calls).toBe(1)
+    off()
+    setPhoneSpotify('unknown')
   })
 })

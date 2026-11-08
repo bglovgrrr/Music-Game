@@ -6,7 +6,7 @@ import { useSpotifyConnected } from '@/hooks/use-spotify'
 import { connectSpotify, disconnectSpotify, SpotifyError, spotifyConfigured } from '@/music/spotify-auth'
 import { testSpotify } from '@/music/spotify-diagnostics'
 import { onSpotifyLog, spotifyLogLines } from '@/music/spotify-log'
-import { chooseDevice, chosenDeviceId, isIOS, listDevices, LOCAL, localPlayerUsable, needsKeepAlive, playSilence, setKeepAliveDevice, type SpotifyDevice } from '@/music/spotify-player'
+import { chooseDevice, chosenDeviceId, isIOS, listDevices, LOCAL, localPlayerUsable, needsKeepAlive, playSilence, setKeepAliveDevice, type SpotifyDevice, wakeSpotify } from '@/music/spotify-player'
 import { ensureLocalPlayer, LOCAL_PLAYER_NAME, localDeviceId, localPlayerProblem, onLocalPlayer, stopLocalPlayer } from '@/music/spotify-sdk'
 import { cn } from '@/lib/utils'
 
@@ -216,7 +216,15 @@ export function SpotifyCard({ compact, className }: { compact?: boolean; classNa
               rest of the game.
             </p>
             <Button asChild size="sm" className="justify-self-start bg-[#1ED760] text-black hover:bg-[#1ED760]/90">
-              <a href="spotify:">Wake up Spotify</a>
+              <a
+                href="spotify:"
+                onClick={(e) => {
+                  e.preventDefault()
+                  wakeSpotify()
+                }}
+              >
+                Wake up Spotify
+              </a>
             </Button>
           </div>
         )}

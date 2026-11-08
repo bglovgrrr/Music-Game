@@ -2,6 +2,7 @@ import { LogOut } from 'lucide-react'
 import { useState } from 'react'
 import { AvatarStack } from '@/components/game-ui'
 import { LabelTape } from '@/components/physical'
+import { SpotifyWakeBanner } from '@/components/spotify-wake-banner'
 import { ThemeToggle } from '@/components/theme-toggle'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -41,6 +42,7 @@ export function GameShell({ children, onExit }: { children: React.ReactNode; onE
           )}
         </div>
       </header>
+      <SpotifyWakeBanner />
       <main className="no-scrollbar -mx-4 flex min-h-0 flex-1 flex-col overflow-y-auto overscroll-contain px-4 pb-[env(safe-area-inset-bottom)] sm:-mx-8 sm:px-8">{children}</main>
     </div>
   )

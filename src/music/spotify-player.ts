@@ -45,6 +45,35 @@ export const setKeepAliveDevice = (id: string | null) => {
 }
 export const keepAliveDevice = () => keepAliveId
 
+/**
+ * Is Spotify reachable on this phone? 'asleep' = this is an iPhone host and Spotify isn't
+ * running (it isn't on the account's device list), so nothing can play until it's opened.
+ */
+export type PhoneSpotify = 'unknown' | 'awake' | 'asleep'
+let phoneState: PhoneSpotify = 'unknown'
+const phoneListeners = new Set<() => void>()
+export const phoneSpotify = () => phoneState
+export function setPhoneSpotify(next: PhoneSpotify) {
+  if (next === phoneState) return
+  phoneState = next
+  phoneListeners.forEach((l) => l())
+}
+export function onPhoneSpotify(l: () => void) {
+  phoneListeners.add(l)
+  return () => phoneListeners.delete(l)
+}
+
+let wokeAt = 0
+/** Open the Spotify app (must run inside a tap). Coming back soon after counts as "just woken". */
+export function wakeSpotify() {
+  wokeAt = Date.now()
+  window.location.href = 'spotify:'
+}
+export const justWoke = () => Date.now() - wokeAt < 3 * 60_000
+export const clearWoke = () => {
+  wokeAt = 0
+}
+
 export async function listDevices(): Promise<SpotifyDevice[]> {
   const d = await spotifyApi<{ devices: SpotifyDevice[] }>('/me/player/devices')
   return (d?.devices ?? []).filter((x) => x.id)
@@ -60,7 +89,7 @@ async function targetDevice(): Promise<SpotifyDevice> {
   }
   const devices = await listDevices()
   if (!devices.length) {
-    throw new SpotifyError('Open the Spotify app (tap “Wake up Spotify” on the Spotify card), then tap play again.', 'no_device')
+    throw new SpotifyError(isIOS() ? 'Spotify isn’t open on this phone. Tap “Open Spotify”, then come right back.' : 'Spotify isn’t open anywhere. Open it on this device (or a speaker), then tap play again.', 'no_device')
   }
   return (
     devices.find((d) => d.id === picked) ??
