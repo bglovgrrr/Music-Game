@@ -27,7 +27,7 @@ export function SpotifyWakeBanner() {
             <Music2 className="size-5 shrink-0 text-[#a0560b]" />
             <p className="min-w-0 flex-1 text-sm leading-snug">
               <span className="font-semibold">Spotify isn’t open on this phone.</span>{' '}
-              <span className="text-muted-foreground">Open it once, then come right back.</span>
+              <span className="text-muted-foreground">Open it, then come right back. The song starts by itself.</span>
             </p>
             <Button variant="sketch-fill" size="sm" onClick={wakeSpotify}>
               Open Spotify

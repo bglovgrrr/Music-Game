@@ -46,6 +46,16 @@ export const setKeepAliveDevice = (id: string | null) => {
 export const keepAliveDevice = () => keepAliveId
 
 /**
+ * Which device the keep-alive should look after: the remembered one if it's still listed;
+ * otherwise (no built-in player on this browser, e.g. iPhone) this phone's Spotify app.
+ */
+export function keepAliveTarget(devices: SpotifyDevice[], picked: string | null, localUsable: boolean): SpotifyDevice | undefined {
+  const remembered = devices.find((d) => d.id === picked)
+  if (remembered) return remembered
+  return localUsable ? undefined : devices.find(needsKeepAlive)
+}
+
+/**
  * Is Spotify reachable on this phone? 'asleep' = this is an iPhone host and Spotify isn't
  * running (it isn't on the account's device list), so nothing can play until it's opened.
  */

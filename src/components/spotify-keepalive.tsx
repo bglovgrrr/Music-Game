@@ -12,6 +12,7 @@ import {
   localPlayerUsable,
   needsKeepAlive,
   isIOS,
+  keepAliveTarget,
   playSilence,
   setKeepAliveDevice,
   setPhoneSpotify,
@@ -42,11 +43,13 @@ export function SpotifyKeepAlive() {
       try {
         const devices = await listDevices().catch(() => [])
         const picked = chosenDeviceId()
-        let target = devices.find((d) => d.id === picked)
-        // No usable built-in player here (e.g. iPhone): default to this phone's Spotify app.
-        if (!target && (!picked || picked === LOCAL) && !localPlayerUsable()) {
-          target = devices.find(needsKeepAlive)
-          if (target) chooseDevice(target.id)
+        // The remembered device, or (no built-in player here, e.g. iPhone) this phone's Spotify,
+        // also when the remembered device is stale. Without that the silence never played and
+        // iOS put Spotify to sleep while people were picking songs.
+        const target = keepAliveTarget(devices, picked, localPlayerUsable())
+        if (target && target.id !== picked) {
+          chooseDevice(target.id)
+          logSpotify(`keep-alive: using ${target.name}${picked && picked !== LOCAL ? ' (the remembered device is gone)' : ''}`)
         }
         const phone = target && needsKeepAlive(target) ? target : null
         setKeepAliveDevice(phone?.id ?? null)

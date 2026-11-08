@@ -265,3 +265,20 @@ describe('waking Spotify on an iPhone', () => {
     setPhoneSpotify('unknown')
   })
 })
+
+describe('which phone the keep-alive looks after', () => {
+  it('uses this iPhone’s Spotify even when the remembered device is gone (regression: silence never played)', async () => {
+    const { keepAliveTarget } = await import('./spotify-player')
+    const phone = { id: 'new-iphone-id', name: 'iPhone', type: 'Smartphone', is_active: false }
+    expect(keepAliveTarget([phone], 'old-device-id', false)?.id).toBe('new-iphone-id')
+    expect(keepAliveTarget([phone], null, false)?.id).toBe('new-iphone-id')
+    expect(keepAliveTarget([phone], 'local', false)?.id).toBe('new-iphone-id')
+  })
+  it('keeps the remembered device when it is still there, and leaves desktops with a built-in player alone', async () => {
+    const { keepAliveTarget } = await import('./spotify-player')
+    const phone = { id: 'p', name: 'iPhone', type: 'Smartphone', is_active: false }
+    const speaker = { id: 's', name: 'Sonos', type: 'Speaker', is_active: true }
+    expect(keepAliveTarget([phone, speaker], 's', false)?.id).toBe('s')
+    expect(keepAliveTarget([phone], 'gone', true)).toBeUndefined()
+  })
+})

@@ -5,7 +5,7 @@ import type { Track } from '@/game/types'
 import { useGame, useNow } from '@/hooks/use-game'
 import { useSpotifyConnected } from '@/hooks/use-spotify'
 import { SpotifyError } from '@/music/spotify-auth'
-import { getPlayback, pausePlayback, playTrack, seekTo, isIOS, setPhoneSpotify, wakeSpotify, justWoke, clearWoke } from '@/music/spotify-player'
+import { getPlayback, pausePlayback, playTrack, seekTo, isIOS, setPhoneSpotify, justWoke, clearWoke } from '@/music/spotify-player'
 import { findPreview } from '@/music/search'
 import { logSpotify } from '@/music/spotify-log'
 import { watchSpotify } from '@/music/spotify-watch'
@@ -143,14 +143,9 @@ function SpotifyEngine({ track }: { track: Track }) {
     const noDevice = err instanceof SpotifyError && err.code === 'no_device'
     const msg = err instanceof SpotifyError ? err.message : 'Couldn’t control Spotify.'
     logSpotify(`error: ${msg}`)
-    if (noDevice && isIOS()) {
-      setPhoneSpotify('asleep')
-      toast.error('Spotify isn’t open on this phone', {
-        description: 'Tap Open Spotify, then come straight back. The song starts by itself.',
-        duration: 15_000,
-        action: { label: 'Open Spotify', onClick: wakeSpotify },
-      })
-    } else toast.error(msg, { duration: 10_000 })
+    // On iPhone the "Spotify isn't open" strip under the top bar says this, with the button.
+    if (noDevice && isIOS()) setPhoneSpotify('asleep')
+    else toast.error(msg, { duration: 10_000 })
     sent.current = null
     dispatch({ type: 'pause' })
     // It never started: put the tape back to the beginning (not "played and stopped").
