@@ -3,7 +3,7 @@ import { safeStorage } from '@/lib/utils'
 
 export type ThemeChoice = 'system' | 'light' | 'dark'
 
-const KEY = 'sideb:theme'
+const KEY = 'mm:theme'
 const listeners = new Set<() => void>()
 let choice: ThemeChoice = (() => {
   const saved = safeStorage.get(KEY)

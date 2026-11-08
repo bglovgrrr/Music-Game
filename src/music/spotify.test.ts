@@ -37,7 +37,7 @@ function fakeSpotify(opts: { createStatus?: number; known?: string[] } = {}) {
 beforeEach(() => {
   store.clear()
   // Already signed in (the sign-in window itself needs a real browser).
-  store.set('sideb:spotify-token', JSON.stringify({ access_token: 'tok', expires_at: Date.now() + 3_600_000 }))
+  store.set('mm:spotify-token', JSON.stringify({ access_token: 'tok', expires_at: Date.now() + 3_600_000 }))
 })
 
 describe('Save to Spotify', () => {

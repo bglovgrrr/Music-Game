@@ -35,7 +35,7 @@ function fakeSpotify(handler: (c: Call) => Response) {
 }
 
 const signedIn = (overrides: Record<string, unknown> = {}) =>
-  store.set('sideb:spotify-token', JSON.stringify({ access_token: 'tok', refresh_token: 'ref', expires_at: Date.now() + 3_600_000, scope: SCOPES.join(' '), ...overrides }))
+  store.set('mm:spotify-token', JSON.stringify({ access_token: 'tok', refresh_token: 'ref', expires_at: Date.now() + 3_600_000, scope: SCOPES.join(' '), ...overrides }))
 
 beforeEach(() => {
   store.clear()
@@ -139,7 +139,7 @@ describe('Spotify sign-in', () => {
     const calls = fakeSpotify(() => json(200, { access_token: 'new', expires_in: 3600, scope: SCOPES.join(' ') }))
     expect(await getAccessToken()).toBe('new')
     expect(String(calls[0].body)).toContain('grant_type=refresh_token')
-    expect(JSON.parse(store.get('sideb:spotify-token')!).refresh_token).toBe('ref')
+    expect(JSON.parse(store.get('mm:spotify-token')!).refresh_token).toBe('ref')
   })
 
   it('asks to reconnect when an old sign-in lacks the playback permissions', () => {

@@ -2,21 +2,14 @@ import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import './index.css'
 import App from './App.tsx'
+import { SpotifyDone } from './components/spotify-done'
 import { setupPwa } from './lib/pwa'
 import { handleSpotifyCallback } from './music/spotify-auth'
+import { migrateStorageKeys } from './lib/utils'
+
+migrateStorageKeys()
 
 const root = createRoot(document.getElementById('root')!)
-
-function SpotifyDone() {
-  return (
-    <div className="grid min-h-dvh place-items-center p-6 text-center">
-      <div className="grid gap-2">
-        <p className="font-display text-2xl">Connected to Spotify</p>
-        <p className="text-muted-foreground">You can close this window and go back to Mixtape Memories.</p>
-      </div>
-    </div>
-  )
-}
 
 // If this window is Spotify sending us back after sign-in, finish that instead of starting the game.
 handleSpotifyCallback()

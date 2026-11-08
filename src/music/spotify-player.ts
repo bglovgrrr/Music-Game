@@ -15,7 +15,7 @@ export type SpotifyPlayback = {
   contextUri?: string
 }
 
-const DEVICE_KEY = 'sideb:spotify-device'
+const DEVICE_KEY = 'mm:spotify-device'
 /** Stored choice meaning "Mixtape Memories' own in-page player" (its device id changes every visit). */
 export const LOCAL = 'local'
 export const chosenDeviceId = () => safeStorage.get(DEVICE_KEY) || null
@@ -26,7 +26,7 @@ export const isIOS = () =>
   typeof navigator !== 'undefined' &&
   (/iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1))
 
-const LOCAL_BROKEN_KEY = 'sideb:local-player-broken'
+const LOCAL_BROKEN_KEY = 'mm:local-player-broken'
 /** Mixtape Memories' built-in player can be used on this browser (not iOS, and it hasn't failed here before). */
 export const localPlayerUsable = () => !isIOS() && safeStorage.get(LOCAL_BROKEN_KEY) !== '1'
 const markLocalBroken = () => safeStorage.set(LOCAL_BROKEN_KEY, '1')

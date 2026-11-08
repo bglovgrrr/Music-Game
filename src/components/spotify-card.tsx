@@ -76,8 +76,10 @@ export function SpotifyCard({ compact, className }: { compact?: boolean; classNa
 
   useEffect(() => {
     if (!connected) return
-    void refresh()
+    // Fetch after this render (the device list updates its own loading state).
+    const t = window.setTimeout(() => void refresh(), 0)
     if (canUseLocal) void ensureLocalPlayer()
+    return () => window.clearTimeout(t)
   }, [connected, refresh, canUseLocal])
 
   // Back from the Spotify app ("Wake up Spotify"): find the phone, use it, and keep it awake.

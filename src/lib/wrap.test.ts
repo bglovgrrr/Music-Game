@@ -61,3 +61,27 @@ describe('share link page (Open Graph)', () => {
     expect(html).toContain('/?wrap=abcdEFGH23')
   })
 })
+
+describe('saved data from the Side B days', () => {
+  it('moves sideb: keys to mm: once, without overwriting newer values', async () => {
+    const { migrateStorageKeys } = await import('./utils')
+    const data = new Map<string, string>([
+      ['sideb:name', 'Brian'],
+      ['sideb:theme', 'dark'],
+      ['mm:theme', 'light'],
+      ['other', 'x'],
+    ])
+    const store = {
+      get length() {
+        return data.size
+      },
+      key: (i: number) => [...data.keys()][i] ?? null,
+      getItem: (k: string) => data.get(k) ?? null,
+      setItem: (k: string, v: string) => void data.set(k, v),
+      removeItem: (k: string) => void data.delete(k),
+    }
+    ;(globalThis as { localStorage?: unknown }).localStorage = store
+    migrateStorageKeys()
+    expect(Object.fromEntries(data)).toEqual({ 'mm:name': 'Brian', 'mm:theme': 'light', other: 'x' })
+  })
+})

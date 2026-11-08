@@ -20,8 +20,8 @@ export const SCOPES = [
   'user-read-email',
   'user-read-private',
 ]
-const TOKEN_KEY = 'sideb:spotify-token'
-const PENDING_KEY = 'sideb:spotify-pending'
+const TOKEN_KEY = 'mm:spotify-token'
+const PENDING_KEY = 'mm:spotify-pending'
 
 export const spotifyConfigured = !!CLIENT_ID && import.meta.env.MODE !== 'preview'
 
@@ -137,7 +137,7 @@ export async function connectSpotify(): Promise<void> {
     code_challenge: challenge,
   }).toString()
 
-  const popup = window.open(url.toString(), 'sideb-spotify', 'width=480,height=720')
+  const popup = window.open(url.toString(), 'mm-spotify', 'width=480,height=720')
   if (!popup) throw new SpotifyError('Your browser blocked the Spotify window. Allow pop-ups and try again.')
 
   await new Promise<void>((resolve, reject) => {

@@ -28,6 +28,26 @@ export function sample<T>(items: readonly T[]): T {
 }
 
 /** localStorage that never throws (private mode, blocked storage, sandboxed previews). */
+/**
+ * Saved data used the old "sideb:" prefix (from when the app was called Side B). Copy it to
+ * the "mm:" prefix once, so nobody loses their name, Spotify login, theme or game.
+ */
+export function migrateStorageKeys() {
+  for (const store of [globalThis.localStorage, globalThis.sessionStorage]) {
+    try {
+      if (!store) continue
+      const old = Array.from({ length: store.length }, (_, i) => store.key(i)).filter((k): k is string => !!k && k.startsWith('sideb:'))
+      for (const k of old) {
+        const next = `mm:${k.slice('sideb:'.length)}`
+        if (store.getItem(next) === null) store.setItem(next, store.getItem(k) ?? '')
+        store.removeItem(k)
+      }
+    } catch {
+      /* storage blocked: nothing to move */
+    }
+  }
+}
+
 export const safeStorage = {
   get(key: string) {
     try {

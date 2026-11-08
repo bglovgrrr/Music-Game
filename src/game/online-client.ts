@@ -9,7 +9,7 @@ import type { Action, GameState } from './types'
 
 type RoomRow = { id: string; code: string; state: GameState; version: number }
 
-const ROOM_KEY = 'sideb:room'
+const ROOM_KEY = 'mm:room'
 
 /**
  * Online game. Every phone runs the same rules (engine.ts) locally, then saves the new

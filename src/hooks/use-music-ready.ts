@@ -3,7 +3,7 @@ import { useSpotifyConnected } from '@/hooks/use-spotify'
 import { isIOS, localPlayerUsable, onPhoneSpotify, phoneSpotify } from '@/music/spotify-player'
 import { safeStorage } from '@/lib/utils'
 
-const PREVIEWS_KEY = 'sideb:music-previews'
+const PREVIEWS_KEY = 'mm:music-previews'
 
 /**
  * The host's music, set up before the game can start. Ready means either:
