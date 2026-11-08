@@ -161,10 +161,13 @@ function loadTrack(s: GameState, index: number, autoplay: boolean, now: number):
   // Moving on from a song reveals who picked it.
   if (index !== r.current && r.order[r.current]) r = reveal(r, r.order[r.current])
   return {
-    ...withRound(s, { ...r, current: index }),
+    ...withRound(s, { ...r, current: index, furthest: Math.max(index, heardUpTo(r)) }),
     playback: { isPlaying: autoplay, positionMs: 0, updatedAt: now },
   }
 }
+
+/** Index of the furthest song reached in a round (older games: the current one). */
+export const heardUpTo = (r: Round) => Math.max(r.furthest ?? 0, r.current)
 
 /**
  * The whole game's rules. Pure function: (state, action, who did it) -> new state.
@@ -294,7 +297,7 @@ export function reduce(s: GameState, a: Action, actorId: string, now = clock.now
     case 'jump': {
       if (s.phase !== 'listening' || !round) return s
       if (a.index < 0 || a.index >= round!.order.length) return s
-      if (a.index > round!.current) fail("No peeking! Songs are revealed in order.")
+      if (a.index > heardUpTo(round!)) fail("No peeking! Songs are revealed in order.")
       return loadTrack(s, a.index, true, now)
     }
 

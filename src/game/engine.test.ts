@@ -6,6 +6,7 @@ import {
   currentRound,
   GameError,
   guessersFor,
+  heardUpTo,
   isRevealed,
   pickTimeUp,
   scores,
@@ -209,6 +210,18 @@ describe('listening & playback', () => {
     const restarted = reduce(second, { type: 'prev' }, 'a', T0 + 5_000)
     expect(currentRound(restarted)!.current).toBe(1)
     expect(restarted.playback.positionMs).toBe(0)
+  })
+
+  it('going back keeps later songs uncovered (and you can jump forward to them again)', () => {
+    let s = listening(4)
+    for (let i = 0; i < 3; i++) s = reduce(s, { type: 'next', from: currentRound(s)!.current }, 'a', T0 + 1)
+    s = reduce(s, { type: 'jump', index: 0 }, 'b', T0 + 2)
+    const r = currentRound(s)!
+    expect(r.current).toBe(0)
+    expect(heardUpTo(r)).toBe(3)
+    expect(currentRound(reduce(s, { type: 'jump', index: 3 }, 'b', T0 + 3))!.current).toBe(3)
+    s = reduce(s, { type: 'next', from: 0 }, 'a', T0 + 4)
+    expect(heardUpTo(currentRound(s)!)).toBe(3)
   })
 
   it('lets you jump back to a revealed song but not peek ahead', () => {

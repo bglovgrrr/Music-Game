@@ -8,7 +8,7 @@ import { CassetteDeck } from '@/components/cassette-deck'
 import { SpotifyCard } from '@/components/spotify-card'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
-import { currentPick, currentRound, guessersFor, isRevealed, playbackPosition, playerById } from '@/game/engine'
+import { currentPick, currentRound, guessersFor, heardUpTo, isRevealed, playbackPosition, playerById } from '@/game/engine'
 import { themeName } from '@/game/prompts'
 import { useGame, useNow } from '@/hooks/use-game'
 import { spotifySearchUrl } from '@/music/search'
@@ -225,7 +225,7 @@ export function ListeningScreen() {
             {round.order.map((pid, i) => {
               const p = round.picks.find((x) => x.playerId === pid)!
               const who = playerById(state, pid)
-              const played = i <= round.current
+              const played = i <= heardUpTo(round)
               const showWho = played && isRevealed(round, pid)
               const active = i === round.current
               return (

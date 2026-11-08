@@ -44,6 +44,8 @@ export type Round = {
   order: string[]
   /** Index into `order` of the song that is up now. */
   current: number
+  /** Furthest song reached so far (going back doesn't hide songs already heard). */
+  furthest?: number
   startedAt: number
   /** When picking closes automatically (pick timer). */
   pickDeadline?: number
