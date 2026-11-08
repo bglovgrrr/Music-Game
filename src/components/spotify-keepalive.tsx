@@ -18,7 +18,8 @@ import {
 /**
  * Host only. When the music plays on a phone's Spotify app, iOS puts that app to sleep
  * once it's paused. So whenever no song is playing, keep Spotify busy with silence.
- * Checks every 45s and whenever the host comes back to Mixtape Memories.
+ * Silence plays on repeat, so Spotify stays awake even while the host's phone is locked.
+ * Checks every 20s and whenever the host comes back to Mixtape Memories.
  */
 export function SpotifyKeepAlive() {
   const { state, client } = useGame()
@@ -58,7 +59,7 @@ export function SpotifyKeepAlive() {
       }
     }
     void tick()
-    const timer = setInterval(tick, 45_000)
+    const timer = setInterval(tick, 20_000)
     const onVisible = () => document.visibilityState === 'visible' && void tick()
     document.addEventListener('visibilitychange', onVisible)
     return () => {

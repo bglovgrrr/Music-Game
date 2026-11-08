@@ -161,8 +161,7 @@ describe('keeping a phone’s Spotify awake', () => {
     setKeepAliveDevice('iphone')
     const calls = fakeSpotify(() => json(204))
     await pausePlayback()
-    expect(calls).toHaveLength(1)
-    expect(calls[0].url).toContain('/me/player/play?device_id=iphone')
+    expect(calls.map((c) => c.url.replace('https://api.spotify.com/v1', ''))).toEqual(['/me/player/play?device_id=iphone', '/me/player/repeat?state=context&device_id=iphone'])
     expect(calls[0].body).toEqual({ context_uri: SILENCE.album, offset: { uri: SILENCE.uri }, position_ms: 0 })
   })
 
@@ -201,5 +200,48 @@ describe('keeping a phone’s Spotify awake', () => {
     } finally {
       Object.defineProperty(globalThis, 'navigator', { value: nav, configurable: true })
     }
+  })
+})
+
+describe('keeping a phone’s Spotify awake', () => {
+  it('plays the silence on repeat, so it keeps going while the host’s phone is locked', async () => {
+    const calls = fakeSpotify(() => json(204))
+    setKeepAliveDevice('phone')
+    await pausePlayback()
+    const play = calls.find((c) => c.url.includes('/me/player/play'))!
+    expect(play.url).toContain('device_id=phone')
+    expect(play.body).toMatchObject({ context_uri: SILENCE.album })
+    expect(calls.some((c) => c.method === 'PUT' && c.url.includes('/me/player/repeat?state=context') && c.url.includes('device_id=phone'))).toBe(true)
+  })
+
+  it('songs themselves do not repeat', async () => {
+    const calls = fakeSpotify((c) => (c.url.endsWith('/me/player/devices') ? json(200, devices) : json(204)))
+    await playTrack('spotify:track:1', 0, 'spotify:album:A')
+    await new Promise((r) => setTimeout(r, 0))
+    expect(calls.some((c) => c.url.includes('/me/player/repeat?state=off'))).toBe(true)
+  })
+
+  it('when a phone that just dozed off says "no active device", hands playback to it and retries once', async () => {
+    chooseDevice('phone')
+    let plays = 0
+    const calls = fakeSpotify((c) => {
+      if (c.url.endsWith('/me/player/devices')) return json(200, devices)
+      if (c.url.includes('/me/player/play')) return ++plays === 1 ? json(404, { error: { message: 'Player command failed: No active device found', reason: 'NO_ACTIVE_DEVICE' } }) : json(204)
+      return json(204)
+    })
+    const device = await playTrack('spotify:track:1', 0, 'spotify:album:A')
+    expect(device.id).toBe('phone')
+    const transfer = calls.find((c) => c.method === 'PUT' && c.url.endsWith('/me/player'))!
+    expect(transfer.body).toEqual({ device_ids: ['phone'], play: true })
+    expect(plays).toBe(2)
+  })
+
+  it('gives the wake-up hint when the phone has dropped off the list entirely', async () => {
+    chooseDevice('phone')
+    fakeSpotify((c) => {
+      if (c.url.endsWith('/me/player/devices')) return json(200, { devices: [] })
+      return json(204)
+    })
+    await expect(playTrack('spotify:track:1', 0, 'spotify:album:A')).rejects.toThrow(/Wake up Spotify/)
   })
 })

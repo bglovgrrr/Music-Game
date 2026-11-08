@@ -2,6 +2,7 @@
 import { SpotifyError, spotifyApi } from './spotify-auth'
 import { safeStorage } from '@/lib/utils'
 import { ensureLocalPlayer, localDeviceId } from './spotify-sdk'
+import { logSpotify } from './spotify-log'
 
 export type SpotifyDevice = { id: string; name: string; type: string; is_active: boolean }
 export type SpotifyPlayback = {
@@ -101,11 +102,20 @@ export async function playTrack(uri: string, positionMs: number, albumUri?: stri
   const body = JSON.stringify(album ? { context_uri: album, offset: { uri }, position_ms } : { uris: [uri], position_ms })
   const play = () => spotifyApi(`/me/player/play${q(device.id)}`, { method: 'PUT', body })
   const isLocal = device.id === localDeviceId()
+  let revived = false
   for (let attempt = 0; ; attempt++) {
     try {
       await play()
+      // Songs shouldn't loop (the silence does); harmless if it fails.
+      void setRepeat('off', device.id)
       return device
     } catch (err) {
+      // A phone's Spotify app that just dozed off: hand playback to it with play=true, which
+      // usually wakes it, then try once more. (Fully asleep apps still need "Wake up Spotify".)
+      if (!isLocal && !revived && err instanceof SpotifyError && err.code === 'no_device') {
+        revived = true
+        if (await revive(device.id)) continue
+      }
       // A freshly started built-in player can take a few seconds before Spotify knows it.
       // Switch playback to it explicitly, wait, and try again.
       if (!(isLocal && err instanceof SpotifyError && err.code === 'no_device') || attempt >= 3) {
@@ -122,13 +132,40 @@ export async function playTrack(uri: string, positionMs: number, albumUri?: stri
   }
 }
 
-/** Play silence on the kept-awake phone (instead of pausing, which lets iOS put Spotify to sleep). */
+/** Spotify's repeat mode on a device: 'context' loops the album/playlist, 'off' doesn't. */
+async function setRepeat(state: 'off' | 'context' | 'track', deviceId: string) {
+  await spotifyApi(`/me/player/repeat?state=${state}&device_id=${encodeURIComponent(deviceId)}`, { method: 'PUT' }).catch(() => {})
+}
+
+/** Hand playback to a device that's still listed, asking it to play. True if it's listed. */
+async function revive(deviceId: string): Promise<boolean> {
+  const listed = (await listDevices().catch(() => [])).some((d) => d.id === deviceId)
+  if (!listed) return false
+  logSpotify('no active device: handing playback back to the phone and retrying')
+  await spotifyApi('/me/player', { method: 'PUT', body: JSON.stringify({ device_ids: [deviceId], play: true }) }).catch(() => {})
+  await new Promise((r) => setTimeout(r, 800))
+  return true
+}
+
+/**
+ * Play silence on the kept-awake phone (instead of pausing, which lets iOS put Spotify to
+ * sleep), on repeat, so it keeps "playing" even while the host's phone is locked.
+ */
 export async function playSilence() {
   if (!keepAliveId) return
-  await spotifyApi(`/me/player/play?device_id=${encodeURIComponent(keepAliveId)}`, {
-    method: 'PUT',
-    body: JSON.stringify({ context_uri: SILENCE.album, offset: { uri: SILENCE.uri }, position_ms: 0 }),
-  })
+  const id = keepAliveId
+  const play = () =>
+    spotifyApi(`/me/player/play?device_id=${encodeURIComponent(id)}`, {
+      method: 'PUT',
+      body: JSON.stringify({ context_uri: SILENCE.album, offset: { uri: SILENCE.uri }, position_ms: 0 }),
+    })
+  try {
+    await play()
+  } catch (err) {
+    if (!(err instanceof SpotifyError && err.code === 'no_device') || !(await revive(id))) throw err
+    await play()
+  }
+  await setRepeat('context', id)
 }
 
 /** Stop the song. On a kept-awake phone this switches to silence so Spotify stays awake. */
