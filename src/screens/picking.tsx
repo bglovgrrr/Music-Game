@@ -1,6 +1,7 @@
 import { ArrowLeft, Headphones, Loader2, Lock, Pause, Play, Search, Timer, WifiOff } from 'lucide-react'
 import { AnimatePresence, motion } from 'motion/react'
 import { useEffect, useRef, useState } from 'react'
+import { primeKeyboard } from '@/lib/keyboard'
 import { AlbumArt, PlayerAvatar, PromptCard, TrackRow } from '@/components/game-ui'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
@@ -132,6 +133,13 @@ export function PickingScreen() {
   }
 
   const showSearch = !myPick || changing
+  // Ready to type the moment the search shows (and, after a tap on iPhone, with the keyboard up).
+  const searchRef = useRef<HTMLInputElement>(null)
+  useEffect(() => {
+    if (!showSearch || selected) return
+    const t = window.setTimeout(() => searchRef.current?.focus({ preventScroll: true }), 50)
+    return () => window.clearTimeout(t)
+  }, [showSearch, selected])
 
   return (
     <div className="mx-auto flex min-h-0 w-full max-w-md flex-1 flex-col gap-3 pt-1 pb-3">
@@ -156,7 +164,10 @@ export function PickingScreen() {
         {selected ? (
           <motion.div key="confirm" initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -12 }} className="flex flex-1 flex-col gap-3">
             <Card className="grid gap-4 p-4">
-              <button className="flex cursor-pointer items-center gap-1.5 justify-self-start text-sm text-muted-foreground" onClick={() => setSelected(null)}>
+              <button className="flex cursor-pointer items-center gap-1.5 justify-self-start text-sm text-muted-foreground" onClick={() => {
+                  primeKeyboard()
+                  setSelected(null)
+                }}>
                 <ArrowLeft className="size-4" /> Back to results
               </button>
               <div className="flex items-center gap-4">
@@ -180,11 +191,15 @@ export function PickingScreen() {
             <div className="relative">
               <Search className="pointer-events-none absolute top-1/2 left-4 size-5 -translate-y-1/2 text-muted-foreground" />
               <Input
+                ref={searchRef}
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 placeholder="Search songs or artists"
                 className="paper pl-12"
                 autoFocus
+                autoComplete="off"
+                autoCorrect="off"
+                spellCheck={false}
                 enterKeyHint="search"
               />
               {loading && <Loader2 className="absolute top-1/2 right-4 size-5 -translate-y-1/2 animate-spin text-muted-foreground" />}
@@ -226,7 +241,10 @@ export function PickingScreen() {
               <div className="font-display text-2xl leading-tight font-bold [font-stretch:80%]">{myPick!.track.title}</div>
               <div className="text-muted-foreground">{myPick!.track.artist}</div>
             </div>
-            <Button variant="sketch" className="text-foreground [--sketch-ink:var(--foreground)]" onClick={() => setChanging(true)}>
+            <Button variant="sketch" className="text-foreground [--sketch-ink:var(--foreground)]" onClick={() => {
+                primeKeyboard()
+                setChanging(true)
+              }}>
               Change my pick
             </Button>
           </motion.div>

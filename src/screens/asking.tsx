@@ -7,6 +7,7 @@ import { Textarea } from '@/components/ui/input'
 import { askerOf, MAX_PROMPT_LENGTH } from '@/game/engine'
 import { ALL_PROMPTS, dealQuestions, DEPTH_LABEL, THEMES } from '@/game/prompts'
 import { useGame } from '@/hooks/use-game'
+import { primeKeyboard } from '@/lib/keyboard'
 import { cn, sample } from '@/lib/utils'
 
 export function AskingScreen() {
@@ -44,7 +45,10 @@ export function AskingScreen() {
     )
   }
 
-  const ask = (prompt: string, tid?: string) => dispatch({ type: 'ask', prompt, themeId: tid })
+  const ask = (prompt: string, tid?: string) => {
+    primeKeyboard() // the next screen is the song search: bring the keyboard up from this tap
+    dispatch({ type: 'ask', prompt, themeId: tid })
+  }
 
   return (
     <div className="mx-auto grid w-full max-w-2xl content-start gap-4 py-2 [@media(max-height:700px)]:gap-3">
