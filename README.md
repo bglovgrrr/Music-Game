@@ -6,7 +6,7 @@ Mixtape Memories is a relaxed music game for 2–8 friends in the same room. Som
 
 **▶ Play: [music-game-virid.vercel.app](https://music-game-virid.vercel.app)**
 
-> **Status:** live on Vercel, backed by Supabase. Not yet played in a real game with friends.
+> **Status:** version 1.0, live on Vercel and backed by Supabase. The version and build show in the top left of the app.
 
 ## How a game works
 
@@ -151,15 +151,16 @@ Add more shadcn components with `npx shadcn@latest add <component>`.
 
 - [x] Full game loop with themes, secret picks, and a recap
 - [x] Shared playback controls; songs revealed one at a time
-- [x] Pastel design with light and dark themes
+- [x] "Basement sessions" design: wooden table, paper, neon, cassette player, stickers (light and dark)
 - [x] Online rooms: codes, invite links, live sync, rejoin after refresh
 - [x] Database live on Supabase with security rules
 - [x] Guess who picked it, pick timer, reactions, song of the round, QR join, chimes
-- [x] Recap card and Save to Spotify
+- [x] Recap card (poster), share link with rich preview, and Save to Spotify
+- [x] Fan favorite, question categories (light to deep), required music setup before starting
 - [x] Group selfies saved with each game
 - [x] Hosted on Vercel
 - [ ] Play a first real game with friends
-- [ ] Game history: browse past games and their mixtapes
+- [ ] Game history and favorites (see "Someday: accounts" below)
 - [x] Spotify: search any song and play it in full on the host's Spotify
 
 ### Someday: accounts (not started)

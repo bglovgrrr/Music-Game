@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { toast } from 'sonner'
+import { getAudio } from '@/lib/audio'
 import { currentPick, playbackPosition } from '@/game/engine'
 import type { Track } from '@/game/types'
 import { useGame, useNow } from '@/hooks/use-game'
@@ -9,36 +10,6 @@ import { getPlayback, pausePlayback, playTrack, seekTo, isIOS, setPhoneSpotify, 
 import { findPreview } from '@/music/search'
 import { logSpotify } from '@/music/spotify-log'
 import { watchSpotify } from '@/music/spotify-watch'
-
-const SILENT_WAV = 'data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQAAAAA='
-let shared: HTMLAudioElement | null = null
-let unlocked = false
-
-/** One audio element for the whole app, so it stays "unlocked" once the user has tapped. */
-function getAudio() {
-  if (!shared) {
-    shared = new Audio()
-    shared.preload = 'auto'
-  }
-  return shared
-}
-
-/**
- * Phones only let a page play sound after a tap. Call this from any tap so that later,
- * when someone else presses play on their phone, the speaker device is allowed to start.
- */
-export function unlockAudio() {
-  if (unlocked) return
-  unlocked = true
-  const el = getAudio()
-  if (el.getAttribute('src')) return
-  el.src = SILENT_WAV
-  el.play()
-    .then(() => el.pause())
-    .catch(() => {
-      unlocked = false
-    })
-}
 
 /**
  * Plays the current song on the speaker device (the host) and keeps it in step with the

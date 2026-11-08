@@ -8,7 +8,6 @@
 import type { Track } from '@/game/types'
 import { connectSpotify, SpotifyError, spotifyApi, spotifyConfigured } from './spotify-auth'
 
-export { SpotifyError }
 export const spotifyAvailable = spotifyConfigured
 
 type Token = Record<string, never>

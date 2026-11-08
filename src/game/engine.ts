@@ -6,7 +6,7 @@ export const MAX_PLAYERS = 8
 export const MAX_PROMPT_LENGTH = 160
 export const MAX_NOTE_LENGTH = 140
 export const PICK_TIMER_OPTIONS = [60, 90, 120] as const
-export const DEFAULT_SETTINGS: Settings = { guessMode: false, pickSeconds: null }
+const DEFAULT_SETTINGS: Settings = { guessMode: false, pickSeconds: null }
 
 export const settingsOf = (s: GameState): Settings => ({ ...DEFAULT_SETTINGS, ...s.settings })
 

@@ -10,23 +10,23 @@ import { compressPhoto } from '@/lib/photo'
 import { cn } from '@/lib/utils'
 
 /** Resolves a stored photo to something an <img> can show. */
-export function usePhotoUrl(photo?: Photo) {
+function usePhotoUrl(photo?: Photo) {
   const { client } = useGame()
-  const [url, setUrl] = useState<string | null>(null)
+  // Remember which photo the link belongs to, so a new photo never shows the old link.
+  const [loaded, setLoaded] = useState<{ path: string; url: string | null } | null>(null)
   const path = photo?.path
   useEffect(() => {
-    let cancelled = false
-    setUrl(null)
     if (!path) return
+    let cancelled = false
     client
       .photoUrl(path)
-      .then((u) => !cancelled && setUrl(u))
-      .catch(() => !cancelled && setUrl(null))
+      .then((u) => !cancelled && setLoaded({ path, url: u }))
+      .catch(() => !cancelled && setLoaded({ path, url: null }))
     return () => {
       cancelled = true
     }
   }, [client, path])
-  return url
+  return path && loaded?.path === path ? loaded.url : null
 }
 
 /** A photo styled like a polaroid, slightly tilted. */

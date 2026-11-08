@@ -1,7 +1,5 @@
 import { animate, motion, useMotionTemplate, useMotionValue, useReducedMotion, useTransform } from 'motion/react'
 import { useEffect, useRef, useState } from 'react'
-import { AlbumArt, Logo } from '@/components/game-ui'
-import type { Track } from '@/game/types'
 import { cn } from '@/lib/utils'
 
 /** Soft, bouncy springs: the "chill" feel. */
@@ -144,26 +142,3 @@ export function Tiltable({
   )
 }
 
-/** The album sleeve: front is the cover, back reads "Mixtape Memories". */
-export function TiltAlbum({ track, back, floating, className }: { track: Track; back?: React.ReactNode; floating?: boolean; className?: string }) {
-  return (
-    <Tiltable
-      label={`${track.title} by ${track.artist}`}
-      resetKey={track.id}
-      floating={floating}
-      className={className}
-      front={<AlbumArt track={track} className="size-full" rounded="rounded-xl" />}
-      back={
-        <div className="paper paper-texture flex size-full flex-col justify-between bg-[var(--paper)] p-[9%]">
-          <Logo className="[&>svg]:h-4 [&>svg]:w-6 [&>span]:text-base" />
-          <div className="grid gap-1 text-left">
-            <span className="font-mono text-[10px] tracking-[0.2em] text-muted-foreground uppercase">Now playing</span>
-            <span className="font-note text-3xl leading-tight italic">{track.title}</span>
-            <span className="text-sm text-muted-foreground">{track.artist}</span>
-            {back}
-          </div>
-        </div>
-      }
-    />
-  )
-}

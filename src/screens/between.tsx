@@ -33,7 +33,7 @@ export function BetweenScreen() {
         <div className="grid min-w-0 gap-2">
           <IndexCard tilt={-0.8} className="mt-1">
             <IndexCardHeader>
-              <h3 className="text-xl leading-none font-bold font-soft">Song of the round</h3>
+              <h2 className="text-xl leading-none font-bold font-soft">Song of the round</h2>
               <span className="font-mono text-xs tracking-[0.1em] text-muted-foreground">
                 {voted}/{voters} VOTED
               </span>

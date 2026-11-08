@@ -5,7 +5,7 @@ import { useGame } from '@/hooks/use-game'
 import { cn } from '@/lib/utils'
 
 /** Song-of-the-round wins per player across the game. */
-export function crownCounts(s: GameState) {
+function crownCounts(s: GameState) {
   const out: Record<string, number> = {}
   for (const r of s.rounds) for (const w of voteResults(r).winners) out[w] = (out[w] ?? 0) + 1
   return out

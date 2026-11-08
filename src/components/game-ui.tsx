@@ -140,20 +140,6 @@ export function PromptCard({ prompt, asker, compact, topic }: { prompt: string; 
   )
 }
 
-export function Equalizer({ playing, className }: { playing: boolean; className?: string }) {
-  return (
-    <span className={cn('inline-flex h-3.5 items-end gap-[2px]', className)} aria-hidden>
-      {[0, 0.2, 0.4, 0.1].map((d, i) => (
-        <span
-          key={i}
-          className={cn('w-[3px] rounded-full bg-current', playing ? 'eq-bar' : 'h-1')}
-          style={playing ? { animationDelay: `${d}s`, height: '100%' } : undefined}
-        />
-      ))}
-    </span>
-  )
-}
-
 export function TrackRow({
   track,
   onClick,

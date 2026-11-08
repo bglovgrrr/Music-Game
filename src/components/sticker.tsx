@@ -95,7 +95,7 @@ const ART: { name: string; art: Art }[] = [
 ]
 
 /** Which sticker a player gets: by their colour slot, else a hash of their id. */
-export function stickerFor(player: { id: string; color?: string }) {
+function stickerFor(player: { id: string; color?: string }) {
   const i = inkIndex(player.color)
   if (i >= 0) return ART[i % ART.length]
   let h = 0
@@ -104,7 +104,7 @@ export function stickerFor(player: { id: string; color?: string }) {
 }
 
 /** A small, stable tilt per player so stickers look hand-placed. */
-export function stickerTilt(id: string) {
+function stickerTilt(id: string) {
   let h = 7
   for (const ch of id) h = (h * 33 + ch.charCodeAt(0)) >>> 0
   return (h % 17) - 8

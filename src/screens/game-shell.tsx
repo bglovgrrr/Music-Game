@@ -29,6 +29,7 @@ export function GameShell({ children, onExit }: { children: React.ReactNode; onE
   return (
     <div className="mx-auto flex h-dvh w-full max-w-5xl flex-col px-4 pt-safe sm:px-8">
       <header className="relative z-20 -mx-4 mb-2 flex h-14 shrink-0 items-center gap-2.5 bg-[color-mix(in_oklab,var(--table)_70%,black_20%)]/80 px-4 backdrop-blur-md shadow-[0_8px_20px_-14px_rgb(0_0_0/0.8)] sm:-mx-8 sm:px-8">
+        <h1 className="sr-only">Mixtape Memories, room {state.code}</h1>
         <LabelTape className="text-[0.8rem]">{state.code}</LabelTape>
         <VersionTag className="max-[370px]:hidden" />
         {client.mode === 'demo' && <Badge variant="secondary" className="max-sm:hidden">Demo</Badge>}

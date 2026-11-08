@@ -43,7 +43,6 @@ let keepAliveId: string | null = null
 export const setKeepAliveDevice = (id: string | null) => {
   keepAliveId = id
 }
-export const keepAliveDevice = () => keepAliveId
 
 /**
  * Which device the keep-alive should look after: the remembered one if it's still listed;

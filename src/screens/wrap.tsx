@@ -88,6 +88,9 @@ export function WrapScreen({ id, onDone }: { id: string; onDone: () => void }) {
       <div className="flex min-h-0 flex-1 flex-col gap-2">
         <div
           className="no-scrollbar -mx-4 flex min-h-0 flex-1 snap-x snap-mandatory gap-3 overflow-x-auto px-4 py-1"
+          tabIndex={0}
+          role="region"
+          aria-label="Rounds (swipe sideways)"
           onScroll={(e) => {
             const el = e.currentTarget
             setAt(Math.round(el.scrollLeft / Math.max(1, el.scrollWidth / wrap.rounds.length)))
@@ -103,7 +106,7 @@ export function WrapScreen({ id, onDone }: { id: string; onDone: () => void }) {
                 </p>
                 <p className="line-clamp-2 font-note text-lg leading-snug italic">{r.prompt}</p>
               </div>
-              <ul className="min-h-0 flex-1 overflow-y-auto overscroll-contain">
+              <ul className="min-h-0 flex-1 overflow-y-auto overscroll-contain" tabIndex={0} aria-label={`Songs for “${r.prompt}”`}>
                 {r.songs.map((s, j) => (
                   <li key={j}>
                     <a href={s.url} target="_blank" rel="noreferrer" className="flex items-center gap-3 rounded-md p-1.5 hover:bg-muted">

@@ -28,7 +28,10 @@ export function SpotifyKeepAlive() {
   const { state, client } = useGame()
   const connected = useSpotifyConnected()
   const songPlaying = useRef(false)
-  songPlaying.current = state.phase === 'listening' && state.playback.isPlaying
+  const playingNow = state.phase === 'listening' && state.playback.isPlaying
+  useEffect(() => {
+    songPlaying.current = playingNow
+  }, [playingNow])
 
   useEffect(() => {
     if (!connected || !client.isSpeaker) {

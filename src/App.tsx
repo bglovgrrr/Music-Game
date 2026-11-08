@@ -1,8 +1,9 @@
 import { Loader2 } from 'lucide-react'
 import { AnimatePresence, motion } from 'motion/react'
-import { useEffect, useState } from 'react'
+import { lazy, Suspense, useEffect, useState } from 'react'
 import { toast } from 'sonner'
-import { AudioEngine, unlockAudio } from '@/components/audio-engine'
+import { AudioEngine } from '@/components/audio-engine'
+import { unlockAudio } from '@/lib/audio'
 import { ReactionLayer } from '@/components/reactions'
 import { ReactionTally } from '@/components/reaction-tally'
 import { SpotifyKeepAlive } from '@/components/spotify-keepalive'
@@ -25,9 +26,16 @@ import { HomeScreen } from '@/screens/home'
 import { ListeningScreen } from '@/screens/listening'
 import { LobbyScreen } from '@/screens/lobby'
 import { PickingScreen } from '@/screens/picking'
-import { RecapScreen } from '@/screens/recap'
-import { WrapScreen } from '@/screens/wrap'
 import { wrapIdFromLocation } from '@/lib/wrap'
+
+// Only needed at the end of a game or from a share link: loaded when first used.
+const RecapScreen = lazy(() => import('@/screens/recap').then((m) => ({ default: m.RecapScreen })))
+const WrapScreen = lazy(() => import('@/screens/wrap').then((m) => ({ default: m.WrapScreen })))
+const Loading = () => (
+  <div className="grid flex-1 place-items-center py-20 text-muted-foreground">
+    <Loader2 className="size-6 animate-spin" />
+  </div>
+)
 
 function Game({ onExit }: { onExit: () => void }) {
   const { state, client, meId, isHost } = useGame()
@@ -39,7 +47,11 @@ function Game({ onExit }: { onExit: () => void }) {
     picking: <PickingScreen />,
     listening: <ListeningScreen />,
     between: <BetweenScreen />,
-    recap: <RecapScreen onExit={onExit} />,
+    recap: (
+      <Suspense fallback={<Loading />}>
+        <RecapScreen onExit={onExit} />
+      </Suspense>
+    ),
   }
   return (
     <GameShell onExit={onExit}>
@@ -127,6 +139,7 @@ export default function App() {
           <Loader2 className="size-6 animate-spin" />
         </div>
       ) : wrapId && !client ? (
+        <Suspense fallback={<Loading />}>
         <WrapScreen
           id={wrapId}
           onDone={() => {
@@ -134,6 +147,7 @@ export default function App() {
             setWrapId(null)
           }}
         />
+        </Suspense>
       ) : client ? (
         <GameContext.Provider value={client}>
           <Game onExit={exit} />

@@ -126,6 +126,3 @@ export function PeekSheet({
     </>
   )
 }
-
-/** Space at the bottom of a screen so the peeking sheet tab never covers content. */
-export const PEEK_SPACE = 'pb-20'

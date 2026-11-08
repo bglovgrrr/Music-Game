@@ -18,7 +18,7 @@ let itunesFailedAt = 0
 let lastReason = ''
 /** Searches already done this session (fewer requests to Apple, instant repeats). */
 const cache = new Map<string, Track[]>()
-export const MIN_QUERY_LENGTH = 2
+const MIN_QUERY_LENGTH = 2
 
 export type SearchResult = {
   tracks: Track[]

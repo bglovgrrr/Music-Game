@@ -74,7 +74,7 @@ export function ReactionLayer() {
 const HOLD = { firstDelay: 260, start: 150, fastest: 120 }
 
 /** Holding powers the button up through 4 levels, one every LEVEL_MS: each level-up wobbles and grows. */
-export const MAX_LEVEL = 4
+const MAX_LEVEL = 4
 const LEVEL_MS = 1800
 /** Button scale at each level (index = level). */
 const LEVEL_SCALE = [1, 1.1, 1.22, 1.34, 1.48]

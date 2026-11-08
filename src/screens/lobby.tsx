@@ -3,7 +3,8 @@ import { toast } from 'sonner'
 import { GameSettings } from '@/components/game-settings'
 import { LabelTape } from '@/components/physical'
 import { QrCode } from '@/components/qr-code'
-import { MusicSetup, useMusicReady } from '@/components/music-setup'
+import { MusicSetup } from '@/components/music-setup'
+import { useMusicReady } from '@/hooks/use-music-ready'
 import { PeekSheet } from '@/components/sheet'
 import { StickerBoard } from '@/components/sticker-board'
 import { spotifyConfigured } from '@/music/spotify-auth'
@@ -72,7 +73,7 @@ export function LobbyScreen() {
 
       <section>
         <div className="flex items-baseline justify-between pb-3">
-          <h3 className="text-xl leading-none font-bold font-soft">Who&rsquo;s here</h3>
+          <h2 className="text-xl leading-none font-bold font-soft">Who&rsquo;s here</h2>
           <span className="font-mono text-xs tracking-[0.1em] text-muted-foreground">{state.players.length}/8</span>
         </div>
         <StickerBoard players={state.players} meId={meId} hostId={state.hostId} outlines={4} />

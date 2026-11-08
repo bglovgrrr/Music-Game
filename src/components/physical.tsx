@@ -49,14 +49,3 @@ export function Washi({ className, tilt = -4 }: { className?: string; tilt?: num
   return <span aria-hidden className={cn('washi pointer-events-none absolute block h-6 w-24', className)} style={{ transform: `rotate(${tilt}deg)` }} />
 }
 
-/** A rubber stamp (awards): ink in the accent colour, slightly rotated. */
-export function Stamp({ children, className, tilt = -4 }: { children: React.ReactNode; className?: string; tilt?: number }) {
-  return (
-    <span
-      className={cn('inline-flex items-center gap-1 rounded-[4px] border-[1.5px] border-current px-1.5 py-0.5 font-mono text-[0.65rem] font-semibold tracking-[0.12em] text-neon uppercase opacity-90', className)}
-      style={{ transform: `rotate(${tilt}deg)` }}
-    >
-      {children}
-    </span>
-  )
-}

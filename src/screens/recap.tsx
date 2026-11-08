@@ -9,7 +9,6 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { playerById, voteResults } from '@/game/engine'
-import { drawRecapCard } from '@/lib/recap-card'
 import { canShareWrap, shareWrap } from '@/lib/wrap'
 import { saveToSpotify, spotifyAvailable, type ExportResult } from '@/music/spotify'
 import { PeekSheet } from '@/components/sheet'
@@ -34,7 +33,7 @@ function RecapCardDialog({ onClose }: { onClose: () => void }) {
     let objectUrl: string | null = null
     const latest = [...state.rounds].reverse().find((r) => r.photo)?.photo
     ;(latest ? client.photoUrl(latest.path).catch(() => null) : Promise.resolve(null))
-      .then((photoUrl) => drawRecapCard(state, photoUrl))
+      .then(async (photoUrl) => (await import('@/lib/recap-card')).drawRecapCard(state, photoUrl))
       .then((blob) => {
         objectUrl = URL.createObjectURL(blob)
         setFile(new File([blob], 'mixtape-memories.png', { type: 'image/png' }))
@@ -51,7 +50,7 @@ function RecapCardDialog({ onClose }: { onClose: () => void }) {
     setBusy(true)
     try {
       // The public preview never includes selfies: draw a clean card for it.
-      const href = link ?? (await shareWrap(client, state, await drawRecapCard(state, null)))
+      const href = link ?? (await shareWrap(client, state, await (await import('@/lib/recap-card')).drawRecapCard(state, null)))
       setLink(href)
       if (navigator.share) await navigator.share({ title, text: 'Here’s our mixtape from tonight 🎶', url: href })
       else {
@@ -267,6 +266,9 @@ function RoundCarousel({ rounds }: { rounds: Round[] }) {
     <div className="flex min-h-0 flex-1 flex-col gap-2">
       <div
         className="no-scrollbar -mx-4 flex min-h-0 flex-1 snap-x snap-mandatory gap-3 overflow-x-auto px-4 py-1"
+        tabIndex={0}
+        role="region"
+        aria-label="Rounds (swipe sideways)"
         onScroll={(e) => {
           const el = e.currentTarget
           setAt(Math.round(el.scrollLeft / Math.max(1, el.scrollWidth / rounds.length)))
@@ -284,7 +286,7 @@ function RoundCarousel({ rounds }: { rounds: Round[] }) {
                 <p className="line-clamp-2 font-note text-lg leading-snug italic">{r.prompt}</p>
               </div>
             </div>
-            <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain">
+            <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain" tabIndex={0} role="region" aria-label={`Songs for “${r.prompt}”`}>
               {r.order.map((pid) => {
                 const p = r.picks.find((x) => x.playerId === pid)!
                 const who = playerById(state, pid)
