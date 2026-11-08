@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { toast } from 'sonner'
+import { report } from '@/lib/report'
 import { getAudio } from '@/lib/audio'
 import { currentPick, playbackPosition } from '@/game/engine'
 import type { Track } from '@/game/types'
@@ -114,6 +115,7 @@ function SpotifyEngine({ track }: { track: Track }) {
     const noDevice = err instanceof SpotifyError && err.code === 'no_device'
     const msg = err instanceof SpotifyError ? err.message : 'Couldn’t control Spotify.'
     logSpotify(`error: ${msg}`)
+    report('spotify', `${err instanceof SpotifyError ? err.code : 'unknown'}: ${msg}`)
     // On iPhone the "Spotify isn't open" strip under the top bar says this, with the button.
     if (noDevice && isIOS()) setPhoneSpotify('asleep')
     else toast.error(msg, { duration: 10_000 })

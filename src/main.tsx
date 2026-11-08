@@ -6,8 +6,11 @@ import { SpotifyDone } from './components/spotify-done'
 import { setupPwa } from './lib/pwa'
 import { handleSpotifyCallback } from './music/spotify-auth'
 import { migrateStorageKeys } from './lib/utils'
+import { installErrorReporting } from './lib/report'
+import { ErrorBoundary } from './components/error-boundary'
 
 migrateStorageKeys()
+installErrorReporting()
 
 const root = createRoot(document.getElementById('root')!)
 
@@ -22,7 +25,9 @@ handleSpotifyCallback()
     }
     root.render(
       <StrictMode>
-        <App />
+        <ErrorBoundary>
+          <App />
+        </ErrorBoundary>
       </StrictMode>,
     )
     setupPwa()

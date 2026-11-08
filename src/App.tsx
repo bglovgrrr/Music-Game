@@ -4,6 +4,7 @@ import { lazy, Suspense, useEffect, useState } from 'react'
 import { toast } from 'sonner'
 import { AudioEngine } from '@/components/audio-engine'
 import { unlockAudio } from '@/lib/audio'
+import { setReportWhere } from '@/lib/report'
 import { ReactionLayer } from '@/components/reactions'
 import { ReactionTally } from '@/components/reaction-tally'
 import { SpotifyKeepAlive } from '@/components/spotify-keepalive'
@@ -39,6 +40,7 @@ const Loading = () => (
 
 function Game({ onExit }: { onExit: () => void }) {
   const { state, client, meId, isHost } = useGame()
+  useEffect(() => setReportWhere(state.phase), [state.phase])
   useCues(state, meId)
   useWakeLock(client.isSpeaker && state.phase !== 'lobby' && state.phase !== 'recap')
   const screens = {
