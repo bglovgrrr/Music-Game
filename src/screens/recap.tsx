@@ -1,4 +1,4 @@
-import { Copy, ExternalLink, Home, ImageIcon, ListMusic, Loader2, Share, Trophy, X } from 'lucide-react'
+import { Copy, ExternalLink, Home, ImageIcon, Link2, ListMusic, Loader2, Share, Trophy, X } from 'lucide-react'
 import { AnimatePresence, motion } from 'motion/react'
 import { useEffect, useState } from 'react'
 import { toast } from 'sonner'
@@ -10,6 +10,7 @@ import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { playerById, voteResults } from '@/game/engine'
 import { drawRecapCard } from '@/lib/recap-card'
+import { canShareWrap, shareWrap } from '@/lib/wrap'
 import { saveToSpotify, spotifyAvailable, type ExportResult } from '@/music/spotify'
 import { PeekSheet } from '@/components/sheet'
 import { themeName } from '@/game/prompts'
@@ -17,11 +18,17 @@ import type { Round } from '@/game/types'
 import { useGame } from '@/hooks/use-game'
 import { cn } from '@/lib/utils'
 
-/** Shows the recap image with Share (where supported) or "press and hold to save". */
+/**
+ * The recap card. Online games share a link (/w/<id>) that unfurls in chats with this card
+ * as its preview and opens a read-only wrap of the night. Demo games share the image.
+ */
 function RecapCardDialog({ onClose }: { onClose: () => void }) {
   const { state, client } = useGame()
   const [file, setFile] = useState<File | null>(null)
   const [url, setUrl] = useState<string | null>(null)
+  const [link, setLink] = useState<string | null>(null)
+  const [busy, setBusy] = useState(false)
+  const linkable = canShareWrap(client)
 
   useEffect(() => {
     let objectUrl: string | null = null
@@ -30,7 +37,7 @@ function RecapCardDialog({ onClose }: { onClose: () => void }) {
       .then((photoUrl) => drawRecapCard(state, photoUrl))
       .then((blob) => {
         objectUrl = URL.createObjectURL(blob)
-        setFile(new File([blob], 'side-b-mixtape.png', { type: 'image/png' }))
+        setFile(new File([blob], 'mixtape-memories.png', { type: 'image/png' }))
         setUrl(objectUrl)
       })
       .catch(() => toast.error('Could not make the image'))
@@ -39,11 +46,30 @@ function RecapCardDialog({ onClose }: { onClose: () => void }) {
     }
   }, [state, client])
 
-  const canShare = !!file && typeof navigator.canShare === 'function' && navigator.canShare({ files: [file] })
-  const share = async () => {
+  const title = 'Our Mixtape Memories mixtape'
+  const shareLink = async () => {
+    setBusy(true)
+    try {
+      // The public preview never includes selfies: draw a clean card for it.
+      const href = link ?? (await shareWrap(client, state, await drawRecapCard(state, null)))
+      setLink(href)
+      if (navigator.share) await navigator.share({ title, text: 'Here’s our mixtape from tonight 🎶', url: href })
+      else {
+        await navigator.clipboard.writeText(href)
+        toast.success('Link copied')
+      }
+    } catch (err) {
+      if ((err as Error).name !== 'AbortError') toast.error((err as Error).message || 'Could not share')
+    } finally {
+      setBusy(false)
+    }
+  }
+
+  const canShareFile = !!file && typeof navigator.canShare === 'function' && navigator.canShare({ files: [file] })
+  const shareImage = async () => {
     if (!file) return
     try {
-      await navigator.share({ files: [file], title: 'Our Mixtape Memories mixtape' })
+      await navigator.share({ files: [file], title })
     } catch (err) {
       if ((err as Error).name !== 'AbortError') toast.error('Could not share')
     }
@@ -72,11 +98,25 @@ function RecapCardDialog({ onClose }: { onClose: () => void }) {
             <X />
           </Button>
         </div>
-        <div className="grid aspect-[4/5] place-items-center overflow-hidden rounded-2xl bg-muted">
-          {url ? <img src={url} alt="Recap card of tonight's mixtape" className="size-full object-cover" /> : <Loader2 className="size-6 animate-spin text-muted-foreground" />}
+        <div className="grid aspect-[4/5] max-h-[52dvh] place-items-center justify-self-center overflow-hidden rounded-[4px] bg-muted">
+          {url ? <img src={url} alt="Recap card of tonight's mixtape" className="size-full object-contain" /> : <Loader2 className="size-6 animate-spin text-muted-foreground" />}
         </div>
-        {canShare ? (
-          <Button variant="brand" size="lg" onClick={share}>
+        {linkable ? (
+          <>
+            <Button variant="brand" size="lg" onClick={shareLink} disabled={busy}>
+              {busy ? <Loader2 className="animate-spin" /> : <Link2 />} Share the mixtape link
+            </Button>
+            <p className="text-center text-xs text-muted-foreground">
+              Opens a page with every song (no selfies or notes). Anyone with the link can see it.
+            </p>
+            {canShareFile && (
+              <Button variant="ghost" size="sm" onClick={shareImage}>
+                <Share /> Share the image instead
+              </Button>
+            )}
+          </>
+        ) : canShareFile ? (
+          <Button variant="brand" size="lg" onClick={shareImage}>
             <Share /> Share
           </Button>
         ) : (

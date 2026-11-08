@@ -26,6 +26,8 @@ import { ListeningScreen } from '@/screens/listening'
 import { LobbyScreen } from '@/screens/lobby'
 import { PickingScreen } from '@/screens/picking'
 import { RecapScreen } from '@/screens/recap'
+import { WrapScreen } from '@/screens/wrap'
+import { wrapIdFromLocation } from '@/lib/wrap'
 
 function Game({ onExit }: { onExit: () => void }) {
   const { state, client, meId, isHost } = useGame()
@@ -63,6 +65,8 @@ function Game({ onExit }: { onExit: () => void }) {
 
 export default function App() {
   const [client, setClient] = useState<GameClient | null>(null)
+  // Opened from a share link (/w/<id>): show that wrap instead of the home screen.
+  const [wrapId, setWrapId] = useState(wrapIdFromLocation)
   const [resuming, setResuming] = useState(onlineAvailable)
 
   // Reopen the game this device was in (refresh, phone locked, app reopened).
@@ -122,6 +126,14 @@ export default function App() {
         <div className="grid min-h-dvh place-items-center text-muted-foreground">
           <Loader2 className="size-6 animate-spin" />
         </div>
+      ) : wrapId && !client ? (
+        <WrapScreen
+          id={wrapId}
+          onDone={() => {
+            window.history.replaceState(null, '', '/')
+            setWrapId(null)
+          }}
+        />
       ) : client ? (
         <GameContext.Provider value={client}>
           <Game onExit={exit} />

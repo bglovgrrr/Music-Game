@@ -1,0 +1,3 @@
+{
+  "rewrites": [{ "source": "/w/:id", "destination": "/api/wrap?id=:id" }]
+}

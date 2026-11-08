@@ -23,7 +23,7 @@ export default defineConfig(({ mode }) => {
             injectRegister: false,
             registerType: 'prompt',
             workbox: {
-              navigateFallbackDenylist: [/^\/api\//],
+              navigateFallbackDenylist: [/^\/api\//, /^\/w\//],
               cleanupOutdatedCaches: true,
             },
             includeAssets: ['favicon.svg', 'apple-touch-icon.png'],

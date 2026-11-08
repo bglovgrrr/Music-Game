@@ -25,7 +25,7 @@ Mixtape Memories is a relaxed music game for 2–8 friends in the same room. Som
 - **Fan favorite.** Every reaction a song gets counts for the person who picked it. The end of each round shows each song's tally, and the scoreboard, recap, and recap card crown the night's fan favorite.
 - **Song of the round.** Vote for your favourite after each round; the winner gets a crown.
 - **Group selfies.** Snap a selfie after any round; it's saved privately with the game, shown as polaroids in the recap, and added to the recap card.
-- **Recap card.** A shareable image of the night's mixtape.
+- **Recap card and share link.** Share a link to the night (`/w/<id>`): chat apps show the recap card as a rich preview, and tapping it opens a read-only wrap with every round and every song (one tap to Spotify) plus "Start your own mixtape". The shared snapshot leaves out selfies and notes; anyone with the link can see it. Demo games share the image instead.
 - **Save to Spotify.** Turn the whole game into a playlist.
 - **Gentle chimes.** A soft sound when it's your turn to ask, when picking starts, and when 10 seconds are left.
 - **Live sync.** Every phone stays in step: questions, picks, play/pause, and the progress bar.
