@@ -10,7 +10,7 @@ import { chooseDevice, chosenDeviceId, isIOS, listDevices, LOCAL, localPlayerUsa
 import { ensureLocalPlayer, LOCAL_PLAYER_NAME, localDeviceId, localPlayerProblem, onLocalPlayer, stopLocalPlayer } from '@/music/spotify-sdk'
 import { cn } from '@/lib/utils'
 
-function SpotifyLogo({ className }: { className?: string }) {
+export function SpotifyLogo({ className }: { className?: string }) {
   return (
     <svg viewBox="0 0 24 24" className={className} aria-hidden>
       <circle cx="12" cy="12" r="12" fill="#1ED760" />

@@ -1,6 +1,8 @@
-import { Check, Loader2, Music2, Smartphone } from 'lucide-react'
+import { Check, Loader2, Music2, Smartphone, X } from 'lucide-react'
+import { AnimatePresence, motion } from 'motion/react'
 import { useState, useSyncExternalStore } from 'react'
 import { toast } from 'sonner'
+import { SpotifyCard, SpotifyLogo } from '@/components/spotify-card'
 import { Button } from '@/components/ui/button'
 import { useSpotifyConnected } from '@/hooks/use-spotify'
 import { connectSpotify } from '@/music/spotify-auth'
@@ -42,6 +44,9 @@ export function MusicSetup({ music }: { music: ReturnType<typeof useMusicReady> 
       setBusy(false)
     }
   }
+
+  // Ready with Spotify: one compact row; the full Spotify panel opens on demand.
+  if (connected && ready) return <SpotifyReadyRow />
 
   if (previews) {
     return (
@@ -113,3 +118,55 @@ function Step({ done, disabled, icon, label, hint, action }: { done?: boolean; d
     </div>
   )
 }
+
+/** "Spotify ready" with a Manage button that opens the full Spotify panel. */
+function SpotifyReadyRow() {
+  const [open, setOpen] = useState(false)
+  return (
+    <>
+      <div className="paper paper-texture on-table flex items-center gap-3 rounded-[4px] bg-[var(--paper)] px-3.5 py-2.5">
+        <SpotifyLogo className="size-7 shrink-0" />
+        <span className="grid min-w-0 flex-1">
+          <span className="flex items-center gap-1.5 text-sm font-semibold">
+            <Check className="size-3.5 text-success" strokeWidth={3} /> Spotify ready
+          </span>
+          <span className="truncate text-xs text-muted-foreground">Full songs play from this phone.</span>
+        </span>
+        <Button variant="sketch" size="sm" onClick={() => setOpen(true)}>
+          Manage
+        </Button>
+      </div>
+      <AnimatePresence>
+        {open && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 grid place-items-end bg-black/50 p-3 sm:place-items-center"
+            onClick={() => setOpen(false)}
+            role="dialog"
+            aria-modal="true"
+            aria-label="Spotify"
+          >
+            <motion.div
+              initial={{ y: 30 }}
+              animate={{ y: 0 }}
+              exit={{ y: 30 }}
+              className="paper paper-texture grid max-h-[85dvh] w-full max-w-md gap-3 overflow-y-auto rounded-[4px] bg-[var(--paper)] p-4 shadow-2xl"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="flex items-center justify-between">
+                <h3 className="text-lg font-bold font-soft">Spotify</h3>
+                <Button variant="ghost" size="icon-sm" onClick={() => setOpen(false)} aria-label="Close">
+                  <X />
+                </Button>
+              </div>
+              <SpotifyCard />
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </>
+  )
+}
+

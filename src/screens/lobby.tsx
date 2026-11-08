@@ -6,7 +6,6 @@ import { QrCode } from '@/components/qr-code'
 import { MusicSetup, useMusicReady } from '@/components/music-setup'
 import { PeekSheet } from '@/components/sheet'
 import { StickerBoard } from '@/components/sticker-board'
-import { SpotifyCard } from '@/components/spotify-card'
 import { spotifyConfigured } from '@/music/spotify-auth'
 import { Button } from '@/components/ui/button'
 import { MIN_PLAYERS, settingsOf } from '@/game/engine'
@@ -47,8 +46,9 @@ export function LobbyScreen() {
 
   const settings = settingsOf(state)
   const music = useMusicReady()
-  // Only the phone that plays the music (the host's, in an online game) has to set it up.
-  const needsMusic = client.mode === 'online' && client.isSpeaker && spotifyConfigured
+  // The phone that plays the music sets it up here. In an online game it's required to start.
+  const showMusic = client.isSpeaker && spotifyConfigured
+  const needsMusic = showMusic && client.mode === 'online'
   const settingsSummary = [settings.guessMode ? 'Guessing on' : 'Guessing off', settings.pickSeconds ? `${settings.pickSeconds}s timer` : 'No timer'].join(' · ')
 
   return (
@@ -80,7 +80,7 @@ export function LobbyScreen() {
 
       <div className="mt-auto grid gap-2">
         {/* The host can't start until the music is set up: Spotify ready, or previews on purpose */}
-        {needsMusic && <MusicSetup music={music} />}
+        {showMusic && <MusicSetup music={music} />}
         {client.mode === 'online' && host && !(needsMusic && !music.ready) && (
           <p className="flex items-center justify-center gap-2 text-center text-xs text-muted-foreground">
             <Speaker className="size-3.5 shrink-0" />
@@ -100,7 +100,6 @@ export function LobbyScreen() {
       <PeekSheet label="Game settings" summary={settingsSummary} icon={<Settings2 />}>
         <div className="grid gap-5 pt-1">
           <GameSettings />
-          {client.isSpeaker && spotifyConfigured && <SpotifyCard />}
         </div>
       </PeekSheet>
     </div>
