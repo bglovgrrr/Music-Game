@@ -40,7 +40,10 @@ export function Scoreboard({ className, compact }: { className?: string; compact
           </span>
           {anyReactions && (
             <span
-              className={cn('flex min-w-12 items-center justify-end gap-1 text-sm tabular-nums', favs.includes(p.id) ? 'font-semibold' : 'text-muted-foreground')}
+              className={cn(
+                'flex min-w-12 items-center justify-end gap-1 text-sm tabular-nums',
+                favs.includes(p.id) ? 'font-semibold' : 'text-muted-foreground',
+              )}
               title="Reactions their songs got"
             >
               <span className="text-base">{rx[p.id]?.top ?? '·'}</span>
@@ -77,11 +80,11 @@ export function FanFavoriteBanner({ className }: { className?: string }) {
         <span className="text-xs font-semibold tracking-[0.14em] text-accent uppercase">Fan favorite</span>
         <span className="truncate font-display text-xl font-bold font-soft">{names.join(' & ')}</span>
         <span className="text-xs text-muted-foreground">
-          {total} {total === 1 ? 'reaction' : 'reactions'}{favs.length > 1 ? ' each' : ''}
+          {total} {total === 1 ? 'reaction' : 'reactions'}
+          {favs.length > 1 ? ' each' : ''}
           {top ? ` · mostly ${top}` : ''}
         </span>
       </div>
     </div>
   )
 }
-

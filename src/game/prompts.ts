@@ -18,7 +18,7 @@ export const THEMES: Theme[] = [
     name: 'Basement Sessions',
     blurb: 'This room, these friends, tonight.',
     questions: [
-      ...q(1, 'The song that plays when this group walks in', "A song you'd make everyone here sing", "Your 1am, nobody-wants-to-leave song"),
+      ...q(1, 'The song that plays when this group walks in', "A song you'd make everyone here sing", 'Your 1am, nobody-wants-to-leave song'),
       ...q(2, 'A song that reminds you of someone here', 'The song that sounds like this friend group', 'A song you only play for people you trust'),
       ...q(3, 'Your best memory with someone here, as a song', 'A song for the friend who got you through it', "A song you'd want us to remember you by"),
     ],

@@ -27,14 +27,7 @@ export type WatchAction =
  *
  * `sharedPosMs` is where the game thinks the song is.
  */
-export function watchSpotify(
-  pb: SpotifyPlayback | null,
-  uri: string,
-  s: StartState,
-  now: number,
-  durationMs: number,
-  sharedPosMs: number,
-): WatchAction {
+export function watchSpotify(pb: SpotifyPlayback | null, uri: string, s: StartState, now: number, durationMs: number, sharedPosMs: number): WatchAction {
   const ours = !!pb && pb.uri === uri
   const duration = (ours && pb.durationMs) || durationMs
   // Only believe "finished" if the game's own clock agrees the song is nearly over.

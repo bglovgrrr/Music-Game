@@ -27,7 +27,9 @@ export function BetweenScreen() {
       {/* Goal: pick the song of the round, then move on. Selfie, scores and settings live in the sheet. */}
       <div className="grid min-w-0 gap-2">
         <div>
-          <p className="font-mono text-[0.65rem] tracking-[0.16em] text-accent uppercase">Round {round.number} complete{themeName(round.themeId) ? ` · ${themeName(round.themeId)}` : ''}</p>
+          <p className="font-mono text-[0.65rem] tracking-[0.16em] text-accent uppercase">
+            Round {round.number} complete{themeName(round.themeId) ? ` · ${themeName(round.themeId)}` : ''}
+          </p>
           <p className="mt-1 line-clamp-2 font-note text-xl leading-snug italic">“{round.prompt}”</p>
         </div>
         <div className="grid min-w-0 gap-2">
@@ -76,7 +78,11 @@ export function BetweenScreen() {
                         )}
                         <div className="flex min-w-0 items-baseline gap-1 pt-1 text-sm text-muted-foreground">
                           <span className="truncate">{p.track.artist} ·</span>
-                          <CrownedName name={mine ? 'you' : (who?.name ?? '')} crowned={isWinner} className={cn('shrink-0', isWinner && 'font-semibold text-foreground')} />
+                          <CrownedName
+                            name={mine ? 'you' : (who?.name ?? '')}
+                            crowned={isWinner}
+                            className={cn('shrink-0', isWinner && 'font-semibold text-foreground')}
+                          />
                         </div>
                       </div>
                       {!!counts[pid] && (

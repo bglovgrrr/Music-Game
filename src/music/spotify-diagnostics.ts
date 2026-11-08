@@ -32,14 +32,18 @@ export async function testSpotify(log: (line: string) => void) {
   }
 
   const me = await call('/me')
-  log(me.status === 200 ? `✓ Signed in as ${(me.body?.display_name as string) || (me.body?.id as string)}` : `✗ Profile: HTTP ${me.status}${errorText(me.body)}`)
+  log(
+    me.status === 200 ? `✓ Signed in as ${(me.body?.display_name as string) || (me.body?.id as string)}` : `✗ Profile: HTTP ${me.status}${errorText(me.body)}`,
+  )
 
   const dv = await call('/me/player/devices')
   const devices = ((dv.body?.devices as Device[]) ?? []).filter((d) => d.id)
   if (dv.status !== 200) log(`✗ Devices: HTTP ${dv.status}${errorText(dv.body)}`)
   log(`Devices (${devices.length}):`)
   for (const d of devices)
-    log(`  • ${d.name} · ${d.type}${d.is_active ? ' · ACTIVE' : ''}${d.is_restricted ? ' · RESTRICTED (can’t be controlled)' : ''} · volume ${d.volume_percent ?? '?'}%`)
+    log(
+      `  • ${d.name} · ${d.type}${d.is_active ? ' · ACTIVE' : ''}${d.is_restricted ? ' · RESTRICTED (can’t be controlled)' : ''} · volume ${d.volume_percent ?? '?'}%`,
+    )
 
   let picked = chosenDeviceId()
   if (!picked || picked === LOCAL) {
@@ -73,7 +77,9 @@ export async function testSpotify(log: (line: string) => void) {
   }
   if (!devices.length) return log('✗ No devices. Open Spotify on the phone/computer/speaker and play any song for a second, then test again.')
   const target = devices.find((d) => d.id === picked) ?? devices.find((d) => d.is_active) ?? devices[0]
-  log(`Target: ${target.name}${target.id === picked ? ' (picked in Mixtape Memories)' : target.is_active ? ' (Spotify’s active device)' : ' (first available)'}`)
+  log(
+    `Target: ${target.name}${target.id === picked ? ' (picked in Mixtape Memories)' : target.is_active ? ' (Spotify’s active device)' : ' (first available)'}`,
+  )
   if (target.volume_percent === 0) log('⚠ That device’s Spotify volume is 0%.')
 
   let uri = 'spotify:track:4uLU6hMCjMI75M1A2tKUQC'
@@ -92,7 +98,13 @@ export async function testSpotify(log: (line: string) => void) {
   // 1. Is this song playable for this account?
   const tr = await call(`/tracks/${id}?market=from_token`)
   if (tr.status === 200) {
-    const b = tr.body as { is_playable?: boolean; restrictions?: { reason?: string }; album?: { uri?: string }; explicit?: boolean; linked_from?: { uri?: string } }
+    const b = tr.body as {
+      is_playable?: boolean
+      restrictions?: { reason?: string }
+      album?: { uri?: string }
+      explicit?: boolean
+      linked_from?: { uri?: string }
+    }
     log(
       `Song check: playable=${b.is_playable ?? '?'}${b.restrictions?.reason ? ` · restricted: ${b.restrictions.reason}` : ''}${b.explicit ? ' · explicit' : ''}${b.linked_from ? ' · relinked' : ''}`,
     )

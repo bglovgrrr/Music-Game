@@ -112,7 +112,11 @@ export async function getAccessToken(): Promise<string | null> {
 }
 
 const redirectUri = () => `${window.location.origin}/`
-const b64url = (bytes: Uint8Array) => btoa(String.fromCharCode(...bytes)).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '')
+const b64url = (bytes: Uint8Array) =>
+  btoa(String.fromCharCode(...bytes))
+    .replace(/\+/g, '-')
+    .replace(/\//g, '_')
+    .replace(/=+$/, '')
 
 /**
  * Sign in to Spotify in a new window/tab. Resolves once the user approves.
@@ -207,13 +211,9 @@ export async function spotifyApi<T = unknown>(path: string, init?: RequestInit):
   if (res.status === 404 && /NO_ACTIVE_DEVICE/i.test(reason + (body?.error?.message ?? '')))
     throw new SpotifyError('Spotify isn’t open anywhere. Open the Spotify app on the speaker phone, then tap play again.', 'no_device')
   if (res.status === 404) throw new SpotifyError('Spotify couldn’t find a device to play on. Open the Spotify app, then tap play again.', 'no_device')
-  if (res.status === 403 && /PREMIUM/i.test(reason))
-    throw new SpotifyError('Playing full songs needs Spotify Premium on the host account.', 'premium')
+  if (res.status === 403 && /PREMIUM/i.test(reason)) throw new SpotifyError('Playing full songs needs Spotify Premium on the host account.', 'premium')
   if (res.status === 403)
-    throw new SpotifyError(
-      'Spotify refused. Make sure this Spotify account is added under User Management in the Spotify developer dashboard.',
-      'forbidden',
-    )
+    throw new SpotifyError('Spotify refused. Make sure this Spotify account is added under User Management in the Spotify developer dashboard.', 'forbidden')
   if (res.status === 429) throw new SpotifyError('Spotify is busy. Wait a moment and try again.', 'rate_limited')
   throw new SpotifyError(`Spotify error (${res.status}).`)
 }

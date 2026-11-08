@@ -5,7 +5,9 @@ import { RETRY_AFTER_MS, resetSearchState, searchTracks } from './search'
 beforeEach(() => resetSearchState())
 
 const ok = () =>
-  new Response(JSON.stringify({ results: [{ trackId: 1, trackName: 'Landslide', artistName: 'Fleetwood Mac', previewUrl: 'https://x/p.m4a' }] }), { status: 200 })
+  new Response(JSON.stringify({ results: [{ trackId: 1, trackName: 'Landslide', artistName: 'Fleetwood Mac', previewUrl: 'https://x/p.m4a' }] }), {
+    status: 200,
+  })
 const jsonRes = (status: number, body: unknown) => new Response(JSON.stringify(body), { status, headers: { 'Content-Type': 'application/json' } })
 const spotifyNotSetUp = () => jsonRes(503, { error: 'not_configured' })
 /** Route fetches: /api/spotify-search -> spotify(), everything else (iTunes) -> itunes(). */
@@ -20,7 +22,14 @@ afterEach(() => {
 
 describe('song search', () => {
   it('uses Spotify search first when it is set up', async () => {
-    const spotifyTrack = { id: 'spotify:track:1', title: 'Landslide', artist: 'Fleetwood Mac', durationMs: 199_000, source: 'spotify', spotifyUri: 'spotify:track:1' }
+    const spotifyTrack = {
+      id: 'spotify:track:1',
+      title: 'Landslide',
+      artist: 'Fleetwood Mac',
+      durationMs: 199_000,
+      source: 'spotify',
+      spotifyUri: 'spotify:track:1',
+    }
     const fetchMock = route(ok, () => jsonRes(200, { tracks: [spotifyTrack] }))
     vi.stubGlobal('fetch', fetchMock)
     const r = await searchTracks('landslide')
@@ -62,7 +71,13 @@ describe('song search', () => {
   })
 
   it('stops a search when the user keeps typing (abort)', async () => {
-    vi.stubGlobal('fetch', vi.fn((_url: string, init: RequestInit) => new Promise((_res, rej) => init.signal!.addEventListener('abort', () => rej(new DOMException('aborted', 'AbortError'))))))
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(
+        (_url: string, init: RequestInit) =>
+          new Promise((_res, rej) => init.signal!.addEventListener('abort', () => rej(new DOMException('aborted', 'AbortError')))),
+      ),
+    )
     const ctrl = new AbortController()
     const pending = searchTracks('land', ctrl.signal)
     ctrl.abort()

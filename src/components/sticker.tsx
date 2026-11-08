@@ -51,7 +51,13 @@ const ART: { name: string; art: Art }[] = [
     name: 'shutter shades',
     art: (c) => (
       <>
-        <path d="M4 22h56l-3 18c-1 5-5 8-10 8h-5c-5 0-8-4-9-8l-1-5h-0l-1 5c-1 4-4 8-9 8h-5c-5 0-9-3-10-8z" fill={c} stroke={INK} strokeWidth="3" strokeLinejoin="round" />
+        <path
+          d="M4 22h56l-3 18c-1 5-5 8-10 8h-5c-5 0-8-4-9-8l-1-5h-0l-1 5c-1 4-4 8-9 8h-5c-5 0-9-3-10-8z"
+          fill={c}
+          stroke={INK}
+          strokeWidth="3"
+          strokeLinejoin="round"
+        />
         <path d="M9 28h18M9 34h18M9 40h17M37 28h18M37 34h18M38 40h17" stroke={INK} strokeWidth="2.5" strokeLinecap="round" />
       </>
     ),
@@ -75,7 +81,13 @@ const ART: { name: string; art: Art }[] = [
     name: 'star',
     art: (c) => (
       <>
-        <path d="M32 5l7.6 16.3 17.9 2.1-13.2 12.3 3.5 17.7L32 44.6l-15.8 8.8 3.5-17.7L6.5 23.4l17.9-2.1z" fill={c} stroke={INK} strokeWidth="3" strokeLinejoin="round" />
+        <path
+          d="M32 5l7.6 16.3 17.9 2.1-13.2 12.3 3.5 17.7L32 44.6l-15.8 8.8 3.5-17.7L6.5 23.4l17.9-2.1z"
+          fill={c}
+          stroke={INK}
+          strokeWidth="3"
+          strokeLinejoin="round"
+        />
         <path d="M51 6l1.5 4 4 1.5-4 1.5L51 17l-1.5-4-4-1.5 4-1.5z" fill={CREAM} stroke={INK} strokeWidth="1.5" strokeLinejoin="round" />
       </>
     ),
@@ -110,7 +122,17 @@ function stickerTilt(id: string) {
   return (h % 17) - 8
 }
 
-export function Sticker({ player, color, className, tilt = true }: { player: { id: string; color?: string }; color: string; className?: string; tilt?: boolean }) {
+export function Sticker({
+  player,
+  color,
+  className,
+  tilt = true,
+}: {
+  player: { id: string; color?: string }
+  color: string
+  className?: string
+  tilt?: boolean
+}) {
   const s = stickerFor(player)
   const art = s.art(color)
   return (

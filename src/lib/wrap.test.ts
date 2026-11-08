@@ -12,7 +12,12 @@ function finishedGame(): GameState {
   s = reduce(s, { type: 'start' }, 'a', 1)
   s = reduce(s, { type: 'ask', prompt: 'A song for a rainy day', themeId: 'places' }, 'a', 1)
   for (const id of ['a', 'b', 'c'])
-    s = reduce(s, { type: 'pick', track: { id, title: `Song ${id}`, artist: 'Artist', durationMs: 1000, source: 'demo' }, note: `secret note from ${id}` }, id, 1)
+    s = reduce(
+      s,
+      { type: 'pick', track: { id, title: `Song ${id}`, artist: 'Artist', durationMs: 1000, source: 'demo' }, note: `secret note from ${id}` },
+      id,
+      1,
+    )
   s = reduce(s, { type: 'photo', roundId: s.rounds[0].id, path: 'room/selfie.jpg' }, 'a', 1)
   return s
 }

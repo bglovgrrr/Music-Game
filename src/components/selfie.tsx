@@ -40,7 +40,11 @@ export function Polaroid({ photo, caption, tilt = -2.5, className }: { photo: Ph
       className={cn('rounded-md bg-white p-2.5 pb-3 text-ink shadow-[0_14px_30px_-12px_rgb(30_20_60/0.45)]', className)}
     >
       <div className="grid aspect-[4/3] place-items-center overflow-hidden rounded-sm bg-[#eceaf2]">
-        {url ? <img src={url} alt={caption ?? 'Group selfie'} className="size-full object-cover" /> : <Loader2 className="size-5 animate-spin text-[#8a86a0]" />}
+        {url ? (
+          <img src={url} alt={caption ?? 'Group selfie'} className="size-full object-cover" />
+        ) : (
+          <Loader2 className="size-5 animate-spin text-[#8a86a0]" />
+        )}
       </div>
       {caption && <figcaption className="mt-2 line-clamp-2 text-center font-note text-base italic">{caption}</figcaption>}
     </motion.figure>
@@ -106,7 +110,9 @@ export function SelfieCard({ round, className }: { round: Round; className?: str
             {busy ? <Loader2 className="size-5 animate-spin" /> : <Camera className="size-5" />}
           </span>
           <span className="font-semibold">{busy ? 'Saving…' : 'Take a group selfie'}</span>
-          <span className="text-xs text-muted-foreground">Squeeze in! It's saved with this game{client.mode === 'demo' ? ' (on this device only in the demo)' : ''}.</span>
+          <span className="text-xs text-muted-foreground">
+            Squeeze in! It's saved with this game{client.mode === 'demo' ? ' (on this device only in the demo)' : ''}.
+          </span>
         </button>
       )}
     </div>

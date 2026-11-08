@@ -45,7 +45,14 @@ export function AboutButton() {
 
   return (
     <>
-      <Button variant="ghost" size="icon-sm" aria-label="About Mixtape Memories" title="About Mixtape Memories" aria-expanded={open} onClick={() => (open ? close() : setOpen(true))}>
+      <Button
+        variant="ghost"
+        size="icon-sm"
+        aria-label="About Mixtape Memories"
+        title="About Mixtape Memories"
+        aria-expanded={open}
+        onClick={() => (open ? close() : setOpen(true))}
+      >
         <Info />
       </Button>
       <AnimatePresence>

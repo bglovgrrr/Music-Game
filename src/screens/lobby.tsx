@@ -50,7 +50,9 @@ export function LobbyScreen() {
   // The phone that plays the music sets it up here. In an online game it's required to start.
   const showMusic = client.isSpeaker && spotifyConfigured
   const needsMusic = showMusic && client.mode === 'online'
-  const settingsSummary = [settings.guessMode ? 'Guessing on' : 'Guessing off', settings.pickSeconds ? `${settings.pickSeconds}s timer` : 'No timer'].join(' · ')
+  const settingsSummary = [settings.guessMode ? 'Guessing on' : 'Guessing off', settings.pickSeconds ? `${settings.pickSeconds}s timer` : 'No timer'].join(
+    ' · ',
+  )
 
   return (
     <div className="mx-auto flex w-full max-w-md flex-1 flex-col gap-4 pt-1 pb-24 [@media(max-height:700px)]:gap-3 [@media(max-height:700px)]:pb-[4.5rem]">
@@ -62,7 +64,9 @@ export function LobbyScreen() {
           <button onClick={copy} className="cursor-pointer" aria-label={`Copy room code ${state.code}`}>
             <LabelTape className="py-1.5 text-4xl">{state.code}</LabelTape>
           </button>
-          <span className="text-xs leading-snug text-muted-foreground">Scan to join{client.mode === 'demo' ? ' (not in the demo)' : ''}, or tap the code to copy it.</span>
+          <span className="text-xs leading-snug text-muted-foreground">
+            Scan to join{client.mode === 'demo' ? ' (not in the demo)' : ''}, or tap the code to copy it.
+          </span>
           {client.mode === 'online' && (
             <Button variant="outline" size="sm" onClick={invite}>
               <Share2 /> Invite link
@@ -91,7 +95,11 @@ export function LobbyScreen() {
         {isHost ? (
           <Button variant="brand" size="lg" disabled={!enough || (needsMusic && !music.ready)} onClick={() => dispatch({ type: 'start' })}>
             <Play />{' '}
-            {!enough ? `Need ${MIN_PLAYERS - state.players.length} more` : needsMusic && !music.ready ? 'Set up the music to start' : `Start with ${state.players.length} players`}
+            {!enough
+              ? `Need ${MIN_PLAYERS - state.players.length} more`
+              : needsMusic && !music.ready
+                ? 'Set up the music to start'
+                : `Start with ${state.players.length} players`}
           </Button>
         ) : (
           <p className="text-center text-muted-foreground">Waiting for the host to start…</p>

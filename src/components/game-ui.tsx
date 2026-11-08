@@ -66,26 +66,14 @@ export function AvatarStack({ players, max = 5 }: { players: Player[]; max?: num
         <PlayerAvatar key={p.id} player={p} size="sm" />
       ))}
       {players.length > max && (
-        <span className="grid size-7 place-items-center rounded-full bg-muted text-xs ring-2 ring-background">
-          +{players.length - max}
-        </span>
+        <span className="grid size-7 place-items-center rounded-full bg-muted text-xs ring-2 ring-background">+{players.length - max}</span>
       )}
     </div>
   )
 }
 
 /** Album cover, or a generated gradient cover when there's no artwork. `hidden` = mystery song. */
-export function AlbumArt({
-  track,
-  hidden,
-  className,
-  rounded = 'rounded-xl',
-}: {
-  track?: Track
-  hidden?: boolean
-  className?: string
-  rounded?: string
-}) {
+export function AlbumArt({ track, hidden, className, rounded = 'rounded-xl' }: { track?: Track; hidden?: boolean; className?: string; rounded?: string }) {
   const [broken, setBroken] = useState(false)
   if (hidden || !track) {
     return (
@@ -95,15 +83,7 @@ export function AlbumArt({
     )
   }
   if (track.artwork && !broken) {
-    return (
-      <img
-        src={track.artwork}
-        alt=""
-        onError={() => setBroken(true)}
-        className={cn('aspect-square object-cover', rounded, className)}
-        draggable={false}
-      />
-    )
+    return <img src={track.artwork} alt="" onError={() => setBroken(true)} className={cn('aspect-square object-cover', rounded, className)} draggable={false} />
   }
   const hue = track.hue ?? [...track.title].reduce((h, c) => (h * 31 + c.charCodeAt(0)) % 360, 7)
   return (
@@ -134,23 +114,20 @@ export function PromptCard({ prompt, asker, compact, topic }: { prompt: string; 
             {topic && <span className="ml-auto truncate text-[#a0560b]">{topic}</span>}
           </div>
         )}
-        <p className={cn('font-note leading-[1.15] text-balance italic', compact ? 'line-clamp-2 text-[1.2rem] [@media(max-height:700px)]:line-clamp-1' : 'text-[2rem] sm:text-[2.6rem]')}>{prompt}</p>
+        <p
+          className={cn(
+            'font-note leading-[1.15] text-balance italic',
+            compact ? 'line-clamp-2 text-[1.2rem] [@media(max-height:700px)]:line-clamp-1' : 'text-[2rem] sm:text-[2.6rem]',
+          )}
+        >
+          {prompt}
+        </p>
       </div>
     </div>
   )
 }
 
-export function TrackRow({
-  track,
-  onClick,
-  right,
-  active,
-}: {
-  track: Track
-  onClick?: () => void
-  right?: React.ReactNode
-  active?: boolean
-}) {
+export function TrackRow({ track, onClick, right, active }: { track: Track; onClick?: () => void; right?: React.ReactNode; active?: boolean }) {
   const Comp = onClick ? 'button' : 'div'
   return (
     <Comp

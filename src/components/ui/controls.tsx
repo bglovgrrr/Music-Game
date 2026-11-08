@@ -1,6 +1,18 @@
 import { cn } from '@/lib/utils'
 
-export function Switch({ checked, onChange, disabled, id, label }: { checked: boolean; onChange: (v: boolean) => void; disabled?: boolean; id: string; label: string }) {
+export function Switch({
+  checked,
+  onChange,
+  disabled,
+  id,
+  label,
+}: {
+  checked: boolean
+  onChange: (v: boolean) => void
+  disabled?: boolean
+  id: string
+  label: string
+}) {
   return (
     <button
       id={id}

@@ -5,8 +5,7 @@ const url = import.meta.env.VITE_SUPABASE_URL as string | undefined
 const key = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY as string | undefined
 
 /** Null in the Claude preview build (its sandbox can't reach outside servers) or when not configured. */
-export const supabase: SupabaseClient | null =
-  url && key && import.meta.env.MODE !== 'preview' ? createClient(url, key) : null
+export const supabase: SupabaseClient | null = url && key && import.meta.env.MODE !== 'preview' ? createClient(url, key) : null
 
 export const onlineAvailable = supabase !== null
 

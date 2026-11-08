@@ -9,11 +9,7 @@ function Card({ className, material = 'paper', ...props }: React.ComponentProps<
   return (
     <div
       data-slot="card"
-      className={cn(
-        'on-table rounded-[6px] bg-card text-card-foreground',
-        material === 'paper' ? 'paper paper-texture' : 'border border-white/10',
-        className,
-      )}
+      className={cn('on-table rounded-[6px] bg-card text-card-foreground', material === 'paper' ? 'paper paper-texture' : 'border border-white/10', className)}
       {...props}
     />
   )

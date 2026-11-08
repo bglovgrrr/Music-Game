@@ -99,7 +99,12 @@ describe('asking', () => {
   })
 
   it("lets the host ask when it's someone else's turn (stuck asker)", () => {
-    const s = play(listening(), [['a', { type: 'next' }], ['a', { type: 'next' }], ['a', { type: 'next' }], ['a', { type: 'nextRound' }]])
+    const s = play(listening(), [
+      ['a', { type: 'next' }],
+      ['a', { type: 'next' }],
+      ['a', { type: 'next' }],
+      ['a', { type: 'nextRound' }],
+    ])
     expect(askerOf(s)!.id).toBe('b')
     const asked = reduce(s, { type: 'ask', prompt: 'Q2' }, 'a')
     expect(currentRound(asked)!.askerId).toBe('b')
@@ -124,7 +129,10 @@ describe('picking', () => {
   })
 
   it('lets a player take their pick back', () => {
-    const s = play(asked(), [['b', { type: 'pick', track: track('x') }], ['b', { type: 'unpick' }]])
+    const s = play(asked(), [
+      ['b', { type: 'pick', track: track('x') }],
+      ['b', { type: 'unpick' }],
+    ])
     expect(currentRound(s)!.picks).toHaveLength(0)
   })
 
@@ -138,7 +146,12 @@ describe('picking', () => {
 
   it('goes around the circle starting from the asker', () => {
     let s = play(started(), [['a', { type: 'ask', prompt: 'Q' }], ...['a', 'b', 'c'].map((id): [string, Action] => [id, { type: 'pick', track: track(id) }])])
-    s = play(s, [['a', { type: 'next' }], ['a', { type: 'next' }], ['a', { type: 'next' }], ['a', { type: 'nextRound' }]])
+    s = play(s, [
+      ['a', { type: 'next' }],
+      ['a', { type: 'next' }],
+      ['a', { type: 'next' }],
+      ['a', { type: 'nextRound' }],
+    ])
     expect(askerOf(s)!.id).toBe('b')
     s = play(s, [['b', { type: 'ask', prompt: 'Q2' }], ...['c', 'a', 'b'].map((id): [string, Action] => [id, { type: 'pick', track: track(id) }])])
     expect(currentRound(s)!.order).toEqual(['b', 'c', 'a'])
@@ -191,7 +204,10 @@ describe('listening & playback', () => {
     let s = reduce(listening(), { type: 'next' }, 'c', T0)
     expect(currentRound(s)!.current).toBe(1)
     expect(s.playback.isPlaying).toBe(true)
-    s = play(s, [['c', { type: 'next' }], ['c', { type: 'next' }]])
+    s = play(s, [
+      ['c', { type: 'next' }],
+      ['c', { type: 'next' }],
+    ])
     expect(s.phase).toBe('between')
   })
 
@@ -237,7 +253,14 @@ describe('rounds, ending and leaving', () => {
     let s = started(2)
     for (const expected of ['a', 'b', 'a']) {
       expect(askerOf(s)!.id).toBe(expected)
-      s = play(s, [[expected, { type: 'ask', prompt: 'Q' }], ['a', { type: 'pick', track: track('a') }], ['b', { type: 'pick', track: track('b') }], ['a', { type: 'next' }], ['a', { type: 'next' }], ['a', { type: 'nextRound' }]])
+      s = play(s, [
+        [expected, { type: 'ask', prompt: 'Q' }],
+        ['a', { type: 'pick', track: track('a') }],
+        ['b', { type: 'pick', track: track('b') }],
+        ['a', { type: 'next' }],
+        ['a', { type: 'next' }],
+        ['a', { type: 'nextRound' }],
+      ])
     }
     expect(s.rounds).toHaveLength(3)
   })
@@ -258,7 +281,14 @@ describe('rounds, ending and leaving', () => {
   it("keeps the turn valid when players leave, and doesn't let players remove each other", () => {
     // Finish two rounds so it's c's turn (turn = 2), then c leaves.
     const round = (s: GameState, asker: string) =>
-      play(s, [[asker, { type: 'ask', prompt: 'Q' }], ...['a', 'b', 'c'].map((id): [string, Action] => [id, { type: 'pick', track: track(id) }]), ['a', { type: 'next' }], ['a', { type: 'next' }], ['a', { type: 'next' }], ['a', { type: 'nextRound' }]])
+      play(s, [
+        [asker, { type: 'ask', prompt: 'Q' }],
+        ...['a', 'b', 'c'].map((id): [string, Action] => [id, { type: 'pick', track: track(id) }]),
+        ['a', { type: 'next' }],
+        ['a', { type: 'next' }],
+        ['a', { type: 'next' }],
+        ['a', { type: 'nextRound' }],
+      ])
     const s = round(round(started(), 'a'), 'b')
     expect(askerOf(s)!.id).toBe('c')
     expectError(() => reduce(s, { type: 'leave', playerId: 'c' }, 'b'), /host/)
@@ -280,7 +310,6 @@ describe('rounds, ending and leaving', () => {
 
 // ---------- new features: settings, pick timer, guess who, votes ----------
 
-
 /** Started game with settings applied by the host in the lobby. */
 function startedWith(settings: Partial<Settings>, n = 3) {
   const ids = ['a', 'b', 'c', 'd', 'e'].slice(0, n)
@@ -290,7 +319,10 @@ function startedWith(settings: Partial<Settings>, n = 3) {
   return reduce(s, { type: 'start' }, 'a', T0)
 }
 const allPick = (s: GameState) =>
-  play(s, s.players.map((p): [string, Action] => [p.id, { type: 'pick', track: track(p.id) }]))
+  play(
+    s,
+    s.players.map((p): [string, Action] => [p.id, { type: 'pick', track: track(p.id) }]),
+  )
 
 describe('settings', () => {
   it('defaults to no guessing and no timer, even for older saved games', () => {
@@ -404,12 +436,21 @@ describe('guess who picked it', () => {
 })
 
 describe('song of the round', () => {
-  const between = () => play(listening(), [['a', { type: 'next' }], ['a', { type: 'next' }], ['a', { type: 'next' }]])
+  const between = () =>
+    play(listening(), [
+      ['a', { type: 'next' }],
+      ['a', { type: 'next' }],
+      ['a', { type: 'next' }],
+    ])
 
   it('collects votes and finds the winner, including ties', () => {
     let s = between()
     expect(s.phase).toBe('between')
-    s = play(s, [['a', { type: 'vote', owner: 'b' }], ['b', { type: 'vote', owner: 'c' }], ['c', { type: 'vote', owner: 'b' }]])
+    s = play(s, [
+      ['a', { type: 'vote', owner: 'b' }],
+      ['b', { type: 'vote', owner: 'c' }],
+      ['c', { type: 'vote', owner: 'b' }],
+    ])
     expect(voteResults(currentRound(s)!)).toEqual({ counts: { b: 2, c: 1 }, winners: ['b'] })
     s = reduce(s, { type: 'vote', owner: 'a' }, 'c') // change vote → tie
     expect(voteResults(currentRound(s)!).winners.sort()).toEqual(['a', 'b', 'c'])
@@ -422,7 +463,12 @@ describe('song of the round', () => {
 })
 
 describe('group selfies', () => {
-  const between = () => play(listening(), [['a', { type: 'next' }], ['a', { type: 'next' }], ['a', { type: 'next' }]])
+  const between = () =>
+    play(listening(), [
+      ['a', { type: 'next' }],
+      ['a', { type: 'next' }],
+      ['a', { type: 'next' }],
+    ])
 
   it('lets anyone attach a selfie to a round, and replace or remove it', () => {
     const s0 = between()

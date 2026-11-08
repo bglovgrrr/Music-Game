@@ -140,13 +140,13 @@ export default function App() {
         </div>
       ) : wrapId && !client ? (
         <Suspense fallback={<Loading />}>
-        <WrapScreen
-          id={wrapId}
-          onDone={() => {
-            window.history.replaceState(null, '', '/')
-            setWrapId(null)
-          }}
-        />
+          <WrapScreen
+            id={wrapId}
+            onDone={() => {
+              window.history.replaceState(null, '', '/')
+              setWrapId(null)
+            }}
+          />
         </Suspense>
       ) : client ? (
         <GameContext.Provider value={client}>

@@ -32,8 +32,7 @@ export function createGame(host: Player, code: string, now = clock.now()): GameS
 
 export const currentRound = (s: GameState): Round | undefined => s.rounds[s.rounds.length - 1]
 
-export const askerOf = (s: GameState): Player | undefined =>
-  s.players.length ? s.players[s.turn % s.players.length] : undefined
+export const askerOf = (s: GameState): Player | undefined => (s.players.length ? s.players[s.turn % s.players.length] : undefined)
 
 export const playerById = (s: GameState, id: string) => s.players.find((p) => p.id === id)
 
@@ -85,9 +84,7 @@ export function reactionTotals(s: GameState): Record<string, { total: number; to
       }
     }
   }
-  return Object.fromEntries(
-    Object.entries(out).map(([id, o]) => [id, { total: o.total, top: Object.entries(o.byEmoji).sort((a, b) => b[1] - a[1])[0]?.[0] }]),
-  )
+  return Object.fromEntries(Object.entries(out).map(([id, o]) => [id, { total: o.total, top: Object.entries(o.byEmoji).sort((a, b) => b[1] - a[1])[0]?.[0] }]))
 }
 
 /** The player(s) whose songs got the most reactions (needs at least one). */
@@ -116,7 +113,10 @@ export function playbackPosition(s: GameState, now = clock.now()) {
  */
 function playOrder(s: GameState, r: Round): string[] {
   const pickedIds = new Set(r.picks.map((p) => p.playerId))
-  const start = Math.max(0, s.players.findIndex((p) => p.id === r.askerId))
+  const start = Math.max(
+    0,
+    s.players.findIndex((p) => p.id === r.askerId),
+  )
   const seats = [...s.players.slice(start), ...s.players.slice(0, start)]
   const order = seats.map((p) => p.id).filter((id) => pickedIds.has(id))
   return r.guessMode ? seededShuffle(order, r.id) : order
@@ -297,7 +297,7 @@ export function reduce(s: GameState, a: Action, actorId: string, now = clock.now
     case 'jump': {
       if (s.phase !== 'listening' || !round) return s
       if (a.index < 0 || a.index >= round!.order.length) return s
-      if (a.index > heardUpTo(round!)) fail("No peeking! Songs are revealed in order.")
+      if (a.index > heardUpTo(round!)) fail('No peeking! Songs are revealed in order.')
       return loadTrack(s, a.index, true, now)
     }
 
@@ -314,9 +314,7 @@ export function reduce(s: GameState, a: Action, actorId: string, now = clock.now
     case 'end': {
       if (!isHost) fail('Only the host can end the game.')
       // Reveal everything that was played, so the recap and scores are complete.
-      const rounds = s.rounds.map((r) =>
-        r.order.slice(0, s.phase === 'listening' && r === round ? r.current + 1 : r.order.length).reduce(reveal, r),
-      )
+      const rounds = s.rounds.map((r) => r.order.slice(0, s.phase === 'listening' && r === round ? r.current + 1 : r.order.length).reduce(reveal, r))
       return { ...s, rounds, phase: 'recap', playback: { isPlaying: false, positionMs: 0, updatedAt: now } }
     }
 

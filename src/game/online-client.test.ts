@@ -35,7 +35,13 @@ const fake = vi.hoisted(() => {
           code: 'TEST',
           version: 1,
           state: {
-            id: 'g1', code: 'TEST', hostId: uid, phase: 'lobby', turn: 0, rounds: [], createdAt: now,
+            id: 'g1',
+            code: 'TEST',
+            hostId: uid,
+            phase: 'lobby',
+            turn: 0,
+            rounds: [],
+            createdAt: now,
             players: [{ id: uid, name: args.player_name, color: '#cfcaff' }],
             playback: { isPlaying: false, positionMs: 0, updatedAt: now },
           },
@@ -160,7 +166,9 @@ describe('online game sync', () => {
     third.dispatch({ type: 'pick', track: track('third-song') })
     await settle()
 
-    const picks = currentRound(fake.db.row!.state)!.picks.map((p) => p.track.id).sort()
+    const picks = currentRound(fake.db.row!.state)!
+      .picks.map((p) => p.track.id)
+      .sort()
     expect(picks).toEqual(['friend-song', 'third-song'])
     expect(fake.db.conflicts).toBeGreaterThan(0) // the two saves really collided
     for (const c of [host, friend, third]) expect(currentRound(c.getState())!.picks).toHaveLength(2)

@@ -43,7 +43,11 @@ beforeEach(() => {
 describe('Save to Spotify', () => {
   it('finds each song, creates a private playlist, and adds the songs', async () => {
     const calls = fakeSpotify({ known: ['Landslide', 'Fast Car'] })
-    const res = await saveToSpotify('Side B · Nov 3', 'desc', [track('Landslide', 'Fleetwood Mac'), track('Fast Car', 'Tracy Chapman'), track('Unknown Song', 'Nobody')])
+    const res = await saveToSpotify('Side B · Nov 3', 'desc', [
+      track('Landslide', 'Fleetwood Mac'),
+      track('Fast Car', 'Tracy Chapman'),
+      track('Unknown Song', 'Nobody'),
+    ])
     expect(res).toEqual({ url: 'https://open.spotify.com/playlist/pl1', added: 2, missing: [track('Unknown Song', 'Nobody')] })
     const create = calls.find((c) => c.url === '/v1/me/playlists')!
     expect(create).toMatchObject({ method: 'POST', body: { name: 'Side B · Nov 3', public: false } })
@@ -61,7 +65,11 @@ describe('Save to Spotify', () => {
   it('adds songs in batches of 100', async () => {
     const titles = Array.from({ length: 150 }, (_, i) => `Song${String(i).padStart(3, '0')}`)
     const calls = fakeSpotify({ known: titles })
-    await saveToSpotify('x', 'y', titles.map((t) => track(t, 'A')))
+    await saveToSpotify(
+      'x',
+      'y',
+      titles.map((t) => track(t, 'A')),
+    )
     const adds = calls.filter((c) => c.url.endsWith('/items'))
     expect(adds.map((c) => (c.body as { uris: string[] }).uris.length)).toEqual([100, 50])
   })

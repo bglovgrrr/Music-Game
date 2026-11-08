@@ -23,7 +23,10 @@ function GuessPanel() {
   const guessers = guessersFor(state, owner)
   const done = guessers.filter((p) => guesses[p.id]).length
   const mine = guesses[meId]
-  const options = round.order.filter((id) => id !== meId).map((id) => playerById(state, id)!).filter(Boolean)
+  const options = round.order
+    .filter((id) => id !== meId)
+    .map((id) => playerById(state, id)!)
+    .filter(Boolean)
 
   return (
     <Card className="mx-auto grid w-full max-w-md gap-4 p-4">
@@ -71,7 +74,10 @@ function GuessResult() {
   const round = currentRound(state)!
   const owner = round.order[round.current]
   const guesses = round.guesses?.[owner] ?? {}
-  const right = Object.entries(guesses).filter(([, g]) => g === owner).map(([id]) => playerById(state, id)).filter(Boolean)
+  const right = Object.entries(guesses)
+    .filter(([, g]) => g === owner)
+    .map(([id]) => playerById(state, id))
+    .filter(Boolean)
   if (!Object.keys(guesses).length) return null
   return (
     <p className="flex flex-wrap items-center justify-center gap-2 text-sm text-muted-foreground">
@@ -119,59 +125,59 @@ export function ListeningScreen() {
       {/* Goal: listen together and react. The queue, Spotify and links live in the sheet. */}
       <PromptCard prompt={round.prompt} topic={themeName(round.themeId)} asker={asker} compact />
 
-        {/* Changing song: only the tape slides (inside the deck) and the title cross-fades. */}
-        <div className="grid justify-items-center gap-5 text-center">
-            {/* The 80s cassette player, with the song's tape in the door */}
-            <CassetteDeck
-              track={pick.track}
-              playing={isPlaying}
-              positionMs={pos}
-              durationMs={dur}
-              preview={!!pick.track.previewUrl || pick.track.source === 'demo'}
-              isLast={isLast}
-              back={picker && revealed ? `Picked by ${picker.id === meId ? 'you' : picker.name}` : round.guessMode ? 'Who picked it?' : undefined}
-              label={
-                picker && revealed ? (
-                  <>
-                    <PlayerAvatar player={picker} size="sm" className="size-5" />
-                    <span className="truncate">Picked by {picker.id === meId ? 'you' : picker.name}</span>
-                  </>
-                ) : round.guessMode ? (
-                  'Who picked it?'
-                ) : undefined
-              }
-              onPlay={() => !isPlaying && dispatch({ type: 'play' })}
-              onPause={() => isPlaying && dispatch({ type: 'pause' })}
-              onPrev={() => dispatch({ type: 'prev', from: round.current })}
-              onNext={() => dispatch({ type: 'next', from: round.current })}
-              onSeek={(ms) => dispatch({ type: 'seek', positionMs: ms })}
-              direction={dir}
-            />
+      {/* Changing song: only the tape slides (inside the deck) and the title cross-fades. */}
+      <div className="grid justify-items-center gap-5 text-center">
+        {/* The 80s cassette player, with the song's tape in the door */}
+        <CassetteDeck
+          track={pick.track}
+          playing={isPlaying}
+          positionMs={pos}
+          durationMs={dur}
+          preview={!!pick.track.previewUrl || pick.track.source === 'demo'}
+          isLast={isLast}
+          back={picker && revealed ? `Picked by ${picker.id === meId ? 'you' : picker.name}` : round.guessMode ? 'Who picked it?' : undefined}
+          label={
+            picker && revealed ? (
+              <>
+                <PlayerAvatar player={picker} size="sm" className="size-5" />
+                <span className="truncate">Picked by {picker.id === meId ? 'you' : picker.name}</span>
+              </>
+            ) : round.guessMode ? (
+              'Who picked it?'
+            ) : undefined
+          }
+          onPlay={() => !isPlaying && dispatch({ type: 'play' })}
+          onPause={() => isPlaying && dispatch({ type: 'pause' })}
+          onPrev={() => dispatch({ type: 'prev', from: round.current })}
+          onNext={() => dispatch({ type: 'next', from: round.current })}
+          onSeek={(ms) => dispatch({ type: 'seek', positionMs: ms })}
+          direction={dir}
+        />
 
-            {/* Fixed-height block: title, artist, who picked it and their note cross-fade together,
+        {/* Fixed-height block: title, artist, who picked it and their note cross-fade together,
                 so nothing below moves when the song changes. */}
-            <div className="grid w-full">
-              <AnimatePresence initial={false}>
-                <motion.div
-                  key={pick.playerId}
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
-                  transition={{ duration: 0.45, ease: 'easeInOut' }}
-                  className="grid content-start justify-items-center gap-1 [grid-area:1/1]"
-                >
-                  <p className="line-clamp-1 max-w-full px-2">
-                    <span className="font-display text-xl font-bold [font-stretch:80%]">{pick.track.title}</span>
-                    <span className="text-muted-foreground"> · {pick.track.artist}</span>
-                  </p>
-                  <p className="line-clamp-2 min-h-[2.75rem] max-w-sm [@media(max-height:800px)]:line-clamp-1 [@media(max-height:800px)]:min-h-[1.4rem] text-balance font-note text-[1.05rem] leading-snug text-muted-foreground italic">
-                    {pick.note && revealed ? `“${pick.note}”` : ''}
-                  </p>
-                </motion.div>
-              </AnimatePresence>
-            </div>
-            {round.guessMode && revealed && <GuessResult />}
+        <div className="grid w-full">
+          <AnimatePresence initial={false}>
+            <motion.div
+              key={pick.playerId}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.45, ease: 'easeInOut' }}
+              className="grid content-start justify-items-center gap-1 [grid-area:1/1]"
+            >
+              <p className="line-clamp-1 max-w-full px-2">
+                <span className="font-display text-xl font-bold [font-stretch:80%]">{pick.track.title}</span>
+                <span className="text-muted-foreground"> · {pick.track.artist}</span>
+              </p>
+              <p className="line-clamp-2 min-h-[2.75rem] max-w-sm [@media(max-height:800px)]:line-clamp-1 [@media(max-height:800px)]:min-h-[1.4rem] text-balance font-note text-[1.05rem] leading-snug text-muted-foreground italic">
+                {pick.note && revealed ? `“${pick.note}”` : ''}
+              </p>
+            </motion.div>
+          </AnimatePresence>
         </div>
+        {round.guessMode && revealed && <GuessResult />}
+      </div>
 
       <AnimatePresence>
         {round.guessMode && !revealed && (
@@ -243,11 +249,7 @@ export function ListeningScreen() {
                     <div className="min-w-0 flex-1">
                       <div className="truncate text-sm font-semibold">{played ? p.track.title : 'Mystery song'}</div>
                       <div className="truncate text-xs text-muted-foreground">
-                        {played
-                          ? p.track.artist
-                          : round.guessMode
-                            ? 'Coming up'
-                            : `${who?.id === meId ? 'Your' : `${who?.name}'s`} pick`}
+                        {played ? p.track.artist : round.guessMode ? 'Coming up' : `${who?.id === meId ? 'Your' : `${who?.name}'s`} pick`}
                       </div>
                     </div>
                     {who && (showWho || !round.guessMode) ? (
@@ -263,7 +265,11 @@ export function ListeningScreen() {
           {client.isSpeaker && pick.track.spotifyUri && <SpotifyCard compact />}
           <div className="flex flex-wrap justify-center gap-2 text-sm">
             <Button variant="link" size="sm" asChild>
-              <a href={pick.track.source === 'spotify' && pick.track.externalUrl ? pick.track.externalUrl : spotifySearchUrl(pick.track)} target="_blank" rel="noreferrer">
+              <a
+                href={pick.track.source === 'spotify' && pick.track.externalUrl ? pick.track.externalUrl : spotifySearchUrl(pick.track)}
+                target="_blank"
+                rel="noreferrer"
+              >
                 Open in Spotify <ExternalLink />
               </a>
             </Button>

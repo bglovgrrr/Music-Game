@@ -98,16 +98,18 @@ function RecapCardDialog({ onClose }: { onClose: () => void }) {
           </Button>
         </div>
         <div className="grid aspect-[4/5] max-h-[52dvh] place-items-center justify-self-center overflow-hidden rounded-[4px] bg-muted">
-          {url ? <img src={url} alt="Recap card of tonight's mixtape" className="size-full object-contain" /> : <Loader2 className="size-6 animate-spin text-muted-foreground" />}
+          {url ? (
+            <img src={url} alt="Recap card of tonight's mixtape" className="size-full object-contain" />
+          ) : (
+            <Loader2 className="size-6 animate-spin text-muted-foreground" />
+          )}
         </div>
         {linkable ? (
           <>
             <Button variant="brand" size="lg" onClick={shareLink} disabled={busy}>
               {busy ? <Loader2 className="animate-spin" /> : <Link2 />} Share the mixtape link
             </Button>
-            <p className="text-center text-xs text-muted-foreground">
-              Opens a page with every song (no selfies or notes). Anyone with the link can see it.
-            </p>
+            <p className="text-center text-xs text-muted-foreground">Opens a page with every song (no selfies or notes). Anyone with the link can see it.</p>
             {canShareFile && (
               <Button variant="ghost" size="sm" onClick={shareImage}>
                 <Share /> Share the image instead
@@ -234,7 +236,11 @@ export function RecapScreen({ onExit }: { onExit: () => void }) {
 
       <AnimatePresence>{showCard && <RecapCardDialog onClose={() => setShowCard(false)} />}</AnimatePresence>
 
-      <PeekSheet label="Scores & photos" summary={photos.length ? `${photos.length} photo${photos.length > 1 ? 's' : ''}` : 'Add a group selfie'} icon={<Trophy />}>
+      <PeekSheet
+        label="Scores & photos"
+        summary={photos.length ? `${photos.length} photo${photos.length > 1 ? 's' : ''}` : 'Add a group selfie'}
+        icon={<Trophy />}
+      >
         <div className="grid gap-4 pt-1">
           <Card className="p-3 empty:hidden">
             <Scoreboard />
@@ -295,7 +301,13 @@ function RoundCarousel({ rounds }: { rounds: Round[] }) {
                   <TrackRow
                     key={pid}
                     track={p.track}
-                    right={<CrownedName name={who?.name ?? ''} crowned={crowned} className={cn('pt-1 text-sm', crowned ? 'font-semibold text-foreground' : 'text-muted-foreground')} />}
+                    right={
+                      <CrownedName
+                        name={who?.name ?? ''}
+                        crowned={crowned}
+                        className={cn('pt-1 text-sm', crowned ? 'font-semibold text-foreground' : 'text-muted-foreground')}
+                      />
+                    }
                   />
                 )
               })}

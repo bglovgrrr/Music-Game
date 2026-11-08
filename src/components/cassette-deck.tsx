@@ -140,9 +140,31 @@ export function CassetteDeck({
   )
 }
 
-function PianoKey({ children, label, down, accent, onClick, aria }: { children: React.ReactNode; label: string; down?: boolean; accent?: boolean; onClick: () => void; aria: string }) {
+function PianoKey({
+  children,
+  label,
+  down,
+  accent,
+  onClick,
+  aria,
+}: {
+  children: React.ReactNode
+  label: string
+  down?: boolean
+  accent?: boolean
+  onClick: () => void
+  aria: string
+}) {
   return (
-    <button onClick={onClick} aria-label={aria} aria-pressed={down} className={cn('deck-key group grid cursor-pointer justify-items-center gap-0.5 rounded-b-[6px] pt-2.5 pb-1.5 [@media(max-height:800px)]:pt-1.5 [@media(max-height:800px)]:pb-1', down && 'deck-key-down')}>
+    <button
+      onClick={onClick}
+      aria-label={aria}
+      aria-pressed={down}
+      className={cn(
+        'deck-key group grid cursor-pointer justify-items-center gap-0.5 rounded-b-[6px] pt-2.5 pb-1.5 [@media(max-height:800px)]:pt-1.5 [@media(max-height:800px)]:pb-1',
+        down && 'deck-key-down',
+      )}
+    >
       <span className={cn('text-[#e9e3da]', accent && 'text-[#f4a949]')}>{children}</span>
       <span className="font-mono text-[0.55rem] font-semibold tracking-[0.18em] text-[#a9a298] uppercase">{label}</span>
       {accent && <span className="absolute inset-x-3 top-1.5 h-[3px] rounded-full bg-[#f4a949]/80" />}
@@ -172,7 +194,13 @@ function LevelMeters({ playing }: { playing: boolean }) {
           {Array.from({ length: 6 }, (_, i) => {
             const on = i < Math.round(lv[row] * 0.6)
             const color = i >= 5 ? '#ff3b3b' : i >= 4 ? '#f4a949' : '#9cc08a'
-            return <span key={i} className="h-1.5 w-1.5 rounded-[1px] transition-opacity duration-75" style={{ background: color, opacity: on ? 1 : 0.14, boxShadow: on ? `0 0 5px ${color}` : 'none' }} />
+            return (
+              <span
+                key={i}
+                className="h-1.5 w-1.5 rounded-[1px] transition-opacity duration-75"
+                style={{ background: color, opacity: on ? 1 : 0.14, boxShadow: on ? `0 0 5px ${color}` : 'none' }}
+              />
+            )
           })}
         </div>
       ))}

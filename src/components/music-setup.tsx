@@ -32,7 +32,10 @@ export function MusicSetup({ music }: { music: ReturnType<typeof useMusicReady> 
     return (
       <div className="paper paper-texture on-table grid gap-1 rounded-[4px] bg-[var(--paper)] px-3.5 py-3">
         <Step done label="Music: 30-second previews" hint="Songs play a short clip from this phone." />
-        <button className="cursor-pointer justify-self-start pl-8 text-sm font-semibold text-[#a0560b] underline-offset-2 hover:underline" onClick={() => setPreviews(false)}>
+        <button
+          className="cursor-pointer justify-self-start pl-8 text-sm font-semibold text-[#a0560b] underline-offset-2 hover:underline"
+          onClick={() => setPreviews(false)}
+        >
           Use Spotify for full songs instead
         </button>
       </div>
@@ -44,7 +47,9 @@ export function MusicSetup({ music }: { music: ReturnType<typeof useMusicReady> 
       <div className="flex items-center gap-2">
         <Music2 className="size-4 text-[#a0560b]" />
         <span className="font-display text-base leading-none font-bold [font-stretch:80%]">Set up the music</span>
-        <span className={cn('ml-auto font-mono text-[0.6rem] tracking-[0.14em] uppercase', ready ? 'text-success' : 'text-muted-foreground')}>{ready ? 'Ready' : 'Required'}</span>
+        <span className={cn('ml-auto font-mono text-[0.6rem] tracking-[0.14em] uppercase', ready ? 'text-success' : 'text-muted-foreground')}>
+          {ready ? 'Ready' : 'Required'}
+        </span>
       </div>
       <Step
         done={connected}
@@ -84,10 +89,29 @@ export function MusicSetup({ music }: { music: ReturnType<typeof useMusicReady> 
   )
 }
 
-function Step({ done, disabled, icon, label, hint, action }: { done?: boolean; disabled?: boolean; icon?: React.ReactNode; label: string; hint?: string; action?: React.ReactNode }) {
+function Step({
+  done,
+  disabled,
+  icon,
+  label,
+  hint,
+  action,
+}: {
+  done?: boolean
+  disabled?: boolean
+  icon?: React.ReactNode
+  label: string
+  hint?: string
+  action?: React.ReactNode
+}) {
   return (
     <div className={cn('flex items-center gap-2.5', disabled && 'opacity-45')}>
-      <span className={cn('grid size-5.5 shrink-0 place-items-center rounded-full border-2', done ? 'border-success bg-success text-[#fffdf8]' : 'border-[#2a1e18]/30 text-[#2a1e18]/50')}>
+      <span
+        className={cn(
+          'grid size-5.5 shrink-0 place-items-center rounded-full border-2',
+          done ? 'border-success bg-success text-[#fffdf8]' : 'border-[#2a1e18]/30 text-[#2a1e18]/50',
+        )}
+      >
         {done ? <Check className="size-3" strokeWidth={3} /> : icon}
       </span>
       <span className="grid min-w-0 flex-1">
@@ -149,4 +173,3 @@ function SpotifyReadyRow() {
     </>
   )
 }
-

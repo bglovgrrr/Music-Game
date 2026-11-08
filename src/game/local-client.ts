@@ -154,9 +154,7 @@ export class LocalGameClient implements GameClient {
         if (round.votes?.[bot.id]) continue
         const options = round.order.filter((id) => id !== bot.id)
         if (!options.length) continue
-        this.later(`vote-${round.id}-${bot.id}`, 1500 + Math.random() * 3500, () =>
-          this.apply({ type: 'vote', owner: sample(options) }, bot.id),
-        )
+        this.later(`vote-${round.id}-${bot.id}`, 1500 + Math.random() * 3500, () => this.apply({ type: 'vote', owner: sample(options) }, bot.id))
       }
     }
   }

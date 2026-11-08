@@ -6,7 +6,19 @@ import { useSpotifyConnected } from '@/hooks/use-spotify'
 import { connectSpotify, disconnectSpotify, SpotifyError, spotifyConfigured } from '@/music/spotify-auth'
 import { testSpotify } from '@/music/spotify-diagnostics'
 import { onSpotifyLog, spotifyLogLines } from '@/music/spotify-log'
-import { chooseDevice, chosenDeviceId, isIOS, listDevices, LOCAL, localPlayerUsable, needsKeepAlive, playSilence, setKeepAliveDevice, type SpotifyDevice, wakeSpotify } from '@/music/spotify-player'
+import {
+  chooseDevice,
+  chosenDeviceId,
+  isIOS,
+  listDevices,
+  LOCAL,
+  localPlayerUsable,
+  needsKeepAlive,
+  playSilence,
+  setKeepAliveDevice,
+  type SpotifyDevice,
+  wakeSpotify,
+} from '@/music/spotify-player'
 import { ensureLocalPlayer, LOCAL_PLAYER_NAME, localDeviceId, localPlayerProblem, onLocalPlayer, stopLocalPlayer } from '@/music/spotify-sdk'
 import { cn } from '@/lib/utils'
 
@@ -95,7 +107,7 @@ export function SpotifyCard({ compact, className }: { compact?: boolean; classNa
         chooseDevice(phone.id)
         setDevice(phone.id)
       }
-      if (phone && (chosenDeviceId() === phone.id)) {
+      if (phone && chosenDeviceId() === phone.id) {
         setKeepAliveDevice(phone.id)
         await playSilence().catch(() => {})
       }
@@ -214,8 +226,8 @@ export function SpotifyCard({ compact, className }: { compact?: boolean; classNa
         {!canUseLocal && !(active && needsKeepAlive(active)) && (
           <div className="grid gap-2 rounded-xl bg-muted p-3">
             <p className="text-xs text-muted-foreground">
-              {isIOS() ? 'On iPhone, the music plays through the Spotify app. ' : ''}Tap below, then come straight back here. Mixtape Memories keeps Spotify awake for the
-              rest of the game.
+              {isIOS() ? 'On iPhone, the music plays through the Spotify app. ' : ''}Tap below, then come straight back here. Mixtape Memories keeps Spotify
+              awake for the rest of the game.
             </p>
             <Button asChild size="sm" className="justify-self-start bg-[#1ED760] text-black hover:bg-[#1ED760]/90">
               <a
@@ -291,4 +303,3 @@ function CompactStatus({ active, className }: { active?: string; className?: str
     </div>
   )
 }
-

@@ -71,7 +71,7 @@ async function drawCard(s: GameState, photo: HTMLImageElement | null): Promise<B
 
   // A repeatable "random" per game so the wood and tears look the same every time.
   let seed = [...s.id].reduce((h, ch) => (h * 31 + ch.charCodeAt(0)) >>> 0, 7) || 7
-  const rnd = () => ((seed = (seed * 1664525 + 1013904223) >>> 0) / 4294967296)
+  const rnd = () => (seed = (seed * 1664525 + 1013904223) >>> 0) / 4294967296
 
   // ---- The coffee table: dark wood, plank seams, neon from above, dark corners ----
   c.fillStyle = '#1a100b'
@@ -224,7 +224,17 @@ async function drawCard(s: GameState, photo: HTMLImageElement | null): Promise<B
     return (34 + lines * 44 + Math.min(r.order.length, ROWS) * 52 + (r.order.length > ROWS ? 30 : 0) + 34) * k
   }
   const available = maxY - y
-  let k = Math.min(1.35, Math.max(0.62, available / Math.max(1, rounds.reduce((h, r) => h + blockHeight(r, 1), 0))))
+  let k = Math.min(
+    1.35,
+    Math.max(
+      0.62,
+      available /
+        Math.max(
+          1,
+          rounds.reduce((h, r) => h + blockHeight(r, 1), 0),
+        ),
+    ),
+  )
   while (k > 0.62 && rounds.reduce((h, r) => h + blockHeight(r, k), 0) > available * 0.97) k -= 0.03
   const total = rounds.reduce((h, r) => h + blockHeight(r, k), 0)
   if (total < available) y += Math.min(80, (available - total) / 3)

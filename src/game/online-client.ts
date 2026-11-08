@@ -92,10 +92,12 @@ export class OnlineGameClient implements GameClient {
     // Apply right away so the UI feels instant (throws GameError for invalid moves).
     this.show(reduce(this.shown, action, this.meId, clock.now()))
     this.pending++
-    this.queue = this.queue.then(() => this.save(action)).finally(() => {
-      this.pending--
-      if (this.pending === 0) this.show(this.confirmed.state)
-    })
+    this.queue = this.queue
+      .then(() => this.save(action))
+      .finally(() => {
+        this.pending--
+        if (this.pending === 0) this.show(this.confirmed.state)
+      })
   }
 
   react = (emoji: string) => {

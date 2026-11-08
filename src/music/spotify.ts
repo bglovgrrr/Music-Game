@@ -11,9 +11,13 @@ import { connectSpotify, SpotifyError, spotifyApi, spotifyConfigured } from './s
 export const spotifyAvailable = spotifyConfigured
 
 type Token = Record<string, never>
-const api = <T,>(_token: Token, path: string, init?: RequestInit) => spotifyApi<T>(path, init)
+const api = <T>(_token: Token, path: string, init?: RequestInit) => spotifyApi<T>(path, init)
 
-const clean = (s: string) => s.replace(/["]/g, '').replace(/\s*[([].*?(feat|ft|remaster|live|version).*?[)\]]/gi, '').trim()
+const clean = (s: string) =>
+  s
+    .replace(/["]/g, '')
+    .replace(/\s*[([].*?(feat|ft|remaster|live|version).*?[)\]]/gi, '')
+    .trim()
 
 /** Find the Spotify URI for a song. Returns null when there's no match. */
 async function findUri(token: Token, t: Track): Promise<string | null> {

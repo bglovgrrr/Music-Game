@@ -53,7 +53,9 @@ export function AskingScreen() {
   return (
     <div className="mx-auto grid w-full max-w-2xl content-start gap-4 py-2 [@media(max-height:700px)]:gap-3">
       <div>
-        <p className="text-xs font-semibold tracking-[0.14em] text-accent uppercase [@media(max-height:700px)]:hidden">Round {state.rounds.length + 1} · your turn</p>
+        <p className="text-xs font-semibold tracking-[0.14em] text-accent uppercase [@media(max-height:700px)]:hidden">
+          Round {state.rounds.length + 1} · your turn
+        </p>
         <h2 className="mt-1 text-[2rem] leading-tight font-bold font-soft">Ask the group a question</h2>
       </div>
 
@@ -131,7 +133,6 @@ export function AskingScreen() {
 const HOLD_MS = 280
 const STRIP_SPRING = { type: 'spring', stiffness: 170, damping: 24, mass: 0.9 } as const
 
-
 /** Small stable "randomness" per strip so the pile looks dropped by hand. */
 function jitter(i: number, salt: number) {
   const x = Math.sin((i + 1) * 12.9898 + salt * 78.233) * 43758.5453
@@ -202,7 +203,10 @@ function QuestionStrips({
     if (!held) act()
   }
 
-  const items = [...prompts.map((p) => ({ key: p, label: p, done: used.has(p), act: () => onPick(p) })), { key: '__surprise', label: '', done: false, act: onSurprise }]
+  const items = [
+    ...prompts.map((p) => ({ key: p, label: p, done: used.has(p), act: () => onPick(p) })),
+    { key: '__surprise', label: '', done: false, act: onSurprise },
+  ]
 
   return (
     <ul className="mx-auto grid w-full max-w-xl pb-1">

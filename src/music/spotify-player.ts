@@ -23,8 +23,7 @@ export const chooseDevice = (id: string | null) => safeStorage.set(DEVICE_KEY, i
 
 /** iPhone/iPad: Spotify's in-page player starts there but Spotify never reaches it (tested Nov 2026). */
 export const isIOS = () =>
-  typeof navigator !== 'undefined' &&
-  (/iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1))
+  typeof navigator !== 'undefined' && (/iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1))
 
 const LOCAL_BROKEN_KEY = 'mm:local-player-broken'
 /** Mixtape Memories' built-in player can be used on this browser (not iOS, and it hasn't failed here before). */
@@ -98,14 +97,14 @@ async function targetDevice(): Promise<SpotifyDevice> {
   }
   const devices = await listDevices()
   if (!devices.length) {
-    throw new SpotifyError(isIOS() ? 'Spotify isn’t open on this phone. Tap “Open Spotify”, then come right back.' : 'Spotify isn’t open anywhere. Open it on this device (or a speaker), then tap play again.', 'no_device')
+    throw new SpotifyError(
+      isIOS()
+        ? 'Spotify isn’t open on this phone. Tap “Open Spotify”, then come right back.'
+        : 'Spotify isn’t open anywhere. Open it on this device (or a speaker), then tap play again.',
+      'no_device',
+    )
   }
-  return (
-    devices.find((d) => d.id === picked) ??
-    devices.find((d) => d.is_active) ??
-    (isIOS() ? devices.find(needsKeepAlive) : undefined) ??
-    devices[0]
-  )
+  return devices.find((d) => d.id === picked) ?? devices.find((d) => d.is_active) ?? (isIOS() ? devices.find(needsKeepAlive) : undefined) ?? devices[0]
 }
 
 const q = (deviceId?: string) => (deviceId ? `?device_id=${encodeURIComponent(deviceId)}` : '')

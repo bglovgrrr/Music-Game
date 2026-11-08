@@ -36,7 +36,18 @@ export function Tiltable({
   const rotY = useMotionValue(0)
   const scale = useMotionValue(1)
   const [held, setHeld] = useState(false)
-  const g = useRef<{ x: number; y: number; rx: number; ry: number; vx: number; lastX: number; lastT: number; timer?: number; id?: number; moved: boolean } | null>(null)
+  const g = useRef<{
+    x: number
+    y: number
+    rx: number
+    ry: number
+    vx: number
+    lastX: number
+    lastT: number
+    timer?: number
+    id?: number
+    moved: boolean
+  } | null>(null)
 
   // Light and shadow follow the turn.
   const glareX = useTransform(rotY, (v) => 50 + Math.sin((v * Math.PI) / 180) * 45)
@@ -133,7 +144,10 @@ export function Tiltable({
           {front}
           <motion.div className="pointer-events-none absolute inset-0 mix-blend-soft-light" style={{ background: glare }} />
         </motion.div>
-        <motion.div className={cn('absolute inset-0 overflow-hidden [backface-visibility:hidden] [transform:rotateY(180deg)]', radius)} style={{ boxShadow: shadow }}>
+        <motion.div
+          className={cn('absolute inset-0 overflow-hidden [backface-visibility:hidden] [transform:rotateY(180deg)]', radius)}
+          style={{ boxShadow: shadow }}
+        >
           {back}
           <motion.div className="pointer-events-none absolute inset-0 mix-blend-soft-light" style={{ background: glare }} />
         </motion.div>
@@ -141,4 +155,3 @@ export function Tiltable({
     </motion.div>
   )
 }
-

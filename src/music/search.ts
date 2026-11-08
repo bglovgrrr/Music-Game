@@ -153,5 +153,4 @@ export async function findPreview(t: Track): Promise<string | null> {
   }
 }
 
-export const spotifySearchUrl = (t: Track) =>
-  `https://open.spotify.com/search/${encodeURIComponent(`${t.title} ${t.artist}`)}`
+export const spotifySearchUrl = (t: Track) => `https://open.spotify.com/search/${encodeURIComponent(`${t.title} ${t.artist}`)}`

@@ -80,7 +80,10 @@ function PickTimer() {
       </div>
       <div className="h-1.5 overflow-hidden rounded-full bg-muted">
         <div
-          className={cn('h-full rounded-full transition-[width] duration-300', urgent ? 'bg-destructive' : 'bg-[linear-gradient(90deg,var(--text-grad-1),var(--text-grad-2))]')}
+          className={cn(
+            'h-full rounded-full transition-[width] duration-300',
+            urgent ? 'bg-destructive' : 'bg-[linear-gradient(90deg,var(--text-grad-1),var(--text-grad-2))]',
+          )}
           style={{ width: `${pct}%` }}
         />
       </div>
@@ -162,12 +165,21 @@ export function PickingScreen() {
 
       <AnimatePresence mode="wait">
         {selected ? (
-          <motion.div key="confirm" initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -12 }} className="flex flex-1 flex-col gap-3">
+          <motion.div
+            key="confirm"
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -12 }}
+            className="flex flex-1 flex-col gap-3"
+          >
             <Card className="grid gap-4 p-4">
-              <button className="flex cursor-pointer items-center gap-1.5 justify-self-start text-sm text-muted-foreground" onClick={() => {
+              <button
+                className="flex cursor-pointer items-center gap-1.5 justify-self-start text-sm text-muted-foreground"
+                onClick={() => {
                   primeKeyboard()
                   setSelected(null)
-                }}>
+                }}
+              >
                 <ArrowLeft className="size-4" /> Back to results
               </button>
               <div className="flex items-center gap-4">
@@ -180,7 +192,13 @@ export function PickingScreen() {
                   </div>
                 </div>
               </div>
-              <Input value={note} onChange={(e) => setNote(e.target.value)} maxLength={MAX_NOTE_LENGTH} placeholder="Why this song? (optional teaser)" aria-label="Why this song (optional, shown when it plays)" />
+              <Input
+                value={note}
+                onChange={(e) => setNote(e.target.value)}
+                maxLength={MAX_NOTE_LENGTH}
+                placeholder="Why this song? (optional teaser)"
+                aria-label="Why this song (optional, shown when it plays)"
+              />
             </Card>
             <Button variant="brand" size="lg" className="mt-auto" onClick={lockIn}>
               <Lock /> Lock it in
@@ -234,17 +252,26 @@ export function PickingScreen() {
             {!query.trim() && <p className="py-6 text-center text-sm text-muted-foreground">Your pick stays secret until it plays.</p>}
           </motion.div>
         ) : (
-          <motion.div key="picked" initial={{ opacity: 0, scale: 0.97 }} animate={{ opacity: 1, scale: 1 }} className="flex flex-1 flex-col items-center justify-center gap-3 text-center">
+          <motion.div
+            key="picked"
+            initial={{ opacity: 0, scale: 0.97 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="flex flex-1 flex-col items-center justify-center gap-3 text-center"
+          >
             <p className="font-mono text-xs tracking-[0.16em] text-success uppercase">Locked in</p>
             <AlbumArt track={myPick!.track} className="size-36 shadow-xl [@media(max-height:700px)]:size-24" rounded="rounded-[4px]" />
             <div>
               <div className="font-display text-2xl leading-tight font-bold [font-stretch:80%]">{myPick!.track.title}</div>
               <div className="text-muted-foreground">{myPick!.track.artist}</div>
             </div>
-            <Button variant="sketch" className="text-foreground [--sketch-ink:var(--foreground)]" onClick={() => {
+            <Button
+              variant="sketch"
+              className="text-foreground [--sketch-ink:var(--foreground)]"
+              onClick={() => {
                 primeKeyboard()
                 setChanging(true)
-              }}>
+              }}
+            >
               Change my pick
             </Button>
           </motion.div>

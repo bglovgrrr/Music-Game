@@ -9,7 +9,8 @@ const buttonVariants = cva(
     variants: {
       variant: {
         default: 'key bg-primary text-primary-foreground hover:brightness-105',
-        brand: 'key brand-gradient hover:brightness-105 [box-shadow:inset_0_-3px_0_rgb(0_0_0/0.22),inset_0_1px_0_rgb(255_255_255/0.35),0_2px_0_rgb(120_60_10/0.8),0_8px_26px_-6px_rgb(244_169_73/0.55)]',
+        brand:
+          'key brand-gradient hover:brightness-105 [box-shadow:inset_0_-3px_0_rgb(0_0_0/0.22),inset_0_1px_0_rgb(255_255_255/0.35),0_2px_0_rgb(120_60_10/0.8),0_8px_26px_-6px_rgb(244_169_73/0.55)]',
         secondary: 'bg-secondary text-secondary-foreground hover:brightness-110 active:translate-y-px',
         outline: 'key paper border border-border bg-card text-card-foreground hover:brightness-105',
         /** Hand-drawn: pencil outline on paper. */

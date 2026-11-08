@@ -32,21 +32,29 @@ export function GameShell({ children, onExit }: { children: React.ReactNode; onE
         <h1 className="sr-only">Mixtape Memories, room {state.code}</h1>
         <LabelTape className="text-[0.8rem]">{state.code}</LabelTape>
         <VersionTag className="max-[370px]:hidden" />
-        {client.mode === 'demo' && <Badge variant="secondary" className="max-sm:hidden">Demo</Badge>}
-        {round > 0 && state.phase !== 'recap' && <span className="font-mono text-xs tracking-[0.14em] text-muted-foreground uppercase max-sm:hidden">Round {String(round).padStart(2, '0')}</span>}
+        {client.mode === 'demo' && (
+          <Badge variant="secondary" className="max-sm:hidden">
+            Demo
+          </Badge>
+        )}
+        {round > 0 && state.phase !== 'recap' && (
+          <span className="font-mono text-xs tracking-[0.14em] text-muted-foreground uppercase max-sm:hidden">Round {String(round).padStart(2, '0')}</span>
+        )}
         <div className="ml-auto flex items-center gap-1.5">
           <AvatarStack players={state.players} />
           <ThemeToggle />
           {state.phase !== 'recap' && (
             <Button variant={confirming ? 'destructive' : 'ghost'} size="sm" onClick={handleExit} aria-label="Leave game">
               <LogOut />
-              {confirming ? (inGame && isHost ? 'End game?' : 'Leave?') : <span className="max-sm:hidden">{inGame && isHost ? 'End' : 'Leave'}</span>}
+              {confirming ? inGame && isHost ? 'End game?' : 'Leave?' : <span className="max-sm:hidden">{inGame && isHost ? 'End' : 'Leave'}</span>}
             </Button>
           )}
         </div>
       </header>
       <SpotifyWakeBanner />
-      <main className="no-scrollbar -mx-4 flex min-h-0 flex-1 flex-col overflow-y-auto overscroll-contain px-4 pb-[env(safe-area-inset-bottom)] sm:-mx-8 sm:px-8">{children}</main>
+      <main className="no-scrollbar -mx-4 flex min-h-0 flex-1 flex-col overflow-y-auto overscroll-contain px-4 pb-[env(safe-area-inset-bottom)] sm:-mx-8 sm:px-8">
+        {children}
+      </main>
     </div>
   )
 }

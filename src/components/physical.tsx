@@ -22,7 +22,9 @@ export function IndexCard({
 }) {
   return (
     <div className={cn('drop-on-table min-w-0', className)} style={tilt ? { transform: `rotate(${tilt}deg)` } : undefined}>
-      <div className={cn('paper index-card rounded-[3px]', torn === 'bottom' && 'torn-bottom pb-4', torn === 'top' && 'torn-top pt-4', innerClassName)}>{children}</div>
+      <div className={cn('paper index-card rounded-[3px]', torn === 'bottom' && 'torn-bottom pb-4', torn === 'top' && 'torn-top pt-4', innerClassName)}>
+        {children}
+      </div>
     </div>
   )
 }
@@ -48,4 +50,3 @@ export function LabelTape({ children, className, tilt = -2 }: { children: React.
 export function Washi({ className, tilt = -4 }: { className?: string; tilt?: number }) {
   return <span aria-hidden className={cn('washi pointer-events-none absolute block h-6 w-24', className)} style={{ transform: `rotate(${tilt}deg)` }} />
 }
-

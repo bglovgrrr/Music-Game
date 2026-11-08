@@ -8,7 +8,14 @@ const item = {
   name: 'Landslide',
   duration_ms: 199_000,
   artists: [{ name: 'Fleetwood Mac' }],
-  album: { name: 'Fleetwood Mac', uri: 'spotify:album:fm', images: [{ url: 'big', width: 640 }, { url: 'small', width: 64 }] },
+  album: {
+    name: 'Fleetwood Mac',
+    uri: 'spotify:album:fm',
+    images: [
+      { url: 'big', width: 640 },
+      { url: 'small', width: 64 },
+    ],
+  },
   external_urls: { spotify: 'https://open.spotify.com/track/1' },
 }
 
@@ -75,7 +82,10 @@ describe('/api/spotify-search', () => {
   })
 
   it('reports Spotify errors as 502 without caching', async () => {
-    vi.stubGlobal('fetch', vi.fn(async (url: string) => (String(url).includes('/api/token') ? json(200, { access_token: 't', expires_in: 3600 }) : json(429, {}))))
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async (url: string) => (String(url).includes('/api/token') ? json(200, { access_token: 't', expires_in: 3600 }) : json(429, {}))),
+    )
     const res = await handle(new Request('https://x/api/spotify-search?q=landslide'))
     expect(res.status).toBe(502)
     expect(res.headers.get('cache-control')).toBe('no-store')

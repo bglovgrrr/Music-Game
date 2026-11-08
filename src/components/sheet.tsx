@@ -106,14 +106,15 @@ export function PeekSheet({
               transition={{ type: 'spring', stiffness: 320, damping: 34 }}
             >
               <div className={cn('paper paper-texture torn-top flex min-h-0 flex-col bg-[var(--paper)] pt-3', className)}>
-                <motion.div
-                  className="flex cursor-grab touch-none items-center gap-2.5 px-5 pt-1 pb-3 active:cursor-grabbing"
-                  onPanEnd={sheetDragEnd}
-                >
+                <motion.div className="flex cursor-grab touch-none items-center gap-2.5 px-5 pt-1 pb-3 active:cursor-grabbing" onPanEnd={sheetDragEnd}>
                   <span className="absolute top-3 left-1/2 h-1 w-9 -translate-x-1/2 rounded-full bg-[#2a1e18]/20" />
                   {icon && <span className="mt-2 shrink-0 text-[#a0560b] [&_svg]:size-4">{icon}</span>}
                   <h2 className="mt-2 text-xl leading-none font-bold font-soft">{label}</h2>
-                  <button onClick={() => setOpen(false)} aria-label="Close" className="mt-1 ml-auto grid size-9 cursor-pointer place-items-center rounded-full text-muted-foreground hover:bg-muted">
+                  <button
+                    onClick={() => setOpen(false)}
+                    aria-label="Close"
+                    className="mt-1 ml-auto grid size-9 cursor-pointer place-items-center rounded-full text-muted-foreground hover:bg-muted"
+                  >
                     <X className="size-4" />
                   </button>
                 </motion.div>

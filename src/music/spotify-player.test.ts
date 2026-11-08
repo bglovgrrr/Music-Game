@@ -26,7 +26,11 @@ function fakeSpotify(handler: (c: Call) => Response) {
   vi.stubGlobal(
     'fetch',
     vi.fn(async (url: string, init?: RequestInit) => {
-      const c: Call = { url: String(url), method: init?.method ?? 'GET', body: init?.body && typeof init.body === 'string' ? JSON.parse(init.body) : init?.body }
+      const c: Call = {
+        url: String(url),
+        method: init?.method ?? 'GET',
+        body: init?.body && typeof init.body === 'string' ? JSON.parse(init.body) : init?.body,
+      }
       calls.push(c)
       return handler(c)
     }),
@@ -35,7 +39,10 @@ function fakeSpotify(handler: (c: Call) => Response) {
 }
 
 const signedIn = (overrides: Record<string, unknown> = {}) =>
-  store.set('mm:spotify-token', JSON.stringify({ access_token: 'tok', refresh_token: 'ref', expires_at: Date.now() + 3_600_000, scope: SCOPES.join(' '), ...overrides }))
+  store.set(
+    'mm:spotify-token',
+    JSON.stringify({ access_token: 'tok', refresh_token: 'ref', expires_at: Date.now() + 3_600_000, scope: SCOPES.join(' '), ...overrides }),
+  )
 
 beforeEach(() => {
   store.clear()
@@ -45,7 +52,12 @@ beforeEach(() => {
 })
 afterEach(() => vi.unstubAllGlobals())
 
-const devices = { devices: [{ id: 'phone', name: 'iPhone', type: 'Smartphone', is_active: false }, { id: 'sonos', name: 'Living Room', type: 'Speaker', is_active: true }] }
+const devices = {
+  devices: [
+    { id: 'phone', name: 'iPhone', type: 'Smartphone', is_active: false },
+    { id: 'sonos', name: 'Living Room', type: 'Speaker', is_active: true },
+  ],
+}
 
 describe('Spotify playback control', () => {
   it('starts the song from its album (bare-track playback plays nothing in Development Mode)', async () => {
@@ -129,7 +141,10 @@ describe('Spotify playback control', () => {
     const calls = fakeSpotify((c) => (c.url.includes('/pause') ? json(404, { error: { reason: 'NO_ACTIVE_DEVICE' } }) : json(204)))
     await expect(pausePlayback()).resolves.toBeUndefined()
     await seekTo(61_000)
-    expect(calls.map((c) => `${c.method} ${c.url.replace('https://api.spotify.com/v1', '')}`)).toEqual(['PUT /me/player/pause', 'PUT /me/player/seek?position_ms=61000'])
+    expect(calls.map((c) => `${c.method} ${c.url.replace('https://api.spotify.com/v1', '')}`)).toEqual([
+      'PUT /me/player/pause',
+      'PUT /me/player/seek?position_ms=61000',
+    ])
   })
 })
 
@@ -161,7 +176,10 @@ describe('keeping a phone’s Spotify awake', () => {
     setKeepAliveDevice('iphone')
     const calls = fakeSpotify(() => json(204))
     await pausePlayback()
-    expect(calls.map((c) => c.url.replace('https://api.spotify.com/v1', ''))).toEqual(['/me/player/play?device_id=iphone', '/me/player/repeat?state=context&device_id=iphone'])
+    expect(calls.map((c) => c.url.replace('https://api.spotify.com/v1', ''))).toEqual([
+      '/me/player/play?device_id=iphone',
+      '/me/player/repeat?state=context&device_id=iphone',
+    ])
     expect(calls[0].body).toEqual({ context_uri: SILENCE.album, offset: { uri: SILENCE.uri }, position_ms: 0 })
   })
 
@@ -190,7 +208,10 @@ describe('keeping a phone’s Spotify awake', () => {
 
   it('on iPhone, skips the built-in player and uses the phone’s Spotify app', async () => {
     const nav = globalThis.navigator
-    Object.defineProperty(globalThis, 'navigator', { value: { userAgent: 'Mozilla/5.0 (iPhone; CPU iPhone OS 26_0 like Mac OS X)', platform: 'iPhone', maxTouchPoints: 5 }, configurable: true })
+    Object.defineProperty(globalThis, 'navigator', {
+      value: { userAgent: 'Mozilla/5.0 (iPhone; CPU iPhone OS 26_0 like Mac OS X)', platform: 'iPhone', maxTouchPoints: 5 },
+      configurable: true,
+    })
     try {
       sdk.id = 'sideb-local'
       expect(localPlayerUsable()).toBe(false)
@@ -226,7 +247,8 @@ describe('keeping a phone’s Spotify awake', () => {
     let plays = 0
     const calls = fakeSpotify((c) => {
       if (c.url.endsWith('/me/player/devices')) return json(200, devices)
-      if (c.url.includes('/me/player/play')) return ++plays === 1 ? json(404, { error: { message: 'Player command failed: No active device found', reason: 'NO_ACTIVE_DEVICE' } }) : json(204)
+      if (c.url.includes('/me/player/play'))
+        return ++plays === 1 ? json(404, { error: { message: 'Player command failed: No active device found', reason: 'NO_ACTIVE_DEVICE' } }) : json(204)
       return json(204)
     })
     const device = await playTrack('spotify:track:1', 0, 'spotify:album:A')
