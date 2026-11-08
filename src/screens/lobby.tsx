@@ -3,6 +3,7 @@ import { toast } from 'sonner'
 import { GameSettings } from '@/components/game-settings'
 import { LabelTape } from '@/components/physical'
 import { QrCode } from '@/components/qr-code'
+import { MusicSetup, useMusicReady } from '@/components/music-setup'
 import { PeekSheet } from '@/components/sheet'
 import { StickerBoard } from '@/components/sticker-board'
 import { SpotifyCard } from '@/components/spotify-card'
@@ -45,13 +46,16 @@ export function LobbyScreen() {
   }
 
   const settings = settingsOf(state)
+  const music = useMusicReady()
+  // Only the phone that plays the music (the host's, in an online game) has to set it up.
+  const needsMusic = client.mode === 'online' && client.isSpeaker && spotifyConfigured
   const settingsSummary = [settings.guessMode ? 'Guessing on' : 'Guessing off', settings.pickSeconds ? `${settings.pickSeconds}s timer` : 'No timer'].join(' · ')
 
   return (
-    <div className="mx-auto flex w-full max-w-md flex-1 flex-col gap-6 pt-2 pb-24">
+    <div className="mx-auto flex w-full max-w-md flex-1 flex-col gap-4 pt-1 pb-24 [@media(max-height:700px)]:gap-3 [@media(max-height:700px)]:pb-[4.5rem]">
       {/* Goal: get everyone in. Code + QR up top, stickers in the middle, Start at the thumb. */}
       <div className="flex items-center gap-4">
-        <QrCode value={inviteUrl} className="w-[7.5rem] shrink-0" />
+        <QrCode value={inviteUrl} className="w-[6.5rem] shrink-0 [@media(max-height:700px)]:hidden" />
         <div className="grid min-w-0 justify-items-start gap-2">
           <span className="font-mono text-[0.65rem] tracking-[0.16em] text-muted-foreground uppercase">Room code</span>
           <button onClick={copy} className="cursor-pointer" aria-label={`Copy room code ${state.code}`}>
@@ -75,15 +79,18 @@ export function LobbyScreen() {
       </section>
 
       <div className="mt-auto grid gap-2">
-        {client.mode === 'online' && host && (
+        {/* The host can't start until the music is set up: Spotify ready, or previews on purpose */}
+        {needsMusic && <MusicSetup music={music} />}
+        {client.mode === 'online' && host && !(needsMusic && !music.ready) && (
           <p className="flex items-center justify-center gap-2 text-center text-xs text-muted-foreground">
             <Speaker className="size-3.5 shrink-0" />
             {isHost ? 'Music plays from your phone. Connect it to a speaker.' : `Music plays from ${host.name}'s phone.`}
           </p>
         )}
         {isHost ? (
-          <Button variant="brand" size="lg" disabled={!enough} onClick={() => dispatch({ type: 'start' })}>
-            <Play /> {enough ? `Start with ${state.players.length} players` : `Need ${MIN_PLAYERS - state.players.length} more`}
+          <Button variant="brand" size="lg" disabled={!enough || (needsMusic && !music.ready)} onClick={() => dispatch({ type: 'start' })}>
+            <Play />{' '}
+            {!enough ? `Need ${MIN_PLAYERS - state.players.length} more` : needsMusic && !music.ready ? 'Set up the music to start' : `Start with ${state.players.length} players`}
           </Button>
         ) : (
           <p className="text-center text-muted-foreground">Waiting for the host to start…</p>

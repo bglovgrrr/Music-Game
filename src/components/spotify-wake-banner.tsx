@@ -10,9 +10,10 @@ import { onPhoneSpotify, phoneSpotify, wakeSpotify } from '@/music/spotify-playe
  * can't start it). Say so up front, with a one-tap fix, in the lobby and during the game.
  */
 export function SpotifyWakeBanner() {
-  const { client } = useGame()
+  const { client, state: game } = useGame()
   const state = useSyncExternalStore(onPhoneSpotify, phoneSpotify, phoneSpotify)
-  const show = client.isSpeaker && state === 'asleep'
+  // In the lobby the music setup card covers this.
+  const show = client.isSpeaker && state === 'asleep' && game.phase !== 'lobby'
   return (
     <AnimatePresence initial={false}>
       {show && (
