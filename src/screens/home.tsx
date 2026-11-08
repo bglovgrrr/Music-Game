@@ -2,6 +2,7 @@ import { ArrowRight, Loader2, LogIn, Sparkles, Users } from 'lucide-react'
 import { motion } from 'motion/react'
 import { useEffect, useState } from 'react'
 import { AboutButton } from '@/components/about-card'
+import { VersionTag } from '@/components/version-tag'
 import { Cassette } from '@/components/cassette'
 import { ThemeToggle } from '@/components/theme-toggle'
 import { Button } from '@/components/ui/button'
@@ -64,7 +65,8 @@ export function HomeScreen({
 
   return (
     <div className="mx-auto flex min-h-dvh w-full max-w-5xl flex-col px-4 pt-safe sm:px-8">
-      <header className="flex h-16 items-center justify-end">
+      <header className="flex h-16 items-center justify-between">
+        <VersionTag />
         <div className="flex items-center gap-1">
           <AboutButton />
           <ThemeToggle />

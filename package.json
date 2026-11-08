@@ -1,7 +1,7 @@
 {
   "name": "side-b",
   "private": true,
-  "version": "0.0.0",
+  "version": "1.0.0",
   "description": "Side B: a music storytelling game for friends. Ask a question, everyone picks a song, then listen and talk.",
   "type": "module",
   "scripts": {

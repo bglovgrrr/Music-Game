@@ -4,6 +4,19 @@ import react from '@vitejs/plugin-react'
 import { defineConfig } from 'vite'
 import { VitePWA } from 'vite-plugin-pwa'
 import { viteSingleFile } from 'vite-plugin-singlefile'
+import { execSync } from 'node:child_process'
+import pkg from './package.json' with { type: 'json' }
+
+/** Short id of the commit being built (Vercel provides it; locally ask git). */
+function commit() {
+  const sha = process.env.VERCEL_GIT_COMMIT_SHA
+  if (sha) return sha.slice(0, 7)
+  try {
+    return execSync('git rev-parse --short HEAD', { stdio: ['ignore', 'pipe', 'ignore'] }).toString().trim()
+  } catch {
+    return 'dev'
+  }
+}
 
 // `npm run build:preview` makes one self-contained HTML file (demo mode),
 // used to preview the app inside the Claude app.
@@ -11,6 +24,12 @@ export default defineConfig(({ mode }) => {
   const preview = mode === 'preview'
   return {
     resolve: { alias: { '@': path.resolve(__dirname, './src') } },
+    // Shown in the top left so it's easy to tell which release a phone is running.
+    define: {
+      __APP_VERSION__: JSON.stringify(pkg.version),
+      __APP_COMMIT__: JSON.stringify(commit()),
+      __APP_BUILT__: JSON.stringify(new Date().toISOString()),
+    },
     build: preview ? { outDir: 'dist-preview' } : undefined,
     plugins: [
       react(),

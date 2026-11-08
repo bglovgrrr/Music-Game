@@ -2,6 +2,7 @@ import { LogOut } from 'lucide-react'
 import { useState } from 'react'
 import { AvatarStack } from '@/components/game-ui'
 import { LabelTape } from '@/components/physical'
+import { VersionTag } from '@/components/version-tag'
 import { SpotifyWakeBanner } from '@/components/spotify-wake-banner'
 import { ThemeToggle } from '@/components/theme-toggle'
 import { Badge } from '@/components/ui/badge'
@@ -29,6 +30,7 @@ export function GameShell({ children, onExit }: { children: React.ReactNode; onE
     <div className="mx-auto flex h-dvh w-full max-w-5xl flex-col px-4 pt-safe sm:px-8">
       <header className="relative z-20 -mx-4 mb-2 flex h-14 shrink-0 items-center gap-2.5 bg-[color-mix(in_oklab,var(--table)_70%,black_20%)]/80 px-4 backdrop-blur-md shadow-[0_8px_20px_-14px_rgb(0_0_0/0.8)] sm:-mx-8 sm:px-8">
         <LabelTape className="text-[0.8rem]">{state.code}</LabelTape>
+        <VersionTag className="max-[370px]:hidden" />
         {client.mode === 'demo' && <Badge variant="secondary" className="max-sm:hidden">Demo</Badge>}
         {round > 0 && state.phase !== 'recap' && <span className="font-mono text-xs tracking-[0.14em] text-muted-foreground uppercase max-sm:hidden">Round {String(round).padStart(2, '0')}</span>}
         <div className="ml-auto flex items-center gap-1.5">
