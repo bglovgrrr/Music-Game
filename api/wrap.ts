@@ -6,7 +6,7 @@
  * straight on to the app's wrap screen. The Supabase URL and publishable key are public
  * (the same ones the app ships with); the snapshot is read through get_share().
  */
-import { wrapPage, type WrapMeta } from '../src/server/wrap-page'
+import { wrapPage, type WrapMeta } from '../src/server/wrap-page.js'
 
 const SUPABASE_URL = process.env.VITE_SUPABASE_URL || 'https://iizvvvzccqttwlvqkfzi.supabase.co'
 const SUPABASE_KEY = process.env.VITE_SUPABASE_PUBLISHABLE_KEY || 'sb_publishable_Qjh4wnV1MO63HQVudm22Ww_xjFvnVNc'
