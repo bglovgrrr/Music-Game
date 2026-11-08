@@ -1,103 +1,81 @@
-export type Theme = { id: string; name: string; prompts: string[] }
+/** How deep a question goes: 1 light, 2 warm, 3 deep. */
+export type Depth = 1 | 2 | 3
+export type Question = { text: string; depth: Depth }
+export type Theme = { id: string; name: string; blurb: string; questions: Question[] }
+
+export const DEPTH_LABEL: Record<Depth, string> = { 1: 'Light', 2: 'Warm', 3: 'Deep' }
+
+const q = (depth: Depth, ...texts: string[]): Question[] => texts.map((text) => ({ text, depth }))
 
 /**
- * Question topics, named like moments and places music lives in
- * (in the spirit of "Basement Sessions"). Ids stay stable for older games.
+ * Four question categories, each a different kind of question, named like places music
+ * lives. Every category runs from light (easy, funny) to deep (personal, tender).
+ * Ids stay stable so older games still show their category.
  */
 export const THEMES: Theme[] = [
   {
     id: 'basement',
     name: 'Basement Sessions',
-    prompts: [
-      'A song that sounds like this room right now',
-      "It's 1am and nobody wants to leave. What goes on next?",
-      'A song you only play for people you trust',
-      'A song that reminds you of someone in this room',
-      'The theme song for this friend group',
+    blurb: 'This room, these friends, tonight.',
+    questions: [
+      ...q(1, 'The song that plays when this group walks in', "A song you'd make everyone here sing", "Your 1am, nobody-wants-to-leave song"),
+      ...q(2, 'A song that reminds you of someone here', 'The song that sounds like this friend group', 'A song you only play for people you trust'),
+      ...q(3, 'Your best memory with someone here, as a song', 'A song for the friend who got you through it', "A song you'd want us to remember you by"),
     ],
   },
   {
     id: 'throwback',
     name: 'Back Seat Radio',
-    prompts: [
-      'What was playing in your first car?',
-      'What song takes you back to the summer you were 16?',
-      'A song from the first concert you ever went to',
-      'A song you wore out on repeat as a kid',
-      "The song you'd fight for the aux to play on a road trip",
-    ],
-  },
-  {
-    id: 'family',
-    name: 'Kitchen Radio',
-    prompts: [
-      'A song that was always on in your house growing up',
-      'What song reminds you of your mom?',
-      'What song reminds you of your dad?',
-      'A song a grandparent loved',
-      'A song you and a sibling would sing together',
+    blurb: 'Growing up, first cars, long summers.',
+    questions: [
+      ...q(1, 'What was playing in your first car?', 'A song you wore out on repeat as a kid', 'The first album you ever owned'),
+      ...q(2, 'The summer you were 16, as a song', 'A song always on in your house growing up', 'A song a parent or grandparent loved'),
+      ...q(3, 'A song for who you used to be', "A song for a place that isn't there anymore", 'A song for someone you miss'),
     ],
   },
   {
     id: 'love',
     name: 'Slow Dance',
-    prompts: [
-      'A song that reminds you of your first crush',
-      'Your ultimate breakup song',
-      "The song you'd want for a first dance",
-      'A song for someone you lost touch with',
-      'The most romantic song you know',
-    ],
-  },
-  {
-    id: 'hype',
-    name: 'Front Row',
-    prompts: [
-      'Your go-to pump-up song',
-      'Your karaoke song, no shame',
-      "The guilty pleasure you'd defend to the end",
-      'A song that always gets you on the dance floor',
-      "The song you'd walk out to in a stadium",
+    blurb: 'Crushes, first dances, heartbreak.',
+    questions: [
+      ...q(1, "The song you'd put on to set the mood", 'Your first-crush song', "The song you'd want for a first dance"),
+      ...q(2, 'Your ultimate breakup song', 'A song for someone you lost touch with', 'The most romantic song you know'),
+      ...q(3, 'A love you never said out loud, as a song', 'A song that helped you get over someone', 'A song for how you love people'),
     ],
   },
   {
     id: 'deep',
     name: 'Headphones On',
-    prompts: [
-      'A song that got you through a hard time',
-      'A song that makes you cry every single time',
-      'A song with a lyric you live by',
-      'A song that changed how you see the world',
-      'A song you play when you need to be alone',
-    ],
-  },
-  {
-    id: 'places',
-    name: 'Window Seat',
-    prompts: [
-      'A song for a rainy day',
-      'A song that sounds like summer',
-      'A song that reminds you of a specific city',
-      'A song that reminds you of a trip you took',
-      'The soundtrack to a long walk home at night',
-    ],
-  },
-  {
-    id: 'wild',
-    name: 'B-Sides',
-    prompts: [
-      'The theme song for your life right now',
-      'A song you secretly know every word to',
-      "A song you'd want played at your funeral",
-      'A song nobody here would guess you love',
-      "A song you'd put on a mixtape for your younger self",
+    blurb: 'Just you and the song.',
+    questions: [
+      ...q(1, 'Your guilty pleasure, no shame', 'A song nobody here would guess you love', 'Your go-to pick-me-up song'),
+      ...q(2, 'The theme song for your life right now', 'A song with a lyric you live by', 'A song you play when you need to be alone'),
+      ...q(3, 'A song that got you through a hard time', 'A song that makes you cry every time', "A song you'd want played at your funeral"),
     ],
   },
 ]
 
-export const ALL_PROMPTS = THEMES.flatMap((t) => t.prompts.map((p) => ({ themeId: t.id, prompt: p })))
+export const ALL_PROMPTS = THEMES.flatMap((t) => t.questions.map((x) => ({ themeId: t.id, prompt: x.text, depth: x.depth })))
 
-/** Topic name for a round's theme id (undefined for your own questions). */
+/** Category name for a round's theme id (undefined for your own questions or retired categories). */
 export function themeName(id?: string) {
   return id ? THEMES.find((t) => t.id === id)?.name : undefined
+}
+
+/**
+ * The questions to show for a category this round: one light, one warm, one deep, plus one
+ * more, all unused if possible, ordered light to deep.
+ */
+export function dealQuestions(theme: Theme, used: Set<string>, rand: () => number = Math.random): Question[] {
+  const fresh = theme.questions.filter((x) => !used.has(x.text))
+  const pool = fresh.length >= 4 ? fresh : theme.questions
+  const pickOne = (xs: Question[]) => xs[Math.floor(rand() * xs.length)]
+  const hand: Question[] = []
+  for (const d of [1, 2, 3] as Depth[]) {
+    const options = pool.filter((x) => x.depth === d && !hand.includes(x))
+    if (options.length) hand.push(pickOne(options))
+  }
+  const rest = pool.filter((x) => !hand.includes(x))
+  while (hand.length < 4 && rest.length) hand.push(rest.splice(Math.floor(rand() * rest.length), 1)[0])
+  return hand.sort((a, b) => a.depth - b.depth)
 }

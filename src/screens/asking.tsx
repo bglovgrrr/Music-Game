@@ -5,7 +5,7 @@ import { PlayerAvatar } from '@/components/game-ui'
 import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/input'
 import { askerOf, MAX_PROMPT_LENGTH } from '@/game/engine'
-import { ALL_PROMPTS, themeName } from '@/game/prompts'
+import { ALL_PROMPTS, dealQuestions, DEPTH_LABEL, THEMES } from '@/game/prompts'
 import { useGame } from '@/hooks/use-game'
 import { cn, sample } from '@/lib/utils'
 
@@ -14,8 +14,11 @@ export function AskingScreen() {
   const asker = askerOf(state)!
   const [text, setText] = useState('')
   const used = new Set(state.rounds.map((r) => r.prompt))
-  // A fresh handful of unused questions each round (a mix of themes).
-  const [picks] = useState(() => shuffled(ALL_PROMPTS.filter((p) => !used.has(p.prompt))).slice(0, QUESTIONS_SHOWN))
+  // Four categories; each deals a light, a warm and a deep question (plus one) for this round.
+  const [themeId, setThemeId] = useState(THEMES[0].id)
+  const [hands] = useState(() => Object.fromEntries(THEMES.map((t) => [t.id, dealQuestions(t, used)])))
+  const theme = THEMES.find((t) => t.id === themeId)!
+  const hand = hands[themeId]
 
   if (asker.id !== meId) {
     return (
@@ -44,9 +47,9 @@ export function AskingScreen() {
   const ask = (prompt: string, tid?: string) => dispatch({ type: 'ask', prompt, themeId: tid })
 
   return (
-    <div className="mx-auto grid w-full max-w-2xl content-start gap-4 py-2">
+    <div className="mx-auto grid w-full max-w-2xl content-start gap-4 py-2 [@media(max-height:700px)]:gap-3">
       <div>
-        <p className="text-xs font-semibold tracking-[0.14em] text-accent uppercase">Round {state.rounds.length + 1} · your turn</p>
+        <p className="text-xs font-semibold tracking-[0.14em] text-accent uppercase [@media(max-height:700px)]:hidden">Round {state.rounds.length + 1} · your turn</p>
         <h2 className="mt-1 text-[2rem] leading-tight font-bold font-soft">Ask the group a question</h2>
       </div>
 
@@ -76,11 +79,41 @@ export function AskingScreen() {
         </Button>
       </form>
 
+      {/* category tabs: four paper tabs, the open one lifted and coloured in */}
+      <div className="grid gap-2">
+        <div className="grid grid-cols-4 gap-1.5" role="tablist" aria-label="Question categories">
+          {THEMES.map((t, i) => {
+            const on = t.id === themeId
+            return (
+              <button
+                key={t.id}
+                role="tab"
+                aria-selected={on}
+                onClick={() => setThemeId(t.id)}
+                className={cn(
+                  'paper on-table grid min-h-12 cursor-pointer place-items-center rounded-t-[8px] rounded-b-[3px] px-1.5 py-1.5 text-center font-display text-[0.8rem] leading-[1.05] font-bold [font-stretch:80%] transition-[transform,background-color] duration-200',
+                  on ? 'bg-[#f2c77f] text-[#2a1e18] -translate-y-1' : 'bg-[var(--paper)] text-[#2a1e18]/70 hover:-translate-y-0.5',
+                )}
+                style={{ rotate: `${(i % 2 ? 1 : -1) * 0.8}deg` }}
+              >
+                {t.name}
+              </button>
+            )
+          })}
+        </div>
+        <p className="px-1 font-note text-[1.05rem] text-muted-foreground italic [@media(max-height:700px)]:hidden">{theme.blurb}</p>
+      </div>
+
       <QuestionStrips
-        prompts={picks.map((p) => p.prompt)}
-        topicOf={(p) => themeName(picks.find((x) => x.prompt === p)?.themeId)}
+        key={themeId}
+        prompts={hand.map((x) => x.text)}
+        topicOf={(p) => {
+          const d = hand.find((x) => x.text === p)?.depth
+          return d ? DEPTH_LABEL[d] : undefined
+        }}
+        depthOf={(p) => hand.find((x) => x.text === p)?.depth}
         used={used}
-        onPick={(p) => ask(p, picks.find((x) => x.prompt === p)?.themeId)}
+        onPick={(p) => ask(p, themeId)}
         onSurprise={() => {
           const pool = ALL_PROMPTS.filter((p) => !used.has(p.prompt))
           const p = sample(pool.length ? pool : ALL_PROMPTS)
@@ -91,18 +124,9 @@ export function AskingScreen() {
   )
 }
 
-const QUESTIONS_SHOWN = 4
 const HOLD_MS = 280
 const STRIP_SPRING = { type: 'spring', stiffness: 170, damping: 24, mass: 0.9 } as const
 
-function shuffled<T>(xs: T[]): T[] {
-  const a = [...xs]
-  for (let i = a.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1))
-    ;[a[i], a[j]] = [a[j], a[i]]
-  }
-  return a
-}
 
 /** Small stable "randomness" per strip so the pile looks dropped by hand. */
 function jitter(i: number, salt: number) {
@@ -118,12 +142,14 @@ function jitter(i: number, salt: number) {
 function QuestionStrips({
   prompts,
   topicOf,
+  depthOf,
   used,
   onPick,
   onSurprise,
 }: {
   prompts: string[]
   topicOf?: (p: string) => string | undefined
+  depthOf?: (p: string) => number | undefined
   used: Set<string>
   onPick: (p: string) => void
   onSurprise: () => void
@@ -204,7 +230,7 @@ function QuestionStrips({
               onClick={() => click(it.act)}
               disabled={it.done}
               className={cn(
-                'paper paper-texture torn-both block w-full cursor-pointer px-5 pt-5 pb-5 text-left select-none [-webkit-touch-callout:none] disabled:cursor-default',
+                'paper paper-texture torn-both block w-full cursor-pointer px-5 pt-5 pb-5 [@media(max-height:700px)]:pt-4 [@media(max-height:700px)]:pb-4 text-left select-none [-webkit-touch-callout:none] disabled:cursor-default',
                 surprise ? 'bg-[#f2c77f] text-[#2a1e18]' : 'bg-[var(--paper)] font-note text-[1.2rem] leading-snug italic',
               )}
               style={{ ['--tx' as string]: `${Math.round(jitter(i, 3) * 80)}px` }}
@@ -216,7 +242,14 @@ function QuestionStrips({
               ) : (
                 <>
                   {topicOf?.(it.label) && (
-                    <span className="mb-0.5 block font-mono text-[0.58rem] tracking-[0.16em] text-[#a0560b] uppercase not-italic">{topicOf(it.label)}</span>
+                    <span className="mb-0.5 flex items-center gap-1.5 font-mono text-[0.58rem] tracking-[0.16em] text-[#a0560b] uppercase not-italic">
+                      <span className="flex gap-[2px]" aria-hidden>
+                        {[1, 2, 3].map((n) => (
+                          <span key={n} className={cn('size-1.5 rounded-full', n <= (depthOf?.(it.label) ?? 0) ? 'bg-[#a0560b]' : 'bg-[#a0560b]/20')} />
+                        ))}
+                      </span>
+                      {topicOf(it.label)}
+                    </span>
                   )}
                   {it.label}
                   {it.done && <span className="ml-2 font-mono text-[0.6rem] tracking-[0.14em] text-muted-foreground uppercase not-italic">asked</span>}

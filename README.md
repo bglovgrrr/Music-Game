@@ -30,7 +30,7 @@ Mixtape Memories is a relaxed music game for 2–8 friends in the same room. Som
 - **Gentle chimes.** A soft sound when it's your turn to ask, when picking starts, and when 10 seconds are left.
 - **Live sync.** Every phone stays in step: questions, picks, play/pause, and the progress bar.
 - **Rejoin anytime.** Refresh or lock your phone and you land back in the same game.
-- **Questions.** Write your own, or tap one of four torn paper strips (a fresh mix each round), or "Surprise me". Topics: Basement Sessions, Back Seat Radio, Kitchen Radio, Slow Dance, Front Row, Headphones On, Window Seat and B-Sides. Hold the pile to spread it out; let go and it settles back.
+- **Questions.** Write your own, or open one of four categories, each a different kind of question: Basement Sessions (this room, these friends), Back Seat Radio (growing up), Slow Dance (love and heartbreak) and Headphones On (just you). Each deals a light, a warm and a deep question plus one more, marked with a depth meter, or tap "Surprise me". Hold the pile to spread it out.
 - **Search any song (Spotify) and play it in full** on the host's Spotify. Falls back to 30-second iTunes previews.
 - **Demo mode.** Play a full game on one device with three bot friends.
 - **Made for phones and desktops.** Matches your device's light or dark mode; one tap on the sun/moon flips it. You can add it to your home screen like an app.
