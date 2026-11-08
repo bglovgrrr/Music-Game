@@ -45,7 +45,7 @@ export default defineConfig(({ mode }) => {
               navigateFallbackDenylist: [/^\/api\//, /^\/w\//],
               cleanupOutdatedCaches: true,
             },
-            includeAssets: ['favicon.svg', 'apple-touch-icon.png'],
+            includeAssets: ['favicon.svg', 'apple-touch-icon.png', 'theme-init.js'],
             manifest: {
               name: 'Mixtape Memories',
               short_name: 'Mixtape',
