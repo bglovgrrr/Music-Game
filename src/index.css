@@ -189,6 +189,14 @@
 
 }
 
+/*
+  Phone heights. Screens fit without scrolling; on shorter phones they tighten up.
+  compact: 800px tall or less (e.g. iPhone with Safari's bars)
+  short:   700px tall or less (e.g. iPhone SE)
+*/
+@custom-variant compact (@media (max-height: 800px));
+@custom-variant short (@media (max-height: 700px));
+
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);

@@ -117,7 +117,7 @@ export function PromptCard({ prompt, asker, compact, topic }: { prompt: string; 
         <p
           className={cn(
             'font-note leading-[1.15] text-balance italic',
-            compact ? 'line-clamp-2 text-[1.2rem] [@media(max-height:700px)]:line-clamp-1' : 'text-[2rem] sm:text-[2.6rem]',
+            compact ? 'line-clamp-2 text-[1.2rem] short:line-clamp-1' : 'text-[2rem] sm:text-[2.6rem]',
           )}
         >
           {prompt}

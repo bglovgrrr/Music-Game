@@ -116,7 +116,7 @@ function Step({
       </span>
       <span className="grid min-w-0 flex-1">
         <span className="text-sm font-semibold">{label}</span>
-        {hint && <span className="text-xs leading-snug text-muted-foreground [@media(max-height:700px)]:hidden">{hint}</span>}
+        {hint && <span className="text-xs leading-snug text-muted-foreground short:hidden">{hint}</span>}
       </span>
       {action}
     </div>

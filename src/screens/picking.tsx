@@ -259,7 +259,7 @@ export function PickingScreen() {
             className="flex flex-1 flex-col items-center justify-center gap-3 text-center"
           >
             <p className="font-mono text-xs tracking-[0.16em] text-success uppercase">Locked in</p>
-            <AlbumArt track={myPick!.track} className="size-36 shadow-xl [@media(max-height:700px)]:size-24" rounded="rounded-[4px]" />
+            <AlbumArt track={myPick!.track} className="size-36 shadow-xl short:size-24" rounded="rounded-[4px]" />
             <div>
               <div className="font-display text-2xl leading-tight font-bold [font-stretch:80%]">{myPick!.track.title}</div>
               <div className="text-muted-foreground">{myPick!.track.artist}</div>

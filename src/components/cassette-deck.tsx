@@ -65,7 +65,7 @@ export function CassetteDeck({
       </div>
 
       {/* cassette door */}
-      <div className="deck-door relative grid overflow-hidden rounded-[10px] px-[11%] py-[4.5%] [@media(max-height:800px)]:px-[17%] [@media(max-height:700px)]:px-[22%] [@media(max-height:700px)]:py-[3%]">
+      <div className="deck-door relative grid overflow-hidden rounded-[10px] px-[11%] py-[4.5%] compact:px-[17%] short:px-[22%] short:py-[3%]">
         <AnimatePresence initial={false} custom={direction}>
           <motion.div
             key={track.id}
@@ -122,7 +122,7 @@ export function CassetteDeck({
       </div>
 
       {/* piano keys */}
-      <div className="mt-3.5 grid grid-cols-4 gap-1.5 px-0.5 [@media(max-height:800px)]:mt-2.5">
+      <div className="mt-3.5 grid grid-cols-4 gap-1.5 px-0.5 compact:mt-2.5">
         <PianoKey label="Rew" onClick={onPrev} aria="Previous song">
           <Rewind className="size-4" fill="currentColor" />
         </PianoKey>
@@ -161,7 +161,7 @@ function PianoKey({
       aria-label={aria}
       aria-pressed={down}
       className={cn(
-        'deck-key group grid cursor-pointer justify-items-center gap-0.5 rounded-b-[6px] pt-2.5 pb-1.5 [@media(max-height:800px)]:pt-1.5 [@media(max-height:800px)]:pb-1',
+        'deck-key group grid cursor-pointer justify-items-center gap-0.5 rounded-b-[6px] pt-2.5 pb-1.5 compact:pt-1.5 compact:pb-1',
         down && 'deck-key-down',
       )}
     >

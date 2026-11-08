@@ -55,10 +55,10 @@ export function LobbyScreen() {
   )
 
   return (
-    <div className="mx-auto flex w-full max-w-md flex-1 flex-col gap-4 pt-1 pb-24 [@media(max-height:700px)]:gap-3 [@media(max-height:700px)]:pb-[4.5rem]">
+    <div className="mx-auto flex w-full max-w-md flex-1 flex-col gap-4 pt-1 pb-24 short:gap-3 short:pb-[4.5rem]">
       {/* Goal: get everyone in. Code + QR up top, stickers in the middle, Start at the thumb. */}
       <div className="flex items-center gap-4">
-        <QrCode value={inviteUrl} className="w-[6.5rem] shrink-0 [@media(max-height:700px)]:hidden" />
+        <QrCode value={inviteUrl} className="w-[6.5rem] shrink-0 short:hidden" />
         <div className="grid min-w-0 justify-items-start gap-2">
           <span className="font-mono text-[0.65rem] tracking-[0.16em] text-muted-foreground uppercase">Room code</span>
           <button onClick={copy} className="cursor-pointer" aria-label={`Copy room code ${state.code}`}>
