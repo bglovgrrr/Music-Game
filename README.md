@@ -99,6 +99,7 @@ The project uses Supabase's free tier for live rooms.
 | Conflicts | Every save checks a version number, so two people tapping at once can't overwrite each other. |
 | Live updates | Supabase Realtime, plus a server clock sync so progress bars match. |
 | Selfies | Private Storage bucket `selfies`. Files live in a folder named after the room, and only that room's players can upload, view (short-lived signed links) or delete them. Photos are shrunk to 1600px JPEG before upload. |
+| Share links | `shares` holds a public snapshot per finished game (no selfies or notes). No direct table access: `create_share()` (players of that game only) and `get_share()` (anyone with the link). Preview images live in the public `wraps` bucket; only that game's players can upload. |
 
 **Database changes** live in [`supabase/migrations/`](supabase/migrations). The Supabase GitHub integration applies new migrations when they reach the production branch. To set up a brand-new project in one go, paste [`supabase/schema.sql`](supabase/schema.sql) into **SQL Editor → New query** and press **Run**.
 
