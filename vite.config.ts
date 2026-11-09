@@ -23,7 +23,7 @@ function commit() {
 export default defineConfig(({ mode }) => {
   const preview = mode === 'preview'
   return {
-    resolve: { alias: { '@': path.resolve(__dirname, './src') } },
+    resolve: { alias: { '@': path.resolve(import.meta.dirname, './src') } },
     // Shown in the top left so it's easy to tell which release a phone is running.
     define: {
       __APP_VERSION__: JSON.stringify(pkg.version),
