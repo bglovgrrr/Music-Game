@@ -3,6 +3,10 @@
     {
       "source": "/w/:id",
       "destination": "/api/wrap?id=:id"
+    },
+    {
+      "source": "/privacy",
+      "destination": "/index.html"
     }
   ],
   "headers": [

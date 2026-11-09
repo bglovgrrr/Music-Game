@@ -28,6 +28,7 @@ import { ListeningScreen } from '@/screens/listening'
 import { LobbyScreen } from '@/screens/lobby'
 import { PickingScreen } from '@/screens/picking'
 import { wrapIdFromLocation } from '@/lib/wrap'
+import { PrivacyScreen } from '@/screens/privacy'
 
 // Only needed at the end of a game or from a share link: loaded when first used.
 const RecapScreen = lazy(() => import('@/screens/recap').then((m) => ({ default: m.RecapScreen })))
@@ -81,6 +82,7 @@ export default function App() {
   const [client, setClient] = useState<GameClient | null>(null)
   // Opened from a share link (/w/<id>): show that wrap instead of the home screen.
   const [wrapId, setWrapId] = useState(wrapIdFromLocation)
+  const [privacy, setPrivacy] = useState(() => window.location.pathname === '/privacy')
   const [resuming, setResuming] = useState(onlineAvailable)
 
   // Reopen the game this device was in (refresh, phone locked, app reopened).
@@ -140,6 +142,13 @@ export default function App() {
         <div className="grid min-h-dvh place-items-center text-muted-foreground">
           <Loader2 className="size-6 animate-spin" />
         </div>
+      ) : privacy && !client ? (
+        <PrivacyScreen
+          onDone={() => {
+            window.history.replaceState(null, '', '/')
+            setPrivacy(false)
+          }}
+        />
       ) : wrapId && !client ? (
         <Suspense fallback={<Loading />}>
           <WrapScreen

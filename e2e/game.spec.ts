@@ -114,3 +114,12 @@ test('the share link page explains a missing mixtape', async ({ page }) => {
   await page.getByRole('button', { name: /Start your own mixtape/ }).click()
   await expect(page.getByLabel('Your name')).toBeVisible()
 })
+
+test('privacy page reads well and is accessible', async ({ page }) => {
+  await page.goto('/privacy')
+  await expect(page.getByRole('heading', { name: 'Privacy', level: 1 })).toBeVisible()
+  await expect(page.getByText(/deleted automatically 30 days/)).toBeVisible()
+  await expectAccessible(page)
+  await page.getByRole('button', { name: 'Back' }).click()
+  await expect(page.getByLabel('Your name')).toBeVisible()
+})

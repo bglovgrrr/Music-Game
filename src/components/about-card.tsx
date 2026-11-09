@@ -123,7 +123,12 @@ export function AboutButton() {
                 </motion.li>
               ))}
             </ol>
-            <p className="mt-5 text-center text-xs text-muted-foreground">Swipe away or tap ✕ to close</p>
+            <p className="mt-5 text-center text-xs text-muted-foreground">
+              Swipe away or tap ✕ to close ·{' '}
+              <a href="/privacy" className="font-semibold underline" onPointerDown={(e) => e.stopPropagation()}>
+                Privacy
+              </a>
+            </p>
           </motion.div>
         )}
       </AnimatePresence>
