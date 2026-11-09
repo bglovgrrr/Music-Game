@@ -96,10 +96,14 @@ The project uses Supabase's free tier for live rooms.
 | Sign-in | Anonymous. Each device gets a player id with no account needed. Turn on **Authentication → Sign In / Providers → Allow anonymous sign-ins**. |
 | Games | One row per game in `rooms`, with the whole game state stored as JSON. |
 | Security | Row-level security means you can only read or change games you joined. Players can only join through the `create_room` and `join_room` functions. |
-| Conflicts | Every save checks a version number, so two people tapping at once can't overwrite each other. |
+| Conflicts | Every save (on the server) checks a version number, so two people tapping at once can't overwrite each other. |
 | Live updates | Supabase Realtime, plus a server clock sync so progress bars match. |
 | Selfies | Private Storage bucket `selfies`. Files live in a folder named after the room, and only that room's players can upload, view (short-lived signed links) or delete them. Photos are shrunk to 1600px JPEG before upload. |
 | Share links | `shares` holds a public snapshot per finished game (no selfies or notes). No direct table access: `create_share()` (players of that game only) and `get_share()` (anyone with the link). Preview images live in the public `wraps` bucket; only that game's players can upload. |
+| Game rules on the server | Phones can read their games but can't write them. Every move goes to the `room-action` Edge Function, which checks the player is in the game and applies the same rules as the app (`npm run edge:sync` copies `src/game` into the function; CI checks they match). |
+| Retention | The `cleanup` Edge Function runs daily (pg_cron, 04:23 UTC): games, notes and selfies are deleted 30 days after they started; share links after a year. |
+| Rate limits | At most 10 new games per player per hour (`create_room`). Supabase Auth also rate-limits guest sign-ins per IP. |
+| Error reports | Errors on phones are sent to `/api/log` (no names or songs) and appear in Vercel's runtime logs. |
 
 **Database changes** live in [`supabase/migrations/`](supabase/migrations). The Supabase GitHub integration applies new migrations when they reach the production branch. To set up a brand-new project in one go, paste [`supabase/schema.sql`](supabase/schema.sql) into **SQL Editor → New query** and press **Run**.
 
