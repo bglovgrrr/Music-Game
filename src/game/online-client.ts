@@ -161,37 +161,29 @@ export class OnlineGameClient implements GameClient {
     if (this.pending === 0) this.show(row.state)
   }
 
-  /** Save one action with a version check; on conflict, re-read and try again. */
+  /**
+   * Send one move to the server (the room-action Edge Function), which applies the game rules
+   * and saves it. Phones can't write games directly, so nobody can hand-edit a game.
+   */
   private async save(action: Action) {
-    for (let attempt = 0; attempt < 5; attempt++) {
-      const base = this.confirmed
-      let next: GameState
-      try {
-        next = reduce(base.state, action, this.meId, clock.now())
-      } catch (err) {
-        // Someone else's move made ours invalid (e.g. two people pressed "next").
-        if (!(err instanceof GameError)) console.error(err)
-        return
-      }
-      if (next === base.state) return
-      const { data, error } = await supabase!
-        .from('rooms')
-        .update({ state: next, version: base.version + 1, updated_at: new Date().toISOString() })
-        .eq('id', this.roomId)
-        .eq('version', base.version)
-        .select('id, code, state, version')
-        .maybeSingle()
-      if (error) {
-        toast.error(friendlyError(error))
-        return
-      }
-      if (data) {
-        this.accept(data as RoomRow)
-        return
-      }
-      await this.refresh() // someone else saved first
+    // Quick local check first: skip moves that change nothing or that the rules would refuse.
+    try {
+      if (reduce(this.confirmed.state, action, this.meId, clock.now()) === this.confirmed.state) return
+    } catch (err) {
+      // Someone else's move made ours invalid (e.g. two people pressed "next").
+      if (!(err instanceof GameError)) console.error(err)
+      return
     }
-    toast.error('Could not save that move. Try again.')
+    // `player` is only a hint for logs and tests; the server uses the signed-in user.
+    const { data, error } = await supabase!.functions.invoke('room-action', { body: { roomId: this.roomId, action, player: this.meId } })
+    if (!error && data?.row) {
+      this.accept(data.row as RoomRow)
+      return
+    }
+    const detail = await readFunctionError(error)
+    if (detail?.row) this.accept(detail.row as RoomRow)
+    if (detail?.rejected) return // overtaken by someone else's move: nothing to tell
+    toast.error(detail?.error ?? friendlyError(error ?? new Error('Could not save that move.')))
   }
 
   private async refresh() {
@@ -220,5 +212,16 @@ export class OnlineGameClient implements GameClient {
       void syncClock()
       void this.refresh()
     }
+  }
+}
+
+/** The JSON body of a failed Edge Function call (supabase-js puts the Response in error.context). */
+async function readFunctionError(error: unknown): Promise<{ error?: string; rejected?: boolean; row?: unknown } | null> {
+  const res = (error as { context?: { json?: () => Promise<unknown> } } | null)?.context
+  if (!res || typeof res.json !== 'function') return null
+  try {
+    return (await res.json()) as { error?: string; rejected?: boolean; row?: unknown }
+  } catch {
+    return null
   }
 }

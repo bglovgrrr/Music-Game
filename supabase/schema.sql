@@ -48,9 +48,9 @@ alter table public.room_members enable row level security;
 
 revoke all on public.rooms from anon;
 revoke all on public.room_members from anon;
-revoke insert, delete on public.rooms from authenticated;
+revoke insert, update, delete on public.rooms from authenticated;
 revoke insert, update, delete on public.room_members from authenticated;
-grant select, update on public.rooms to authenticated;
+grant select on public.rooms to authenticated; -- games change only through the room-action Edge Function
 grant select on public.room_members to authenticated;
 
 create or replace function private.is_room_member(rid uuid)
@@ -70,11 +70,9 @@ drop policy if exists "Members can read their rooms" on public.rooms;
 create policy "Members can read their rooms" on public.rooms
   for select to authenticated using (private.is_room_member(id));
 
+-- No update policy: games change only through the room-action Edge Function
+-- (supabase/functions/room-action), which applies the game rules on the server.
 drop policy if exists "Members can update their rooms" on public.rooms;
-create policy "Members can update their rooms" on public.rooms
-  for update to authenticated
-  using (private.is_room_member(id))
-  with check (private.is_room_member(id));
 
 drop policy if exists "Members can see who is in their rooms" on public.room_members;
 create policy "Members can see who is in their rooms" on public.room_members

@@ -101,6 +101,36 @@ const fake = vi.hoisted(() => {
       }
       return ch
     },
+    // Stand-in for the room-action Edge Function: same rules, version-checked save.
+    functions: {
+      invoke: async (_name: string, { body }: { body: { roomId: string; action: never; player: string } }) => {
+        const { reduce, GameError } = await import('./engine')
+        for (let attempt = 0; attempt < 5; attempt++) {
+          await delay()
+          if (!db.row || db.row.id !== body.roomId) return { data: null, error: { message: 'Game not found.' } }
+          const base = copy(db.row)
+          let next: GameState
+          try {
+            next = reduce(base.state, body.action, body.player, Date.now())
+          } catch (err) {
+            if (err instanceof GameError)
+              return { data: null, error: { context: { json: async () => ({ error: err.message, rejected: true, row: copy(db.row) }) } } }
+            throw err
+          }
+          if (next === base.state) return { data: { row: base }, error: null }
+          await delay()
+          if (db.row.version !== base.version) {
+            db.conflicts++
+            continue
+          }
+          db.row = { ...db.row, state: copy(next), version: base.version + 1 }
+          db.updates++
+          broadcast()
+          return { data: { row: copy(db.row) }, error: null }
+        }
+        return { data: null, error: { message: 'busy' } }
+      },
+    },
     removeChannel: async () => {},
     auth: { getSession: async () => ({ data: { session: { user: { id: db.currentUser } } } }) },
   }
