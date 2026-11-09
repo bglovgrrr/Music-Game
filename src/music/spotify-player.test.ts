@@ -15,7 +15,8 @@ vi.mock('./spotify-sdk', () => ({
 }))
 
 const { getAccessToken, isSpotifyConnected, SCOPES } = await import('./spotify-auth')
-const { chooseDevice, pausePlayback, playTrack, seekTo, setKeepAliveDevice, SILENCE, localPlayerUsable } = await import('./spotify-player')
+const { chooseDevice, pausePlayback, playTrack, seekTo, SILENCE, localPlayerUsable } = await import('./spotify-player')
+const { setKeepAliveDevice } = await import('./spotify-session')
 
 type Call = { url: string; method: string; body?: unknown }
 const json = (status: number, body?: unknown) =>
@@ -270,7 +271,7 @@ describe('keeping a phone’s Spotify awake', () => {
 
 describe('waking Spotify on an iPhone', () => {
   it('remembers that Spotify was just opened, so the game can resume by itself on return', async () => {
-    const { wakeSpotify, justWoke, clearWoke, setPhoneSpotify, phoneSpotify, onPhoneSpotify } = await import('./spotify-player')
+    const { wakeSpotify, justWoke, clearWoke, setPhoneSpotify, phoneSpotify, onPhoneSpotify } = await import('./spotify-session')
     expect(justWoke()).toBe(false)
     wakeSpotify()
     expect((globalThis as unknown as { window: { location: { href: string } } }).window.location.href).toBe('spotify:')

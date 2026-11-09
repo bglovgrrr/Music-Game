@@ -15,10 +15,9 @@ import {
   localPlayerUsable,
   needsKeepAlive,
   playSilence,
-  setKeepAliveDevice,
   type SpotifyDevice,
-  wakeSpotify,
 } from '@/music/spotify-player'
+import { setKeepAliveDevice, wakeSpotify } from '@/music/spotify-session'
 import { ensureLocalPlayer, LOCAL_PLAYER_NAME, localDeviceId, localPlayerProblem, onLocalPlayer, stopLocalPlayer } from '@/music/spotify-sdk'
 import { cn } from '@/lib/utils'
 

@@ -3,6 +3,7 @@ import { SpotifyError, spotifyApi } from './spotify-auth'
 import { safeStorage } from '@/lib/utils'
 import { ensureLocalPlayer, localDeviceId } from './spotify-sdk'
 import { logSpotify } from './spotify-log'
+import { keepAliveDevice } from './spotify-session'
 
 export type SpotifyDevice = { id: string; name: string; type: string; is_active: boolean }
 export type SpotifyPlayback = {
@@ -37,12 +38,6 @@ export const needsKeepAlive = (d: Pick<SpotifyDevice, 'type'>) => /smartphone|ta
 export const SILENCE = { uri: 'spotify:track:0XycH5D4znCfJIBeYt3upG', album: 'spotify:album:2d71KC0acijowAr9j9xInR' }
 export const isSilence = (pb: SpotifyPlayback | null) => !!pb && (pb.uri === SILENCE.uri || pb.contextUri === SILENCE.album)
 
-let keepAliveId: string | null = null
-/** The phone being kept awake, or null. Set by the host's game screen. */
-export const setKeepAliveDevice = (id: string | null) => {
-  keepAliveId = id
-}
-
 /**
  * Which device the keep-alive should look after: the remembered one if it's still listed;
  * otherwise (no built-in player on this browser, e.g. iPhone) this phone's Spotify app.
@@ -51,35 +46,6 @@ export function keepAliveTarget(devices: SpotifyDevice[], picked: string | null,
   const remembered = devices.find((d) => d.id === picked)
   if (remembered) return remembered
   return localUsable ? undefined : devices.find(needsKeepAlive)
-}
-
-/**
- * Is Spotify reachable on this phone? 'asleep' = this is an iPhone host and Spotify isn't
- * running (it isn't on the account's device list), so nothing can play until it's opened.
- */
-export type PhoneSpotify = 'unknown' | 'awake' | 'asleep'
-let phoneState: PhoneSpotify = 'unknown'
-const phoneListeners = new Set<() => void>()
-export const phoneSpotify = () => phoneState
-export function setPhoneSpotify(next: PhoneSpotify) {
-  if (next === phoneState) return
-  phoneState = next
-  phoneListeners.forEach((l) => l())
-}
-export function onPhoneSpotify(l: () => void) {
-  phoneListeners.add(l)
-  return () => phoneListeners.delete(l)
-}
-
-let wokeAt = 0
-/** Open the Spotify app (must run inside a tap). Coming back soon after counts as "just woken". */
-export function wakeSpotify() {
-  wokeAt = Date.now()
-  window.location.href = 'spotify:'
-}
-export const justWoke = () => Date.now() - wokeAt < 3 * 60_000
-export const clearWoke = () => {
-  wokeAt = 0
 }
 
 export async function listDevices(): Promise<SpotifyDevice[]> {
@@ -189,8 +155,8 @@ async function revive(deviceId: string): Promise<boolean> {
  * sleep), on repeat, so it keeps "playing" even while the host's phone is locked.
  */
 export async function playSilence() {
-  if (!keepAliveId) return
-  const id = keepAliveId
+  const id = keepAliveDevice()
+  if (!id) return
   const play = () =>
     spotifyApi(`/me/player/play?device_id=${encodeURIComponent(id)}`, {
       method: 'PUT',
@@ -208,7 +174,7 @@ export async function playSilence() {
 /** Stop the song. On a kept-awake phone this switches to silence so Spotify stays awake. */
 export async function pausePlayback() {
   try {
-    if (keepAliveId) {
+    if (keepAliveDevice()) {
       await playSilence()
       return
     }

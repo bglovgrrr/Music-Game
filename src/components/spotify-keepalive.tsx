@@ -14,9 +14,8 @@ import {
   isIOS,
   keepAliveTarget,
   playSilence,
-  setKeepAliveDevice,
-  setPhoneSpotify,
 } from '@/music/spotify-player'
+import { setKeepAliveDevice, setPhoneSpotify } from '@/music/spotify-session'
 
 /**
  * Host only. When the music plays on a phone's Spotify app, iOS puts that app to sleep

@@ -1,6 +1,7 @@
 import { useState, useSyncExternalStore } from 'react'
 import { useSpotifyConnected } from '@/hooks/use-spotify'
-import { isIOS, localPlayerUsable, onPhoneSpotify, phoneSpotify } from '@/music/spotify-player'
+import { isIOS, localPlayerUsable } from '@/music/spotify-player'
+import { onPhoneSpotify, phoneSpotify } from '@/music/spotify-session'
 import { safeStorage } from '@/lib/utils'
 
 const PREVIEWS_KEY = 'mm:music-previews'

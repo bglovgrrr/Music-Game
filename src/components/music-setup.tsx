@@ -6,7 +6,7 @@ import { SpotifyCard, SpotifyLogo } from '@/components/spotify-card'
 import { Button } from '@/components/ui/button'
 import { connectSpotify } from '@/music/spotify-auth'
 import type { useMusicReady } from '@/hooks/use-music-ready'
-import { wakeSpotify } from '@/music/spotify-player'
+import { wakeSpotify } from '@/music/spotify-session'
 import { cn } from '@/lib/utils'
 
 export function MusicSetup({ music }: { music: ReturnType<typeof useMusicReady> }) {

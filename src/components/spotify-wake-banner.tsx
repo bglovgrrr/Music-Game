@@ -3,7 +3,7 @@ import { AnimatePresence, motion } from 'motion/react'
 import { useSyncExternalStore } from 'react'
 import { Button } from '@/components/ui/button'
 import { useGame } from '@/hooks/use-game'
-import { onPhoneSpotify, phoneSpotify, wakeSpotify } from '@/music/spotify-player'
+import { onPhoneSpotify, phoneSpotify, wakeSpotify } from '@/music/spotify-session'
 
 /**
  * Host on an iPhone, Spotify not running: nothing can play until it's opened (a web page

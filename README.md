@@ -118,7 +118,10 @@ src/
     online-client.ts   Online mode: Supabase rooms, realtime, versioned saves
   screens/             One screen per phase: lobby, asking, picking, listening, between, recap
   components/          Shared game UI, audio player, and shadcn/ui components (ui/)
-  music/               Song search and the offline song list
+  music/               Song search, the offline song list, and Spotify:
+                         spotify-auth (sign-in), spotify-player (play/pause/devices),
+                         spotify-session (keep-alive + 'is Spotify awake' state),
+                         spotify-watch (end-of-song detection), spotify-sdk (in-browser player)
   hooks/               useGame, useTheme
   lib/                 Supabase client, clock sync, helpers
 supabase/
